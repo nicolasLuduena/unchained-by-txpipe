@@ -6,7 +6,9 @@
     "issuer": "0x19287BA707706A279B17e0f9DC69ea3028Be5D66",
     "unverified": "0x2b54F241C9281cEf9cBC6BC4164dd6e91A8682f9",
     "venue": "0x775A0CE1ced97d24d5ad719fFc6309E7179f140f",
-    "orderKey": "0x09A4D5ed872F00b067B863ef0593F3E85EF79ae7"
+    "orderKey": "0x09A4D5ed872F00b067B863ef0593F3E85EF79ae7",
+    "venue2": "0x9Ec291A1C7fcd6EAac5F6fC66d289860739FCAbC",
+    "orderKey2": "0x4b4D3A2A4D609e8DF5fA3E3A56F47ff31e8865e3"
   },
   "chainId": 43113,
   "contracts": {
