@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,17 +25,16 @@ body { margin: 0; background: var(--ground); color: var(--text); font: 400 15px/
 .hero .hf-coupon { transition: margin-bottom var(--duration-tear) var(--ease-tear); }
 .hero .hf-coupon--open { margin-bottom: var(--space-3); }
 .hero .caveat { margin: 0; }
-.strip { display: flex; height: 112px; margin-top: auto; margin-bottom: var(--space-4); }
-.strip i { flex: 1; }
-.lead h1 { margin: 0 0 var(--space-3); font: 700 64px/64px var(--font-display); letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+.strip { position: relative; height: 160px; margin-top: auto; margin-bottom: var(--space-4); }
+.strip .hf-ribbons { height: 100%; }
+.lead h1 { margin: 0 0 var(--space-3); font: 200 56px/68px var(--font-display); letter-spacing: .08em; text-transform: uppercase; text-wrap: balance; }
 .lead > div:last-child > p { max-width: 60ch; margin: 0 0 var(--space-5); font-size: 17px; line-height: 26px; }
 section { padding-block: var(--space-7); border-top: 1px solid var(--rule-soft); }
-h2 { margin: 0 0 var(--space-5); font: 700 44px/46px var(--font-display); letter-spacing: .01em; text-transform: uppercase; }
-h3.sub { margin: var(--space-6) 0 var(--space-3); font: 700 22px/26px var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
+h2 { margin: 0 0 var(--space-5); font: 200 36px/46px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
+h3.sub { margin: var(--space-6) 0 var(--space-3); font: 300 17px/26px var(--font-display); letter-spacing: .16em; text-transform: uppercase; }
 .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--space-3); }
-.sw div { min-width: 0; }
-.sw i { display: block; height: 64px; margin-bottom: var(--space-2); border: 1px solid var(--rule-soft); }
-.sw b { display: block; font-weight: 600; }
+.sw div { min-width: 0; min-height: 88px; padding: var(--space-3) 36px var(--space-3) var(--space-3); border: 1px solid var(--rule-soft); background: linear-gradient(var(--swatch), var(--swatch)) right / 24px 100% no-repeat, var(--coupon); }
+.sw b { display: block; font-weight: 500; }
 .sw code { font: 400 13px/18px var(--font-sans); color: var(--text-muted); }
 .types { display: grid; gap: var(--space-4); }
 .types > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: var(--space-4); align-items: baseline; padding-bottom: var(--space-3); border-bottom: 1px solid var(--rule-soft); }
@@ -59,13 +58,13 @@ footer { padding-block: var(--space-5) var(--space-7); border-top: 1px solid var
 @media (max-width: 860px) {
   .coupons, .cols { grid-template-columns: minmax(0, 1fr); }
   .lead { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); padding-block-start: var(--space-4); }
-  .lead h1 { font-size: 44px; line-height: 46px; }
+  .lead h1 { font-size: 34px; line-height: 44px; }
   html { scroll-padding-top: 64px; }
   .top .wrap { min-height: 56px; gap: var(--space-2); }
   .top .lockup { display: none; }
   .top .mark { display: block; height: 32px; flex: none; }
   .top .hf-tabs { flex-wrap: nowrap; gap: 0; }
-  .top .hf-tabs a { padding-inline: 6px; font-size: 14px; letter-spacing: .04em; }
+  .top .hf-tabs a { padding-inline: 6px; letter-spacing: .08em; }
   .types > div { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
   section { padding-block: var(--space-6); }
 }
@@ -81,47 +80,47 @@ footer { padding-block: var(--space-5) var(--space-7); border-top: 1px solid var
   <div class="lead">
     <div class="hero" id="hero"></div>
     <div>
-      <h1>Cada orden es un cupón</h1>
-      <p>Se valida, se corta o se anula. Nunca desaparece. Este es el sistema de diseño de Handoff: un objeto, un papel oscuro y una sola tinta para las cifras.</p>
-      <div class="strip" aria-hidden="true"><i style="background:var(--ground);box-shadow:inset 0 0 0 1px var(--rule-soft)"></i><i style="background:var(--coupon)"></i><i style="background:var(--stub)"></i><i style="background:var(--text)"></i><i style="background:var(--amber)"></i></div>
+      <h1>Every order is a coupon</h1>
+      <p>It validates, tears or voids. It never disappears. This is the Handoff design system: one object, paper on plaster, and a three-colour chord.</p>
+      <div class="strip" id="strip"></div>
       <div class="line" id="lead-stamps"></div>
     </div>
   </div>
   <section id="color"><h2>Color</h2><div class="sw" id="sw"></div></section>
-  <section id="tipo"><h2>Tipografía</h2><div class="types" id="types"></div></section>
+  <section id="tipo"><h2>Type</h2><div class="types" id="types"></div></section>
   <section id="componentes">
-    <h2>Componentes</h2>
-    <h3 class="sub" style="margin-top:0">Cupón</h3>
+    <h2>Components</h2>
+    <h3 class="sub" style="margin-top:0">Coupon</h3>
     <div class="line" style="margin-bottom:var(--space-4)"><span id="replay"></span></div>
     <div class="coupons" id="coupons"></div>
-    <h3 class="sub">Sellos</h3><div class="line" id="stamps"></div>
-    <h3 class="sub">Botones</h3><div class="line" id="buttons"></div><div class="line states" id="button-states"></div>
+    <h3 class="sub">Stamps</h3><div class="line" id="stamps"></div>
+    <h3 class="sub">Buttons</h3><div class="line" id="buttons"></div><div class="line states" id="button-states"></div>
     <div class="cols">
-      <div><h3 class="sub">Filas</h3><div id="rows"></div></div>
-      <div><h3 class="sub">Campos</h3><div class="stack" id="inputs"></div></div>
-      <div><h3 class="sub">Banda de precio</h3><div class="stack" id="bands"></div></div>
-      <div><h3 class="sub">Avisos</h3><div class="stack" id="notices"></div></div>
-      <div><h3 class="sub">Navegación</h3><div id="tabs"></div>
-        <h3 class="sub">Dentro de la billetera</h3><div id="operated"></div></div>
-      <div><h3 class="sub">Hoja</h3><div class="sheetbox" id="sheet"></div></div>
+      <div><h3 class="sub">Rows</h3><div id="rows"></div></div>
+      <div><h3 class="sub">Fields</h3><div class="stack" id="inputs"></div></div>
+      <div><h3 class="sub">Price band</h3><div class="stack" id="bands"></div></div>
+      <div><h3 class="sub">Notices</h3><div class="stack" id="notices"></div></div>
+      <div><h3 class="sub">Navigation</h3><div id="tabs"></div>
+        <h3 class="sub">Inside the wallet</h3><div id="operated"></div></div>
+      <div><h3 class="sub">Sheet</h3><div class="sheetbox" id="sheet"></div></div>
     </div>
-    <h3 class="sub">Feed de cumplimiento</h3><div class="feed" id="feed"></div>
+    <h3 class="sub">Compliance feed</h3><div class="feed" id="feed"></div>
   </section>
   <section id="logo"><h2>Logo</h2>
     <div class="logos">
       <div><img src="logos/handoff-lockup-horizontal.svg" alt="Lockup horizontal" width="220"></div>
-      <div><img src="logos/handoff-lockup-stacked.svg" alt="Lockup apilado" height="120"></div>
-      <div><img src="logos/handoff-mark.svg" alt="Marca" width="96"></div>
-      <div class="amber"><img src="logos/handoff-lockup-horizontal-reverse.svg" alt="Lockup sobre ámbar" width="220"></div>
-      <div><img src="logos/handoff-mark-mono.svg" alt="Marca en una tinta" width="96"></div>
-      <div class="amber"><img src="logos/handoff-mark-reverse.svg" alt="Marca sobre ámbar" width="96"></div>
-      <div><img src="logos/handoff-wordmark.svg" alt="Palabra" width="150"></div>
-      <div class="amber"><img src="logos/handoff-wordmark-reverse.svg" alt="Palabra sobre ámbar" width="150"></div>
-      <div><img src="logos/handoff-app-icon.svg" alt="Ícono de app" width="96"></div>
+      <div><img src="logos/handoff-lockup-stacked.svg" alt="Stacked lockup" height="120"></div>
+      <div><img src="logos/handoff-mark.svg" alt="Mark" width="96"></div>
+      <div class="amber"><img src="logos/handoff-lockup-horizontal-reverse.svg" alt="Lockup on indigo" width="220"></div>
+      <div><img src="logos/handoff-mark-mono.svg" alt="Single-ink mark" width="96"></div>
+      <div class="amber"><img src="logos/handoff-mark-reverse.svg" alt="Mark on indigo" width="96"></div>
+      <div><img src="logos/handoff-wordmark.svg" alt="Wordmark" width="150"></div>
+      <div class="amber"><img src="logos/handoff-wordmark-reverse.svg" alt="Wordmark on indigo" width="150"></div>
+      <div><img src="logos/handoff-app-icon.svg" alt="App icon" width="96"></div>
     </div>
   </section>
 </main>
-<footer><div class="wrap caveat">Datos, hashes y billetera de ejemplo. Atestaciones de demostración en Fuji, sin verificación de identidad.</div></footer>
+<footer><div class="wrap caveat">Example data, hashes and wallet. Demo attestations on Fuji, no identity verification.</div></footer>
 <script src="vendor/react.production.min.js"></script>
 <script src="vendor/react-dom.production.min.js"></script>
 <script src="components/bundle.js"></script>
@@ -130,30 +129,31 @@ var H = window.Handoff, h = React.createElement;
 function mount(id, el) { ReactDOM.createRoot(document.getElementById(id)).render(el); }
 function frag() { return h.apply(null, [React.Fragment, null].concat([].slice.call(arguments))); }
 
-var FIELDS = [{ label: 'Cantidad', value: '4' }, { label: 'Mejor compra', value: '112,00' }, { label: 'Banda', value: '104–116' }, { label: 'Gas', value: '0,00' }];
+var FIELDS = [{ label: 'Amount', value: '4' }, { label: 'Best offer', value: '112.00' }, { label: 'Band', value: '104–116' }, { label: 'Gas', value: '0.00' }];
 var HASH = '0x8a1f3e7700000000000000000000000000000000000000000000000000c42e';
-var base = { label: 'Orden de venta', number: 'N.º 0417', title: 'Edificio Conectia', fields: FIELDS, total: '448,00' };
+var base = { label: 'Sell order', number: 'No. 0417', title: 'Edificio Conectia', fields: FIELDS, total: '448.00' };
 
-mount('nav', h(H.Tabs, { ariaLabel: 'Secciones', items: [{ label: 'Color', href: '#color' }, { label: 'Tipografía', href: '#tipo' }, { label: 'Componentes', href: '#componentes' }, { label: 'Logo', href: '#logo' }] }));
-var CAVEAT = 'Atestaciones de demostración en Fuji, sin verificación de identidad.';
+mount('nav', h(H.Tabs, { ariaLabel: 'Sections', items: [{ label: 'Color', href: '#color' }, { label: 'Type', href: '#tipo' }, { label: 'Components', href: '#componentes' }, { label: 'Logo', href: '#logo' }] }));
+var CAVEAT = 'Demo attestations on Fuji, no identity verification.';
 var CALM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function Hero() {
   var s = React.useState(false), sold = s[0], set = s[1];
   React.useEffect(function () { if (CALM) return; var t = setTimeout(function () { set(true); }, 1400); return function () { clearTimeout(t); }; }, []);
   return frag(
-    h(H.Coupon, Object.assign({}, base, { key: 'hero', state: sold ? 'sold' : 'open', torn: sold, hash: sold ? HASH : undefined, hashHref: sold ? '#componentes' : undefined, reason: sold ? undefined : 'Esperando un comprador verificado.', note: 'Tus tokens quedan en tu billetera hasta que alguien acepte.' })),
-    h(H.Button, { variant: 'primary', size: 'lg' }, sold ? 'Ver historial' : 'Vender 4 tokens'),
+    h(H.Coupon, Object.assign({}, base, { key: 'hero', state: sold ? 'sold' : 'open', torn: sold, hash: sold ? HASH : undefined, hashHref: sold ? '#componentes' : undefined, reason: sold ? undefined : 'Waiting for a verified buyer.', note: 'Your tokens stay in your wallet until someone accepts.' })),
+    h(H.Button, { variant: 'primary', size: 'lg' }, sold ? 'View history' : 'Sell 4 tokens'),
     h('p', { className: 'caveat' }, CAVEAT));
 }
 mount('hero', h(Hero));
+mount('strip', h(H.Ribbons));
 mount('lead-stamps', frag(h(H.Stamp, { status: 'unused' }), h(H.Stamp, { status: 'sold' }), h(H.Stamp, { status: 'pending' }), h(H.Stamp, { status: 'reverted' })));
 
-var COLORS = [['ground', '#141c2b', 'Billetera'], ['coupon', '#1f2a3d', 'Cupón'], ['stub', '#29364c', 'Talón'], ['well', '#0f1522', 'Campos'], ['text', '#e8dfcb', 'Texto'], ['text-muted', '#beb7a6', 'Secundario'], ['rule', '#e8dfcb', 'Línea'], ['rule-soft', '#3f4d66', 'Separador'], ['amber', '#e9a23b', 'Cifras y acción'], ['amber-bright', '#f4b65c', 'Hover'], ['on-amber', '#141c2b', 'Sobre ámbar'], ['focus', '#e9a23b', 'Foco'], ['good', '#a8d3ad', 'Verificado, vendido'], ['bad', '#f08a78', 'Bloqueado, revertida']];
-function sw(c) { return h('div', { key: c[0] }, h('i', { style: { background: 'var(--' + c[0] + ')' } }), h('b', null, c[2]), h('code', null, c[0] + ' ' + c[1])); }
+var COLORS = [['ground', '#f2f0ee', 'Plaster'], ['coupon', '#faf8f5', 'Paper'], ['stub', '#ece8e1', 'Stub'], ['well', '#fbfaf7', 'Inputs'], ['text', '#2b2f7f', 'Text'], ['text-muted', '#50538f', 'Secondary'], ['rule', '#2b2f7f', 'Rule'], ['rule-soft', '#c9c8d8', 'Separator'], ['amber', '#2b2f7f', 'Figures and action'], ['amber-bright', '#3d42a3', 'Hover'], ['on-amber', '#f7f5f2', 'On the action fill'], ['focus', '#2b2f7f', 'Focus'], ['good', '#17603f', 'Verified'], ['bad', '#a62f59', 'Blocked, refused'], ['indigo', '#2b2f7f', 'Chord, first voice'], ['madder', '#b23a65', 'Chord, second voice'], ['saffron', '#f2b31a', 'Chord, third voice']];
+function sw(c) { return h('div', { key: c[0], style: { '--swatch': 'var(--' + c[0] + ')' } }, h('b', null, c[2]), h('code', null, c[0] + ' ' + c[1])); }
 mount('sw', frag.apply(null, COLORS.map(sw)));
 
-var TYPES = [['display-l', 'Edificio Conectia'], ['title', 'Vender 4 tokens'], ['label', 'Orden de venta'], ['body', 'Tus tokens quedan en tu billetera hasta que alguien acepte.'], ['caption', 'Atestaciones de demostración en Fuji, sin verificación de identidad.'], ['field-label', 'Mejor compra'], ['figure-l', '448,00'], ['figure', '112,00'], ['figure-s', 'USDC 41,30'], ['hash', '0x8a1f…c42e']];
-TYPES.unshift(['display-xl', 'Vendé cuando lo necesites']); TYPES.splice(5, 0, ['body-strong', 'Edificio Conectia']);
+var TYPES = [['display-l', 'Edificio Conectia'], ['title', 'Sell 4 tokens'], ['label', 'Sell order'], ['body', 'Your tokens stay in your wallet until someone accepts.'], ['caption', 'Demo attestations on Fuji, no identity verification.'], ['field-label', 'Best offer'], ['figure-l', '448.00'], ['figure', '112.00'], ['figure-s', 'USDC 41.30'], ['hash', '0x8a1f…c42e']];
+TYPES.unshift(['display-xl', 'Sell when you need to']); TYPES.splice(5, 0, ['body-strong', 'Edificio Conectia']);
 mount('types', frag.apply(null, TYPES.map(function (t) {
   var fig = t[0].indexOf('figure') === 0;
   return h('div', { key: t[0] }, h('code', null, t[0]), h('span', { className: 't-' + t[0], style: fig ? { color: 'var(--amber)' } : undefined }, t[1]));
@@ -162,49 +162,49 @@ mount('types', frag.apply(null, TYPES.map(function (t) {
 function Coupons() {
   var s = React.useState(0), n = s[0], set = s[1];
   React.useEffect(function () { mount2(n); }, [n]);
-  return h(H.Button, { variant: 'secondary', size: 'sm', onClick: function () { set(n + 1); } }, 'Repetir el corte');
+  return h(H.Button, { variant: 'secondary', size: 'sm', onClick: function () { set(n + 1); } }, 'Replay the tear');
 }
 var couponRoot = ReactDOM.createRoot(document.getElementById('coupons'));
 function mount2(n) {
   couponRoot.render(frag(
-    h(H.Coupon, Object.assign({}, base, { key: 'o', note: 'Abierta. Sin gas.', reason: 'Esperando un comprador verificado.' })),
-    h(H.Coupon, Object.assign({}, base, { key: 's' + n, state: 'sold', torn: n > 0, note: 'Comprador verificado. Sin gas.', hash: HASH, hashHref: '#componentes' })),
-    h(H.Coupon, Object.assign({}, base, { key: 'c', state: 'cancelled', note: 'Tus tokens siguen en tu billetera.', reason: 'La cancelaste vos. No pagaste gas.' })),
-    h(H.Coupon, Object.assign({}, base, { key: 'r', state: 'reverted', note: 'Tus tokens siguen en tu billetera.', reason: 'El receptor no tiene una atestación vigente.', hash: HASH, hashHref: '#componentes' }))
+    h(H.Coupon, Object.assign({}, base, { key: 'o', note: 'Open. No gas.', reason: 'Waiting for a verified buyer.' })),
+    h(H.Coupon, Object.assign({}, base, { key: 's' + n, state: 'sold', torn: n > 0, note: 'Verified buyer. No gas.', hash: HASH, hashHref: '#componentes' })),
+    h(H.Coupon, Object.assign({}, base, { key: 'c', state: 'cancelled', note: 'Your tokens are still in your wallet.', reason: 'You cancelled it. You paid no gas.' })),
+    h(H.Coupon, Object.assign({}, base, { key: 'r', state: 'reverted', note: 'Your tokens are still in your wallet.', reason: 'The receiver has no valid attestation.', hash: HASH, hashHref: '#componentes' }))
   ));
 }
 mount('replay', h(Coupons));
 
 mount('stamps', frag.apply(null, ['verified', 'sponsored', 'sold', 'pending', 'agent', 'unused', 'blocked', 'cancelled', 'reverted'].map(function (s) { return h(H.Stamp, { key: s, status: s }); })));
 mount('buttons', frag(
-  h(H.Button, { variant: 'primary' }, 'Vender 4 tokens'), h(H.Button, { variant: 'secondary' }, 'Ver orden'),
-  h(H.Button, { variant: 'ghost' }, 'Historial'), h(H.Button, { variant: 'danger' }, 'Cancelar orden'),
-  h(H.Button, { variant: 'secondary', size: 'sm' }, 'Copiar hash')));
+  h(H.Button, { variant: 'primary' }, 'Sell 4 tokens'), h(H.Button, { variant: 'secondary' }, 'View order'),
+  h(H.Button, { variant: 'ghost' }, 'History'), h(H.Button, { variant: 'danger' }, 'Cancel order'),
+  h(H.Button, { variant: 'secondary', size: 'sm' }, 'Copy hash')));
 mount('button-states', frag(
-  h(H.Button, { variant: 'primary', className: 'demo-hover' }, 'Hover'), h(H.Button, { variant: 'primary', className: 'demo-focus' }, 'Foco'),
-  h(H.Button, { variant: 'primary', disabled: true }, 'Vender 4 tokens'), h(H.Button, { variant: 'primary', busy: true }, 'Firmando')));
+  h(H.Button, { variant: 'primary', className: 'demo-hover' }, 'Hover'), h(H.Button, { variant: 'primary', className: 'demo-focus' }, 'Focus'),
+  h(H.Button, { variant: 'primary', disabled: true }, 'Sell 4 tokens'), h(H.Button, { variant: 'primary', busy: true }, 'Signing')));
 mount('rows', frag(
-  h(H.AssetRow, { name: 'Edificio Conectia', meta: 'Tenés 4 tokens', price: '112,00', href: '#componentes' }),
-  h(H.AssetRow, { name: 'CEDEAR Andes', meta: 'Mejor compra', price: '41,30', status: 'agent', href: '#componentes' }),
-  h(H.AssetRow, { name: 'Fideicomiso Sur', meta: 'Reporte pendiente', price: '88,50', status: 'pending' })));
+  h(H.AssetRow, { name: 'Edificio Conectia', meta: 'You have 4 tokens', price: '112.00', href: '#componentes' }),
+  h(H.AssetRow, { name: 'CEDEAR Andes', meta: 'Best offer', price: '41.30', status: 'agent', href: '#componentes' }),
+  h(H.AssetRow, { name: 'Fideicomiso Sur', meta: 'Report pending', price: '88.50', status: 'pending' })));
 mount('inputs', frag(
-  h(H.TextField, { label: 'Precio por token', defaultValue: '112,00', help: 'Banda permitida: 104,00 a 116,00' }),
-  h(H.TextField, { label: 'Precio por token', defaultValue: '120,00', error: 'Fuera de banda. Probá entre 104,00 y 116,00.' }),
-  h(H.TextField, { label: 'Cantidad', placeholder: '0', disabled: true, help: 'Verificá tu identidad para operar.' })));
+  h(H.TextField, { label: 'Price per token', defaultValue: '112.00', help: 'Price band: 104.00 to 116.00' }),
+  h(H.TextField, { label: 'Price per token', defaultValue: '120.00', error: 'Outside the band. Try between 104.00 and 116.00.' }),
+  h(H.TextField, { label: 'Amount', placeholder: '0', disabled: true, help: 'Verify your identity to trade.' })));
 mount('bands', frag(h(H.PriceBand, { min: 104, max: 116, value: 112 }), h(H.PriceBand, { min: 104, max: 116, value: 120 })));
-mount('tabs', h(H.Tabs, { ariaLabel: 'Billetera', items: [{ label: 'Inicio' }, { label: 'Mercado', current: true }, { label: 'Órdenes' }, { label: 'Historial' }] }));
+mount('tabs', h(H.Tabs, { ariaLabel: 'Wallet', items: [{ label: 'Home' }, { label: 'Market', current: true }, { label: 'Orders' }, { label: 'History' }] }));
 mount('operated', h(H.OperatedBy));
 var A = '0x8a1f3e770000000000000000000000000000c42e', B = '0x51d09bb20000000000000000000000000000e713';
 mount('feed', frag(
-  h(H.FeedRow, { time: '21:14', event: 'Vendido', status: 'sold', asset: 'Edificio Conectia', from: A, to: B, price: '448,00' }),
-  h(H.FeedRow, { time: '21:02', event: 'Orden', status: 'unused', asset: 'CEDEAR Andes', from: B, price: '165,20' }),
-  h(H.FeedRow, { time: '20:47', event: 'Cancelada', status: 'cancelled', asset: 'Fideicomiso Sur', from: A, price: '88,50' })));
-mount('sheet', h(H.Sheet, { title: 'Confirmar venta', caveat: CAVEAT },
-  h(H.Fields, { items: [{ label: 'Precio por token', value: '112,00' }, { label: 'Total', value: '448,00' }] }),
-  h(H.Button, { variant: 'primary', size: 'lg' }, 'Confirmar venta')));
+  h(H.FeedRow, { time: '21:14', event: 'Sold', status: 'sold', asset: 'Edificio Conectia', from: A, to: B, price: '448.00' }),
+  h(H.FeedRow, { time: '21:02', event: 'Order', status: 'unused', asset: 'CEDEAR Andes', from: B, price: '165.20' }),
+  h(H.FeedRow, { time: '20:47', event: 'Cancelled', status: 'cancelled', asset: 'Fideicomiso Sur', from: A, price: '88.50' })));
+mount('sheet', h(H.Sheet, { title: 'Confirm sale', caveat: CAVEAT },
+  h(H.Fields, { items: [{ label: 'Price per token', value: '112.00' }, { label: 'Total', value: '448.00' }] }),
+  h(H.Button, { variant: 'primary', size: 'lg' }, 'Confirm sale')));
 mount('notices', frag(
-  h(H.Notice, { status: 'blocked' }, 'Verificá tu identidad en la billetera para operar.'),
-  h(H.Notice, { status: 'pending', word: 'Reporte pendiente' }, 'El registro todavía no confirmó esta venta.')));
+  h(H.Notice, { status: 'blocked' }, 'Verify your identity in the wallet to trade.'),
+  h(H.Notice, { status: 'pending', word: 'Report pending' }, 'The registry has not acknowledged this sale yet.')));
 </script>
 </body>
 </html>

@@ -7,13 +7,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Handoff",
-  description: "Capa de negociación para valores tokenizados, operada por un PSAV.",
+  description: "A trading layer for tokenized securities, operated by a PSAV.",
   icons: "/design/logos/handoff-app-icon.svg",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

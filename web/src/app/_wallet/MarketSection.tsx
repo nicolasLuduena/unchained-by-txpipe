@@ -33,7 +33,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
   const buying = useAction();
   const direct = useAction();
 
-  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en {networkLabel}.</Notice>;
+  if (!snapshot) return <Notice status="pending">Reading your account on {networkLabel}.</Notice>;
 
   const ask = lowestAsk(orders);
   const ownAsk = ask && isAddressEqual(ask.order.seller, address);
@@ -68,49 +68,51 @@ export function MarketSection({ config, actor, wallet }: Props) {
   return (
     <>
       <section className="host__balance">
-        <span className="t-field-label">Saldo disponible</span>
+        <span className="t-field-label">Available balance</span>
         <Amount value={formatUsdc(snapshot.usdc)} currency="USDC" size="l" />
+        <p className="caveat">The USDC you have to buy tokens.</p>
       </section>
 
       <section className="wallet-stack">
-        <h2 className="t-title">Tus activos</h2>
-        <AssetRow name={snapshot.tokenName} meta={`${tokensLabel(snapshot.tokens)} · Precio de referencia`} price={formatUsdc(snapshot.reference)} />
+        <h2 className="t-title">Your assets</h2>
+        <AssetRow name={snapshot.tokenName} meta={`${tokensLabel(snapshot.tokens)} · Reference price`} price={formatUsdc(snapshot.reference)} />
       </section>
 
       {filled && (
         <section className="wallet-stack">
-          <OrderCoupon view={filled} label="Compra" tokenName={snapshot.tokenName} torn />
+          <OrderCoupon view={filled} label="Purchase" tokenName={snapshot.tokenName} torn />
           <FillProof view={filled} userOpHash={lastFill?.userOpHash} />
         </section>
       )}
 
       <section className="wallet-stack">
-        <h2 className="t-title">Mejor oferta</h2>
+        <h2 className="t-title">Best offer</h2>
+        <p className="caveat">The open sell order with the lowest price.</p>
         {ask ? (
           <OrderCoupon
             view={ask}
-            label="Orden de venta"
+            label="Sell order"
             tokenName={snapshot.tokenName}
             reference={snapshot.reference}
-            note={ownAsk ? "Esta oferta es tuya." : "Pagás y recibís los tokens en una sola transacción."}
+            note={ownAsk ? "This offer is yours." : "You pay and receive the tokens in one transaction."}
           />
         ) : (
-          <p className="caveat">Todavía no hay ofertas abiertas. Precio de referencia: USDC {formatUsdc(snapshot.reference)}.</p>
+          <p className="caveat">No open offers yet. Reference price: USDC {formatUsdc(snapshot.reference)}.</p>
         )}
 
-        {precheck === "blocked" && actor !== "metamask" && <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>}
+        {precheck === "blocked" && actor !== "metamask" && <Notice status="blocked">Verify your identity in the wallet to trade.</Notice>}
 
         {ask && !ownAsk && precheck === "passed" && (
           <>
             <Button variant="primary" size="lg" busy={buying.busy} disabled={total > snapshot.usdc} onClick={() => buy(ask)}>
-              {`Comprar ${tokensLabel(BigInt(ask.order.amount))}`}
+              {`Buy ${tokensLabel(BigInt(ask.order.amount))}`}
             </Button>
-            {total > snapshot.usdc && <p className="caveat">Tu saldo no alcanza para esta oferta.</p>}
+            {total > snapshot.usdc && <p className="caveat">Your balance does not cover this offer.</p>}
             <p className="caveat">{SPONSOR_LABEL}</p>
           </>
         )}
         {buying.error && (
-          <Notice status="blocked" word="Rechazado">
+          <Notice status="blocked" word="Refused">
             {buying.error}
           </Notice>
         )}
@@ -118,20 +120,20 @@ export function MarketSection({ config, actor, wallet }: Props) {
 
       {ask && precheck === "blocked" && actor !== "metamask" && (
         <section className="wallet-demo-control">
-          <span className="t-field-label">Control de demostración</span>
-          <p className="caveat">Saltea la billetera y llama al contrato desde esta cuenta, pagando su propio gas.</p>
+          <span className="t-field-label">Demo control</span>
+          <p className="caveat">Skips the wallet and calls the contract from this account, which pays its own gas.</p>
           <Button variant="secondary" busy={direct.busy} onClick={() => attemptDirect(ask)}>
-            Intentar compra directa
+            Try a direct purchase
           </Button>
           {direct.error && (
-            <Notice status="blocked" word="Sin enviar">
+            <Notice status="blocked" word="Not sent">
               {direct.error}
             </Notice>
           )}
           {attempt && (
             <div className="wallet-stack">
-              <Notice status={attempt.reverted ? "reverted" : "sold"} word={attempt.reverted ? "Rechazada" : undefined}>
-                {attempt.reverted ? `El contrato rechazó la compra: ${attempt.reason}` : "La transacción no se revirtió."}
+              <Notice status={attempt.reverted ? "reverted" : "sold"} word={attempt.reverted ? "Refused" : "Accepted"}>
+                {attempt.reverted ? `The contract refused the purchase: ${attempt.reason}` : "The contract accepted the transaction."}
               </Notice>
               <HashText value={attempt.hash} href={explorerUrl("tx", attempt.hash)} />
             </div>

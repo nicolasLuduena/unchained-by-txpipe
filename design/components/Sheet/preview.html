@@ -9,8 +9,8 @@
 <script>
   var H = window.Handoff, h = React.createElement;
   ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
-    h(H.Sheet, { title: 'Confirmar venta', caveat: 'Atestaciones de demostración en Fuji, sin verificación de identidad.' },
-      h(H.Fields, { items: [{ label: 'Precio por token', value: '112,00' }, { label: 'Total', value: '448,00' }] }),
-      h(H.Button, { variant: 'primary', size: 'lg' }, 'Confirmar venta'))
+    h(H.Sheet, { title: 'Confirm sale', caveat: 'Demo attestations on Fuji, no identity verification.' },
+      h(H.Fields, { items: [{ label: 'Price per token', value: '112.00' }, { label: 'Total', value: '448.00' }] }),
+      h(H.Button, { variant: 'primary', size: 'lg' }, 'Confirm sale'))
   ));
 </script>
