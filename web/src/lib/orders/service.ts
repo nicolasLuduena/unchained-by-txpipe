@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { getAddress, hashMessage, type Address, type Hash, type Hex } from "viem";
 import { handoffRegistryAbi, handoffSettlementAbi, handoffTokenAbi } from "@/lib/abi";
 import { chain, chainName, publicClient } from "@/lib/chain";
@@ -13,7 +14,7 @@ import { orderKeyAccount, orderKeyClient } from "./venue";
 
 const RECEIPT_POLL_MS = chainName === "local" ? 200 : 1000;
 const REVERSION_MAX_AGE_S = 600n;
-const MAX_REFUSALS = 200;
+const REPORT_CLAIM_MS = 30_000;
 
 /** A request the PSAV declines. Logged to the refusal list the console reads. */
 export class Refused extends Error {
@@ -27,20 +28,18 @@ export class Refused extends Error {
   }
 }
 
-export function logRefusal(route: string, refused: Refused) {
-  store.refusals.unshift({
-    id: (store.refusals[0]?.id ?? 0) + 1,
+export function logRefusal(route: string, refused: Refused): Promise<void> {
+  return store.addRefusal({
     at: new Date().toISOString(),
     route,
     code: refused.code,
     reason: refused.message,
     ...refused.context,
   });
-  store.refusals.length = Math.min(store.refusals.length, MAX_REFUSALS);
 }
 
-export function listRefusals(): Refusal[] {
-  return store.refusals;
+export function listRefusals(): Promise<Refusal[]> {
+  return store.listRefusals();
 }
 
 function core() {
@@ -166,7 +165,14 @@ export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: 
 
   const orderHash = await hashOrder(order);
   const hashed = { address: order.seller, orderHash };
-  if (store.orders.has(orderHash)) throw new Refused("duplicate", "Esta orden ya está publicada.", 409, hashed);
+
+  // One at a time across instances: the order key has one nonce, and the duplicate check must see the last write.
+  return store.exclusive("order-key", () => announce(order, sellerSig, hashed));
+}
+
+async function announce(order: Order, sellerSig: Hex, hashed: { address: Address; orderHash: Hash }): Promise<OrderView> {
+  const { orderHash } = hashed;
+  if (await store.getOrder(orderHash)) throw new Refused("duplicate", "Esta orden ya está publicada.", 409, hashed);
 
   const simulated = await publicClient
     .simulateContract({ ...settlement(), abi: revertAbi, functionName: "announceOrder", args: [order, sellerSig], account: orderKeyAccount() })
@@ -181,33 +187,44 @@ export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: 
   const receipt = await publicClient.waitForTransactionReceipt({ hash: announceTx, pollingInterval: RECEIPT_POLL_MS });
 
   const stored: StoredOrder = { orderHash, order, sellerSig, announceTx, announceBlock: receipt.blockNumber };
-  store.orders.set(orderHash, stored);
+  await store.putOrder(stored);
   return view(stored);
 }
 
-function reportFill(stored: StoredOrder) {
-  if (stored.report || !stored.filled) return;
-  stored.report = { status: "pending" };
+/**
+ * One instance reports a fill. The claim expires, so a report that failed or died is retried by a later read.
+ * `after` keeps the function alive past the response; a bare promise would freeze with it on Vercel.
+ */
+async function reportFill(stored: StoredOrder) {
   const { order, orderHash, filled } = stored;
-  registryReport
-    .report({ orderHash, txHash: filled.tx, token: order.token, seller: order.seller, buyer: filled.buyer, amount: order.amount, price: order.price })
-    .then((ack) => {
-      stored.report = { status: "acknowledged", ...ack };
-    })
-    .catch(() => {
-      stored.report = undefined; // The next read retries.
+  if (stored.acknowledged || !filled) return;
+  if (!(await store.claim(`report:${orderHash}`, REPORT_CLAIM_MS))) return;
+  after(async () => {
+    const ack = await registryReport.report({
+      orderHash,
+      txHash: filled.tx,
+      token: order.token,
+      seller: order.seller,
+      buyer: filled.buyer,
+      amount: order.amount,
+      price: order.price,
     });
+    await store.recordAcknowledgment(orderHash, ack);
+  });
 }
 
 /** The chain decides whether an order is still open; the store only remembers what it has seen. */
-async function syncWithChain(stored: StoredOrder) {
-  if (stored.filled || stored.cancelled) return reportFill(stored);
+async function syncWithChain(stored: StoredOrder): Promise<StoredOrder> {
+  if (stored.filled || stored.cancelled) {
+    await reportFill(stored);
+    return stored;
+  }
   const { seller, nonce } = stored.order;
   const [filled, cancelled] = await Promise.all([
     publicClient.readContract({ ...settlement(), functionName: "filled", args: [seller, nonce] }),
     publicClient.readContract({ ...settlement(), functionName: "cancelled", args: [seller, nonce] }),
   ]);
-  if (!filled && !cancelled) return;
+  if (!filled && !cancelled) return stored;
 
   // The flag proves the event exists, so this scan runs once per order and always ends.
   const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
@@ -215,14 +232,18 @@ async function syncWithChain(stored: StoredOrder) {
     const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
       publicClient.getContractEvents({ ...settlement(), eventName: "OrderFilled", args: { orderHash: stored.orderHash }, fromBlock, toBlock }),
     );
-    if (event?.args.buyer) stored.filled = { tx: event.transactionHash, buyer: event.args.buyer };
-    reportFill(stored);
-  } else {
-    const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
-      publicClient.getContractEvents({ ...settlement(), eventName: "OrderCancelled", args: { seller, nonce }, fromBlock, toBlock }),
-    );
-    stored.cancelled = { tx: event?.transactionHash };
+    if (!event?.args.buyer) return stored;
+    const synced = { ...stored, filled: { tx: event.transactionHash, buyer: event.args.buyer } };
+    await store.recordFill(stored.orderHash, synced.filled);
+    await reportFill(synced);
+    return synced;
   }
+  const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
+    publicClient.getContractEvents({ ...settlement(), eventName: "OrderCancelled", args: { seller, nonce }, fromBlock, toBlock }),
+  );
+  const synced = { ...stored, cancelled: { tx: event?.transactionHash } };
+  await store.recordCancel(stored.orderHash, synced.cancelled);
+  return synced;
 }
 
 function view(stored: StoredOrder): OrderView {
@@ -236,26 +257,24 @@ function view(stored: StoredOrder): OrderView {
     announceTx: stored.announceTx,
     closeTx: stored.filled?.tx ?? stored.cancelled?.tx,
     buyer: stored.filled?.buyer,
-    report: stored.report,
+    report: stored.acknowledged ? { status: "acknowledged", ...stored.acknowledged } : stored.filled && { status: "pending" },
   };
 }
 
 export async function listOrders(): Promise<OrderView[]> {
-  const orders = [...store.orders.values()];
-  await Promise.all(orders.map(syncWithChain));
+  const orders = await Promise.all((await store.listOrders()).map(syncWithChain));
   return orders.map(view).reverse();
 }
 
-function findOrder(orderHash: string): StoredOrder {
-  const stored = store.orders.get(orderHash as Hash);
+async function findOrder(orderHash: string): Promise<StoredOrder> {
+  const stored = await store.getOrder(orderHash as Hash);
   if (!stored) throw new Refused("unknown_order", "Esa orden no está en el libro.", 404);
   return stored;
 }
 
 /** Records a cancel the seller already made on-chain. The chain is the proof, so nobody can void someone else's order. */
 export async function markCancelled(orderHash: string): Promise<OrderView> {
-  const stored = findOrder(orderHash);
-  await syncWithChain(stored);
+  const stored = await syncWithChain(await findOrder(orderHash));
   if (!stored.cancelled) {
     throw new Refused("not_cancelled_on_chain", "La orden sigue vigente en la cadena.", 409, { address: stored.order.seller, orderHash: stored.orderHash });
   }
@@ -268,11 +287,11 @@ export async function markCancelled(orderHash: string): Promise<OrderView> {
  * rejecting the fill on-chain. Without a signature the revert would be InvalidVenueSignature, not the hook's.
  */
 export async function coSign(orderHash: string, body: { buyer?: unknown; demoDirectAttempt?: unknown }): Promise<{ venueSig: Hex }> {
-  const stored = findOrder(orderHash);
+  const found = await findOrder(orderHash);
   const buyer = parseAddress(body.buyer, "buyer");
-  const context = { address: buyer, orderHash: stored.orderHash };
+  const context = { address: buyer, orderHash: found.orderHash };
 
-  await syncWithChain(stored);
+  const stored = await syncWithChain(found);
   if (view(stored).status !== "open") throw new Refused("order_closed", "Esta orden ya no está vigente.", 409, context);
   if (buyer === stored.order.seller) throw new Refused("self_trade", "No podés comprar tu propia orden.", 422, context);
   await assertTradable(stored.order.token);
@@ -282,7 +301,7 @@ export async function coSign(orderHash: string, body: { buyer?: unknown; demoDir
     const refused = new Refused("buyer_not_attested", "La cuenta compradora no está verificada.", 403, context);
     const demoAllowed = chainName === "local" || process.env.VENUE_DEMO_COSIGN === "1";
     if (body.demoDirectAttempt !== true || !demoAllowed) throw refused;
-    logRefusal("co-sign (demo: firma entregada para mostrar el rechazo en la cadena)", refused);
+    await logRefusal("co-sign (demo: firma entregada para mostrar el rechazo en la cadena)", refused);
   }
 
   const digest = await publicClient.readContract({ ...settlement(), functionName: "hashVenueFill", args: [stored.orderHash, buyer] });
@@ -333,41 +352,43 @@ export async function requestReversion(body: {
   const id = reversionDigest({ chainId: BigInt(chain.id), token, holder, amount, requestedAt });
   await assertHolderSigned(holder, id, signature);
 
-  const open = [...store.reversions.values()].some((r) => r.token === token && r.holder === holder && r.status === "pending");
-  if (open) throw new Refused("already_pending", "Ya tenés un pedido de reversión pendiente.", 409, context);
+  // Exclusive so two requests with different timestamps, hence different ids, cannot both pass the pending check.
+  return store.exclusive(`reversion:${token}:${holder}`, async () => {
+    const open = (await store.listReversions()).some((r) => r.token === token && r.holder === holder && r.status === "pending");
+    if (open) throw new Refused("already_pending", "Ya tenés un pedido de reversión pendiente.", 409, context);
 
-  const stored: StoredReversion = {
-    id,
-    token,
-    holder,
-    amount,
-    requestedAt,
-    scanFrom: await publicClient.getBlockNumber({ cacheTime: 0 }),
-    status: "pending",
-  };
-  store.reversions.set(id, stored);
-  return reversionView(stored);
+    const stored: StoredReversion = {
+      id,
+      token,
+      holder,
+      amount,
+      requestedAt,
+      scanFrom: await publicClient.getBlockNumber({ cacheTime: 0 }),
+      status: "pending",
+    };
+    await store.putReversion(stored);
+    return reversionView(stored);
+  });
 }
 
 /** A request is done when the PSAV's revertToPaper shows up as a Reversion event; the console writes nothing here. */
-async function syncReversion(r: StoredReversion) {
-  if (r.status === "done") return;
+async function syncReversion(r: StoredReversion): Promise<StoredReversion> {
+  if (r.status === "done") return r;
   const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
   const [event] = await firstInSpans(r.scanFrom, latest, async (fromBlock, toBlock) => {
     const events = await publicClient.getContractEvents({ ...registry(), eventName: "Reversion", args: { token: r.token, holder: r.holder }, fromBlock, toBlock });
     return events.filter((e) => e.args.amount === r.amount);
   });
   if (!event) {
-    r.scanFrom = latest + 1n; // A pending request costs one read per poll, however long the PSAV takes.
-    return;
+    await store.advanceScan(r.id, latest + 1n); // A pending request costs one read per poll, however long the PSAV takes.
+    return r;
   }
-  r.status = "done";
-  r.certificateRef = event.args.certificateRef;
-  r.txHash = event.transactionHash;
+  const outcome = { certificateRef: event.args.certificateRef, txHash: event.transactionHash };
+  await store.recordOutcome(r.id, outcome);
+  return { ...r, ...outcome, status: "done" };
 }
 
 export async function listReversions(): Promise<ReversionView[]> {
-  const reversions = [...store.reversions.values()];
-  await Promise.all(reversions.map(syncReversion));
+  const reversions = await Promise.all((await store.listReversions()).map(syncReversion));
   return reversions.map(reversionView).reverse();
 }

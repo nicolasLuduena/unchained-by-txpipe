@@ -130,7 +130,11 @@ export async function readConsole(scanner: LogScanner, roles: RoleAddresses): Pr
   const contracts = [deployment?.contracts?.HandoffRegistry, deployment?.contracts?.HandoffSettlement].filter(Boolean) as Address[];
   await scanner.poll(head, contracts, addresses);
 
-  const [tokens, business] = await Promise.all([Promise.all(addresses.map((address) => readToken(address, scanner))), readBusiness(roles)]);
+  const [tokens, business, refusals] = await Promise.all([
+    Promise.all(addresses.map((address) => readToken(address, scanner))),
+    readBusiness(roles),
+    listRefusals().catch(() => []),
+  ]);
   const names = new Map(tokens.map((t) => [t.address.toLowerCase(), t.name]));
   const assetName = (token: Address) => names.get(String(token).toLowerCase()) ?? shortAddress(String(token));
   return {
@@ -138,6 +142,6 @@ export async function readConsole(scanner: LogScanner, roles: RoleAddresses): Pr
     scannedTo: scanner.scannedTo(),
     tokens,
     business,
-    feed: [...feedFromLogs(scanner.feedLogs, (block) => scanner.timeOf(block), assetName), ...feedFromVenue(listRefusals(), assetName)],
+    feed: [...feedFromLogs(scanner.feedLogs, (block) => scanner.timeOf(block), assetName), ...feedFromVenue(refusals, assetName)],
   };
 }

@@ -12,7 +12,7 @@ export async function venueRoute(route: string, run: () => Promise<object>): Pro
     return respond(await run());
   } catch (error) {
     if (error instanceof Refused) {
-      logRefusal(route, error);
+      await logRefusal(route, error).catch((failure: unknown) => console.error("refusal not logged", failure));
       return respond({ error: { code: error.code, reason: error.message } }, error.status);
     }
     console.error(`venue route ${route} failed`, error);
