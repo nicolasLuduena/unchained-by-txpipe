@@ -1,0 +1,79 @@
+/* The jury's view on a projector. Layout only: everything visual comes from the design system's tokens. */
+.demo {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  height: 100dvh;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+}
+
+.demo__head { display: flex; align-items: center; gap: var(--space-5); }
+.demo__logo { display: block; height: 28px; }
+.demo__caveat { margin-left: auto; text-align: right; }
+
+.demo__stage {
+  display: grid;
+  grid-template-columns: 430px 430px minmax(0, 1fr);
+  gap: var(--space-5);
+  min-height: 0;
+}
+
+/* The frame holds still; only its body scrolls, so the book stays in view on both phones. */
+.host.demo-phone { width: 100%; min-width: 0; min-height: 0; margin: 0; border: 1px solid var(--rule); }
+.demo-phone__who {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px dashed var(--rule-soft);
+}
+.demo-phone__who .hf-hash { grid-column: 1 / -1; }
+.demo-phone__body { flex: 1 1 0; min-height: 0; overflow-y: auto; }
+.demo-phone__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2); }
+
+.demo-book {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--rule);
+  background: var(--stub);
+}
+.demo-book__rows { display: grid; max-height: 116px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.demo-book__rows li {
+  display: grid;
+  grid-template-columns: 62px 66px minmax(0, 1fr) 52px auto;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 38px;
+  border-bottom: 1px solid var(--rule-soft);
+  font-variant-numeric: tabular-nums;
+}
+.demo-book__no, .demo-book__venue { color: var(--text-muted); }
+
+.demo__side { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--space-3); min-width: 0; min-height: 0; }
+.demo__feed { min-height: 0; }
+.demo__feed > .desk__section { grid-template-rows: auto auto minmax(0, 1fr); height: 100%; }
+.demo__feed .desk__feed { min-height: 0; overflow-y: auto; }
+
+.demo__controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.demo-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-3);
+  border: 1px dashed var(--rule);
+}
+.demo-panel__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 26px; }
+.demo-panel__result { display: grid; justify-items: start; gap: var(--space-1); overflow-wrap: anywhere; }
+
+/* Below desktop width the page scrolls, and the columns stack. */
+@media (max-width: 1320px) {
+  .demo { height: auto; padding-inline: var(--space-4); }
+  .demo__head { flex-wrap: wrap; }
+  .demo__caveat { margin-left: 0; text-align: left; }
+  .demo__stage { grid-template-columns: minmax(0, 1fr); }
+  .host.demo-phone { height: 860px; max-width: 430px; margin-inline: auto; }
+  .demo__feed { height: 520px; }
+  .demo__controls { grid-template-columns: minmax(0, 1fr); }
+}

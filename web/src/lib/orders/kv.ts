@@ -6,6 +6,9 @@ export type Kv = {
   hget(key: string, field: string): Promise<string | null>;
   hgetall(key: string): Promise<Record<string, string>>;
   hset(key: string, field: string, value: string): Promise<void>;
+  getValue(key: string): Promise<string | null>;
+  /** Replaces the value, which then expires after `ttlMs`. */
+  setValue(key: string, value: string, ttlMs: number): Promise<void>;
   incr(key: string): Promise<number>;
   /** Puts the value at the head of the list and keeps the newest `max`. */
   pushCapped(key: string, value: string, max: number): Promise<void>;
@@ -33,6 +36,10 @@ function upstashKv(url: string, token: string): Kv {
     async hset(key, field, value) {
       await redis.hset(key, { [field]: value });
     },
+    getValue: (key) => redis.get<string>(key),
+    async setValue(key, value, ttlMs) {
+      await redis.set(key, value, { px: ttlMs });
+    },
     incr: (key) => redis.incr(key),
     async pushCapped(key, value, max) {
       await redis.multi().lpush(key, value).ltrim(key, 0, max - 1).exec();
@@ -50,19 +57,27 @@ type Memory = {
   counters: Map<string, number>;
   lists: Map<string, string[]>;
   locks: Map<string, { token: string; expires: number }>;
+  values: Map<string, { value: string; expires: number }>;
 };
 
 // On globalThis so the in-memory store survives Next dev reloads of this module.
 const holder = globalThis as typeof globalThis & { __handoffVenue?: Memory };
 
 function memoryKv(): Kv {
-  const memory = (holder.__handoffVenue ??= { hashes: new Map(), counters: new Map(), lists: new Map(), locks: new Map() });
+  const memory = (holder.__handoffVenue ??= { hashes: new Map(), counters: new Map(), lists: new Map(), locks: new Map(), values: new Map() });
   const hash = (key: string) => memory.hashes.get(key) ?? memory.hashes.set(key, new Map()).get(key)!;
   return {
     hget: async (key, field) => hash(key).get(field) ?? null,
     hgetall: async (key) => Object.fromEntries(hash(key)),
     async hset(key, field, value) {
       hash(key).set(field, value);
+    },
+    async getValue(key) {
+      const held = memory.values.get(key);
+      return held && held.expires > Date.now() ? held.value : null;
+    },
+    async setValue(key, value, ttlMs) {
+      memory.values.set(key, { value, expires: Date.now() + ttlMs });
     },
     async incr(key) {
       const next = (memory.counters.get(key) ?? 0) + 1;
