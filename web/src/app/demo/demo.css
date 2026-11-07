@@ -275,3 +275,9 @@
   .guide-rail li:not(:last-child)::after { transition: none; }
   .guide-stage { transition: none; }
 }
+
+/* Six steps on a phone: a smaller label keeps a gap between neighbours. */
+@media (max-width: 480px) {
+  .guide-rail ol { column-gap: var(--space-1); }
+  .guide-rail__label { font-size: 12px; line-height: 16px; }
+}

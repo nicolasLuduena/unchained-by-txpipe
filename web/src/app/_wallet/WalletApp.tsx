@@ -31,7 +31,7 @@ const DEFAULT_BRAND = "Billetera Sur";
 
 function Frame({ brand, stamp, children }: { brand: string; stamp?: StampStatus; children: ReactNode }) {
   return (
-    <div className="host">
+    <div className="host wallet-host">
       <Ribbons className="host__ribbons" />
       <header className="host__bar wallet-head">
         <span className="host__name">{brand}</span>

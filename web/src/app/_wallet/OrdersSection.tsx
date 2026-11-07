@@ -1,6 +1,5 @@
 "use client";
 
-import { Fragment } from "react";
 import { encodeFunctionData, isAddressEqual } from "viem";
 import { Button, Notice } from "@/design";
 import { handoffSettlementAbi } from "@/lib/abi";
@@ -41,17 +40,19 @@ export function OrdersSection({ config, actor, wallet }: Props) {
           {cancelling.error}
         </Notice>
       )}
-      {mine.map((view) => (
-        <Fragment key={view.orderHash}>
-          <OrderCoupon view={view} label={isSeller(view) ? "Sell order" : "Purchase"} tokenName={snapshot.tokenName} />
-          {view.status === "filled" && <FillProof view={view} />}
-          {view.status === "open" && isSeller(view) && (
-            <Button variant="danger" busy={cancelling.busy} onClick={() => cancel(view)}>
-              Cancel with no gas
-            </Button>
-          )}
-        </Fragment>
-      ))}
+      <div className="wallet-orders">
+        {mine.map((view) => (
+          <div className="wallet-order" key={view.orderHash}>
+            <OrderCoupon view={view} label={isSeller(view) ? "Sell order" : "Purchase"} tokenName={snapshot.tokenName} />
+            {view.status === "filled" && <FillProof view={view} />}
+            {view.status === "open" && isSeller(view) && (
+              <Button variant="danger" busy={cancelling.busy} onClick={() => cancel(view)}>
+                Cancel with no gas
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

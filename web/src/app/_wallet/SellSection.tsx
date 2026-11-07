@@ -64,57 +64,61 @@ export function SellSection({ config, actor, wallet }: Props) {
   }
 
   return (
-    <>
-      <section className="wallet-stack">
-        <h2 className="t-title">Sell {snapshot.tokenName}</h2>
-        <TextField
-          label="Amount"
-          inputMode="numeric"
-          value={amountText}
-          help={`You have ${tokensLabel(snapshot.tokens)}.`}
-          error={amountError}
-          onChange={(e) => setAmountText(e.target.value)}
+    <div className="wallet-cols">
+      <div className="wallet-group wallet-primary">
+        <section className="wallet-stack">
+          <h2 className="t-title">Sell {snapshot.tokenName}</h2>
+          <TextField
+            label="Amount"
+            inputMode="numeric"
+            value={amountText}
+            help={`You have ${tokensLabel(snapshot.tokens)}.`}
+            error={amountError}
+            onChange={(e) => setAmountText(e.target.value)}
+          />
+          <TextField label="Price per token, in USDC" inputMode="decimal" value={shownPrice} error={priceError} onChange={(e) => setPriceText(e.target.value)} />
+        </section>
+
+        <section className="wallet-stack">
+          <span className="t-field-label">Price band</span>
+          <p className="caveat">The contract refuses any price outside this band, in USDC per token.</p>
+          <PriceBand min={usdcToNumber(snapshot.low)} max={usdcToNumber(snapshot.high)} value={usdcToNumber(price ?? snapshot.reference)} />
+        </section>
+      </div>
+
+      <div className="wallet-group wallet-side">
+        <Coupon
+          label="Sell order"
+          title={snapshot.tokenName}
+          fields={[
+            { label: "Amount", value: amount === null ? "-" : tokensLabel(amount) },
+            { label: "Price", value: price === null ? "-" : `USDC ${formatUsdc(price)}` },
+          ]}
+          note="Your tokens stay in your wallet until someone accepts."
+          stubLabel="Order total"
+          total={formatUsdc((amount ?? 0n) * (price ?? 0n))}
         />
-        <TextField label="Price per token, in USDC" inputMode="decimal" value={shownPrice} error={priceError} onChange={(e) => setPriceText(e.target.value)} />
-      </section>
 
-      <section className="wallet-stack">
-        <span className="t-field-label">Price band</span>
-        <p className="caveat">The contract refuses any price outside this band, in USDC per token.</p>
-        <PriceBand min={usdcToNumber(snapshot.low)} max={usdcToNumber(snapshot.high)} value={usdcToNumber(price ?? snapshot.reference)} />
-      </section>
-
-      <Coupon
-        label="Sell order"
-        title={snapshot.tokenName}
-        fields={[
-          { label: "Amount", value: amount === null ? "-" : tokensLabel(amount) },
-          { label: "Price", value: price === null ? "-" : `USDC ${formatUsdc(price)}` },
-        ]}
-        note="Your tokens stay in your wallet until someone accepts."
-        stubLabel="Order total"
-        total={formatUsdc((amount ?? 0n) * (price ?? 0n))}
-      />
-
-      <section className="wallet-stack">
-        <Button variant="primary" size="lg" busy={posting.busy} disabled={!ready} onClick={post}>
-          {ready ? `Sell ${tokensLabel(amount)}` : "Sell"}
-        </Button>
-        <p className="caveat">{SPONSOR_LABEL}</p>
-        {posting.error && (
-          <Notice status="blocked" word="Refused">
-            {posting.error}
-          </Notice>
-        )}
-        {posted && (
-          <div className="wallet-stack">
-            <Notice status="verified" word="Posted">
-              You signed your order. The PSAV, a licensed virtual asset provider, posted it to the order book, where any verified buyer can accept it.
+        <section className="wallet-stack">
+          <Button variant="primary" size="lg" busy={posting.busy} disabled={!ready} onClick={post}>
+            {ready ? `Sell ${tokensLabel(amount)}` : "Sell"}
+          </Button>
+          <p className="caveat">{SPONSOR_LABEL}</p>
+          {posting.error && (
+            <Notice status="blocked" word="Refused">
+              {posting.error}
             </Notice>
-            <HashText value={posted.announceTx} href={explorerUrl("tx", posted.announceTx)} />
-          </div>
-        )}
-      </section>
-    </>
+          )}
+          {posted && (
+            <div className="wallet-stack">
+              <Notice status="verified" word="Posted">
+                You signed your order. The PSAV, a licensed virtual asset provider, posted it to the order book, where any verified buyer can accept it.
+              </Notice>
+              <HashText value={posted.announceTx} href={explorerUrl("tx", posted.announceTx)} />
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
   );
 }
