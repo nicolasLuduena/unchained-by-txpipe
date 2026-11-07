@@ -1,6 +1,8 @@
+import "server-only";
 import { erc20Abi, type Address } from "viem";
 import { handoffRegistryAbi } from "@/lib/abi";
 import { deployment, publicClient } from "@/lib/chain";
+import { listRefusals } from "@/lib/orders/service";
 import { feedFromLogs, feedFromVenue, openOrders, type FeedEntry } from "./feed";
 import { categoryIn, isBusiness, type Category } from "./kumply";
 import type { LogScanner, ScannedLog } from "./scan";
@@ -40,7 +42,6 @@ export type ConsoleState = {
   tokens: TokenView[];
   feed: FeedEntry[];
   business: BusinessRead;
-  venueRouteUp: boolean;
 };
 
 const registry = () => deployment?.contracts?.HandoffRegistry as Address;
@@ -121,29 +122,15 @@ async function readBusiness(roles: RoleAddresses): Promise<BusinessRead> {
   return Object.fromEntries(entries) as BusinessRead;
 }
 
-/** The order service may not exist yet. Absence is a normal state here, not an error. */
-async function readVenueRefusals(): Promise<unknown | null> {
-  try {
-    const response = await fetch("/api/venue/refusals", { cache: "no-store" });
-    return response.ok ? await response.json() : null;
-  } catch {
-    return null;
-  }
-}
-
 /** One poll: advance the log cursors, then rebuild everything the screen shows from chain reads. */
 export async function readConsole(scanner: LogScanner, roles: RoleAddresses): Promise<ConsoleState> {
-  const head = await publicClient.getBlockNumber();
+  const head = await publicClient.getBlockNumber({ cacheTime: 0 });
   const count = await read<bigint>("tokenCount", []);
   const addresses = await Promise.all(Array.from({ length: Number(count) }, (_, i) => read<Address>("tokenAt", [BigInt(i)])));
   const contracts = [deployment?.contracts?.HandoffRegistry, deployment?.contracts?.HandoffSettlement].filter(Boolean) as Address[];
   await scanner.poll(head, contracts, addresses);
 
-  const [tokens, business, venue] = await Promise.all([
-    Promise.all(addresses.map((address) => readToken(address, scanner))),
-    readBusiness(roles),
-    readVenueRefusals(),
-  ]);
+  const [tokens, business] = await Promise.all([Promise.all(addresses.map((address) => readToken(address, scanner))), readBusiness(roles)]);
   const names = new Map(tokens.map((t) => [t.address.toLowerCase(), t.name]));
   const assetName = (token: Address) => names.get(String(token).toLowerCase()) ?? shortAddress(String(token));
   return {
@@ -151,7 +138,6 @@ export async function readConsole(scanner: LogScanner, roles: RoleAddresses): Pr
     scannedTo: scanner.scannedTo(),
     tokens,
     business,
-    venueRouteUp: venue !== null,
-    feed: [...feedFromLogs(scanner.feedLogs, (block) => scanner.timeOf(block), assetName), ...feedFromVenue(venue, assetName)],
+    feed: [...feedFromLogs(scanner.feedLogs, (block) => scanner.timeOf(block), assetName), ...feedFromVenue(listRefusals(), assetName)],
   };
 }

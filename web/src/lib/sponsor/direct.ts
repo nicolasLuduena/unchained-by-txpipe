@@ -6,7 +6,7 @@ import type { Actor, Call } from "./index";
 
 /** Fixed, so the transaction skips estimation and lands on-chain even though it reverts. */
 const DIRECT_GAS = 600_000n;
-const RECEIPT_POLL_MS = 200;
+const RECEIPT_POLL_MS = chainName === "local" ? 200 : 1000;
 
 export type DirectResult = { hash: Hash; reverted: boolean; reason?: string };
 

@@ -32,13 +32,12 @@ function Entry({ entry }: { entry: FeedEntry }) {
   );
 }
 
-export function ComplianceFeed({ entries, venueRouteUp }: { entries: FeedEntry[]; venueRouteUp: boolean }) {
+export function ComplianceFeed({ entries }: { entries: FeedEntry[] }) {
   return (
     <section className="desk__section">
       <h2 className="t-title">Feed de cumplimiento</h2>
       <p className="t-caption">
-        Órdenes, cancelaciones, ventas, bloqueos, pausas y reversiones leídos de los eventos del contrato.
-        {venueRouteUp ? " Incluye los rechazos del servicio de órdenes." : " El servicio de órdenes no responde: sus rechazos no aparecen acá."}
+        Órdenes, cancelaciones, ventas, bloqueos, pausas y reversiones leídos de los eventos del contrato. Incluye los rechazos del servicio de órdenes.
       </p>
       <div className="desk__feed">
         {entries.length === 0 ? <p className="t-caption desk__empty">Sin actividad todavía.</p> : entries.map((entry) => <Entry key={entry.id} entry={entry} />)}

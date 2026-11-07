@@ -1,15 +1,9 @@
-import { isAddressEqual, parseEventLogs, type Address, type Hash, type Log } from "viem";
+import { isAddressEqual, type Address, type Hash } from "viem";
 import type { StampStatus } from "@/design";
-import { handoffRegistryAbi, handoffSettlementAbi } from "@/lib/abi";
-import { publicClient } from "@/lib/chain";
-import { deployedAtBlock, type WalletConfig } from "./deployment";
+import { parseBig } from "@/lib/big-json";
+import type { ScannedLog } from "@/lib/console/scan";
+import type { WalletConfig } from "./deployment";
 import { formatUsdc, tokensLabel } from "./format";
-import { MAX_LOG_SPAN } from "./logs";
-
-/** How far back the first read reaches. About an hour on Fuji; the whole chain on a fresh local one. */
-const LOOKBACK_BLOCKS = 2000n;
-
-const eventsAbi = [...handoffSettlementAbi, ...handoffRegistryAbi];
 
 export type HistoryEntry = {
   id: string;
@@ -24,69 +18,52 @@ export type HistoryEntry = {
   hash: Hash;
 };
 
-// One tail for the page, shared by every actor: after the first scan a poll costs a single eth_getLogs.
-const tail: { next: bigint | null; logs: Log[]; running: Promise<void> | null } = { next: null, logs: [], running: null };
-const blockTimes = new Map<bigint, bigint>();
+type OrderArgs = { token: Address; seller: Address; buyer: Address; amount: bigint; price: bigint; nonce: bigint };
+type ReversionArgs = { token: Address; holder: Address; amount: bigint };
 
-async function advanceTail(config: WalletConfig) {
-  const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
-  const lookback = latest > LOOKBACK_BLOCKS ? latest - LOOKBACK_BLOCKS : 0n;
-  let fromBlock: bigint = tail.next ?? (lookback > deployedAtBlock ? lookback : deployedAtBlock);
-  while (fromBlock <= latest) {
-    const end: bigint = fromBlock + MAX_LOG_SPAN - 1n;
-    const toBlock = end < latest ? end : latest;
-    tail.logs.push(...(await publicClient.getLogs({ address: [config.settlement, config.registry], fromBlock, toBlock })));
-    fromBlock = toBlock + 1n;
-    tail.next = fromBlock;
-  }
+/** The server scans the chain once, from the deployment's start block, for every screen. There is no indexer. */
+async function readEvents() {
+  const response = await fetch("/api/chain/logs", { cache: "no-store" });
+  if (!response.ok) throw new Error(`chain logs: ${response.status}`);
+  return parseBig<{ logs: ScannedLog[]; times: [bigint, number][] }>(await response.text());
 }
 
-async function blockTime(blockNumber: bigint) {
-  let time = blockTimes.get(blockNumber);
-  if (time === undefined) {
-    time = (await publicClient.getBlock({ blockNumber })).timestamp;
-    blockTimes.set(blockNumber, time);
-  }
-  return time;
+function clock(seconds: number) {
+  return new Date(seconds * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 }
 
-/** Everything this account did on the token, from chain events over RPC. There is no indexer. */
+/** Everything this account did on the token, from chain events. */
 export async function readHistory(config: WalletConfig, account: Address): Promise<HistoryEntry[]> {
-  tail.running ??= advanceTail(config).finally(() => {
-    tail.running = null;
-  });
-  await tail.running;
-
+  const { logs, times } = await readEvents();
+  const timeOf = new Map(times);
   const mine = (address: Address) => isAddressEqual(address, account);
   const ofToken = (token: Address) => isAddressEqual(token, config.token);
   const announced = new Map<bigint, { amount: bigint; price: bigint }>();
-  const entries: (Omit<HistoryEntry, "time"> & { blockNumber: bigint })[] = [];
+  const entries: HistoryEntry[] = [];
 
-  for (const e of parseEventLogs({ abi: eventsAbi, logs: tail.logs })) {
-    const located = { id: `${e.transactionHash}-${e.logIndex}`, hash: e.transactionHash, blockNumber: e.blockNumber };
+  for (const e of logs) {
+    const located = { id: `${e.transactionHash}-${e.logIndex}`, hash: e.transactionHash, time: clock(timeOf.get(e.blockNumber) ?? 0) };
+    const order = e.args as OrderArgs;
 
-    if (e.eventName === "OrderAnnounced" && ofToken(e.args.token) && mine(e.args.seller)) {
-      const { seller, amount, price, nonce } = e.args;
+    if (e.eventName === "OrderAnnounced" && ofToken(order.token) && mine(order.seller)) {
+      const { seller, amount, price, nonce } = order;
       announced.set(nonce, { amount, price });
       entries.push({ ...located, event: "Publicada", status: "unused", detail: tokensLabel(amount), from: seller, price: formatUsdc(price) });
-    } else if (e.eventName === "OrderCancelled" && mine(e.args.seller)) {
-      const order = announced.get(e.args.nonce);
-      if (!order) continue; // Cancelled on another token, or announced before the window.
-      entries.push({ ...located, event: "Cancelada", status: "cancelled", detail: tokensLabel(order.amount), from: account, price: formatUsdc(order.price) });
-    } else if (e.eventName === "OrderFilled" && ofToken(e.args.token) && (mine(e.args.seller) || mine(e.args.buyer))) {
-      const { seller, buyer, amount, price } = e.args;
+    } else if (e.eventName === "OrderCancelled" && mine(order.seller)) {
+      const known = announced.get(order.nonce);
+      if (!known) continue; // Cancelled on another token.
+      entries.push({ ...located, event: "Cancelada", status: "cancelled", detail: tokensLabel(known.amount), from: account, price: formatUsdc(known.price) });
+    } else if (e.eventName === "OrderFilled" && ofToken(order.token) && (mine(order.seller) || mine(order.buyer))) {
+      const { seller, buyer, amount, price } = order;
       entries.push({ ...located, event: mine(seller) ? "Vendido" : "Comprado", status: "sold", detail: tokensLabel(amount), from: seller, to: buyer, price: formatUsdc(price) });
-    } else if (e.eventName === "Reversion" && ofToken(e.args.token) && mine(e.args.holder)) {
+    } else if (e.eventName === "Reversion") {
+      const { token, holder, amount } = e.args as ReversionArgs;
+      if (!ofToken(token) || !mine(holder)) continue;
       // Amount prints the currency first, so a blank one keeps this reading "1 token" rather than "tokens 1".
-      entries.push({ ...located, event: "Revertido", status: "reverted", detail: "A certificado en papel", from: e.args.holder, price: tokensLabel(e.args.amount), currency: " " });
+      entries.push({ ...located, event: "Revertido", status: "reverted", detail: "A certificado en papel", from: holder, price: tokensLabel(amount), currency: " " });
     }
   }
 
-  // The tail is oldest first; the screen is newest first.
-  return Promise.all(
-    entries.reverse().map(async ({ blockNumber, ...entry }) => ({
-      ...entry,
-      time: new Date(Number(await blockTime(blockNumber)) * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
-    })),
-  );
+  // The scan is oldest first; the screen is newest first.
+  return entries.reverse();
 }

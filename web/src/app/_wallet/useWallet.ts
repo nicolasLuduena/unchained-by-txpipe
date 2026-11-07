@@ -11,7 +11,7 @@ import { readSnapshot, type Snapshot } from "@/lib/wallet/market";
 import { passesPrecheck } from "@/lib/wallet/precheck";
 import { revertReason } from "@/lib/wallet/revert-reason";
 
-/** Fuji's public RPC answers 429 at about four reads a second, and a throttled response reads as a CORS failure. */
+/** A throttled response from Fuji's public RPC reads as a CORS failure here, so the wallet polls gently. */
 const POLL_MS = chainName === "local" ? 2500 : 15_000;
 
 export type Precheck = "checking" | "passed" | "blocked" | "unavailable";

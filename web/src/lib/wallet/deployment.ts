@@ -17,9 +17,6 @@ type HandoffDeployment = {
 
 const handoff = deployment as HandoffDeployment | null;
 
-/** The block the contracts were deployed at, where the deployment records one. Nothing older is worth scanning. */
-export const deployedAtBlock = BigInt(handoff?.startBlock ?? 0);
-
 export type CoreContracts ={ registry: Address; settlement: Address };
 
 /** What the venue routes need. Null until the core contracts are deployed. */

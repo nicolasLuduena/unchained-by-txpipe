@@ -3,18 +3,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 import { AssetRow, Hash, Notice, Stamp, Tabs } from "@/design";
+import { parseBig } from "@/lib/big-json";
 import { chainName, deployment, explorerUrl } from "@/lib/chain";
 import type { FeedEntry } from "@/lib/console/feed";
 import { units, usdc } from "@/lib/console/format";
 import { isRole, ROLE_LABEL, ROLES, type Role, type RoleAddresses } from "@/lib/console/roles";
-import { LogScanner } from "@/lib/console/scan";
-import { readConsole, type ConsoleState } from "@/lib/console/state";
+import type { ConsoleState } from "@/lib/console/state";
 import { ActionPanel } from "./ActionPanel";
 import { ComplianceFeed } from "./ComplianceFeed";
 import { HoldersTable } from "./HoldersTable";
 import { TokenSummary } from "./TokenSummary";
 
-const POLL_MS = 3000;
+const POLL_MS = chainName === "local" ? 3000 : 5000;
 const CAVEAT = "Atestaciones de demostración en Fuji, sin verificación de identidad.";
 
 function useRoleFromHash(): Role {
@@ -31,20 +31,20 @@ function useRoleFromHash(): Role {
   return role;
 }
 
-/** Polls the chain. The scanner lives across polls, so each one reads only the new blocks. */
+/** Polls the server's shared reading, which keeps its scan across polls and across screens. */
 function useConsoleState() {
   const [roles, setRoles] = useState<RoleAddresses | null>(null);
   const [state, setState] = useState<ConsoleState | null>(null);
   const [failed, setFailed] = useState(false);
-  const scanner = useRef<LogScanner | null>(null);
   const running = useRef(false);
 
   const refresh = useCallback(async () => {
-    if (!roles || running.current) return;
+    if (running.current) return;
     running.current = true;
-    scanner.current ??= new LogScanner();
     try {
-      setState(await readConsole(scanner.current, roles));
+      const response = await fetch("/console/api/state", { cache: "no-store" });
+      if (!response.ok) throw new Error(`console state: ${response.status}`);
+      setState(parseBig<ConsoleState>(await response.text()));
       setFailed(false);
     } catch (error) {
       console.error(error);
@@ -52,7 +52,7 @@ function useConsoleState() {
     } finally {
       running.current = false;
     }
-  }, [roles]);
+  }, []);
 
   useEffect(() => {
     fetch("/console/api")
@@ -187,7 +187,7 @@ export function Console() {
 
           {token ? <TokenSummary token={token} /> : null}
           {token ? <HoldersTable token={token} /> : null}
-          <ComplianceFeed entries={feed} venueRouteUp={state?.venueRouteUp ?? false} />
+          <ComplianceFeed entries={feed} />
         </div>
       </div>
     </main>
