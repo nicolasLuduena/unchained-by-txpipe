@@ -26,12 +26,12 @@ export async function isBusiness(address: Address): Promise<boolean | null> {
   return sdk(store).isBusiness(address).catch(() => null);
 }
 
-export type Category = "Persona" | "Empresa" | "Agente" | "Sin atestación";
+export type Category = "Person" | "Business" | "Agent" | "No attestation";
 
 function categoryOf(tier: number): Category {
-  if (tier === 4) return "Empresa";
-  if (tier === 5) return "Agente";
-  return tier >= 1 && tier <= 3 ? "Persona" : "Sin atestación";
+  if (tier === 4) return "Business";
+  if (tier === 5) return "Agent";
+  return tier >= 1 && tier <= 3 ? "Person" : "No attestation";
 }
 
 /** A token names its own attesters, so the first of them that verifies the holder decides the category. */
@@ -40,5 +40,5 @@ export async function categoryIn(stores: readonly Address[], holder: Address): P
     const { verified, tier } = await sdk(store).verify(holder);
     if (verified) return categoryOf(tier);
   }
-  return "Sin atestación";
+  return "No attestation";
 }

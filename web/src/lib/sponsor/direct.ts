@@ -19,14 +19,14 @@ export async function sendFrom(wallet: WalletClient<Transport, Chain, Account>, 
   // A receipt carries no reason, so the call is replayed at its block to read the named error.
   const reason = await publicClient
     .call({ account: wallet.account.address, to: call.to, data: call.data, blockNumber: receipt.blockNumber })
-    .then(() => "Rechazada sin motivo informado")
+    .then(() => "Refused with no reason given")
     .catch(revertReason);
   return { hash, reverted: true, reason };
 }
 
 /** An unsponsored transaction the actor pays for: the refusal demo, where a revert with a hash is the point. */
 export async function sendDirect(actor: Actor, call: Call): Promise<DirectResult> {
-  if (actor === "metamask") throw new Error("Mi billetera opera solo con patrocinio.");
+  if (actor === "metamask") throw new Error("My wallet works only with sponsorship.");
   if (chainName === "local") return sendFrom((await import("./dev-keys")).devWallet(actor), call);
   return venue.sponsor<DirectResult>({ action: "direct", actor, call });
 }

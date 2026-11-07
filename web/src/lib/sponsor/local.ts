@@ -9,7 +9,7 @@ import type { Actor, DemoActor, Sponsor } from "./index";
 const RECEIPT_POLL_MS = 200;
 
 function demoActor(actor: Actor): DemoActor {
-  if (actor === "metamask") throw new Error("Mi billetera funciona solo en Fuji.");
+  if (actor === "metamask") throw new Error("My wallet works only on Fuji.");
   return actor;
 }
 
@@ -20,21 +20,21 @@ function demoActor(actor: Actor): DemoActor {
  */
 export const localSponsor: Sponsor = {
   async sendCalls(actor, calls) {
-    if (actor === "unverified") throw new Error("Una cuenta sin verificar no tiene patrocinio.");
+    if (actor === "unverified") throw new Error("An unverified account has no sponsorship.");
     if (calls.length === 0) throw new Error("sendCalls needs at least one call");
     const wallet = devWallet(demoActor(actor));
     let hash: Hash | undefined;
     for (const call of calls) {
       hash = await wallet.sendTransaction(call);
       const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: RECEIPT_POLL_MS });
-      if (receipt.status !== "success") throw new Error(`Transacción revertida: ${hash}`);
+      if (receipt.status !== "success") throw new Error(`Transaction reverted: ${hash}`);
     }
     return { hash: hash as Hash };
   },
 
   async signOrder(actor, order) {
     const address = coreContracts()?.settlement;
-    if (!address) throw new Error("Los contratos todavía no están desplegados.");
+    if (!address) throw new Error("The contracts are not deployed yet.");
     const hash = await publicClient.readContract({ address, abi: handoffSettlementAbi, functionName: "hashOrder", args: [order] });
     return devAccount(demoActor(actor)).sign({ hash });
   },

@@ -19,7 +19,7 @@ export function setMetaMaskSession(next: Session | null) {
 }
 
 function current(): Session {
-  if (!session) throw new Error("Conectá MetaMask primero.");
+  if (!session) throw new Error("Connect MetaMask first.");
   return session;
 }
 
@@ -47,7 +47,7 @@ async function freshClient() {
   } as never);
 
   if (!isAddressEqual((await client.getAccountAddress()) as Address, account.smartAccount)) {
-    throw new Error("La cuenta de MetaMask no corresponde a esta cuenta inteligente.");
+    throw new Error("This MetaMask account does not match this smart account.");
   }
   return client;
 }
@@ -62,7 +62,7 @@ async function send(calls: Call[]) {
 
   const { receipt, success } = await response.wait();
   // success is the string "true" or "false", so a plain truthiness check would pass a failed operation.
-  if (String(success) !== "true") throw new Error(`Transacción revertida: ${receipt.transactionHash}`);
+  if (String(success) !== "true") throw new Error(`Transaction reverted: ${receipt.transactionHash}`);
   return { hash: receipt.transactionHash as Hash, userOpHash: response.userOpHash as Hash };
 }
 
@@ -74,7 +74,7 @@ async function signDigest(digest: Hash): Promise<Hex> {
   const client = await freshClient();
   // The 0x prefix matters: without it the SDK signs the text and verification fails.
   const signature = (await client.signMessage(digest)) as Hex;
-  if (signature.endsWith(ERC6492_SUFFIX)) throw new Error("La cuenta todavía no está desplegada. Probá de nuevo en un momento.");
+  if (signature.endsWith(ERC6492_SUFFIX)) throw new Error("The account is not deployed yet. Try again in a moment.");
   return signature;
 }
 
@@ -84,7 +84,7 @@ export const metamaskSponsor: Sponsor = {
 
   async signOrder(_actor, order) {
     const address = coreContracts()?.settlement;
-    if (!address) throw new Error("Los contratos todavía no están desplegados.");
+    if (!address) throw new Error("The contracts are not deployed yet.");
     return signDigest(await publicClient.readContract({ address, abi: handoffSettlementAbi, functionName: "hashOrder", args: [order] }));
   },
 
