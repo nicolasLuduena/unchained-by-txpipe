@@ -2,7 +2,7 @@ import { erc20Abi, type Address } from "viem";
 import { handoffRegistryAbi } from "@/lib/abi";
 import { deployment, publicClient } from "@/lib/chain";
 import { feedFromLogs, feedFromVenue, openOrders, type FeedEntry } from "./feed";
-import { categoryIn, kumply, type Category } from "./kumply";
+import { categoryIn, isBusiness, type Category } from "./kumply";
 import type { LogScanner, ScannedLog } from "./scan";
 import { ROLES, type Role, type RoleAddresses } from "./roles";
 import { shortAddress } from "./format";
@@ -111,12 +111,11 @@ async function readToken(address: Address, scanner: LogScanner): Promise<TokenVi
 }
 
 async function readBusiness(roles: RoleAddresses): Promise<BusinessRead> {
-  const store = await read<Address>("issuerAttester", []);
   const entries = await Promise.all(
     ROLES.map(async (role) => {
       const address = roles[role];
       if (!address) return [role, null] as const;
-      return [role, await kumply(store).isBusiness(address).catch(() => null)] as const;
+      return [role, await isBusiness(address)] as const;
     }),
   );
   return Object.fromEntries(entries) as BusinessRead;

@@ -1,8 +1,8 @@
-import { erc20Abi, getAbiItem, type AbiEvent, type Address, type Hash } from "viem";
+import { erc20Abi, type AbiEvent, type Address, type Hash } from "viem";
 import { handoffRegistryAbi, handoffSettlementAbi } from "@/lib/abi";
 import { deployment, publicClient } from "@/lib/chain";
 
-/** Fuji's public RPC caps getLogs ranges. */
+/** Starting chunk. An RPC that allows less says so, and the scanner drops to its cap: Fuji's public RPC allows 100. */
 const CHUNK_BLOCKS = 2048n;
 /** Bounds one poll, so a long backfill shows progress instead of holding the screen. */
 const MAX_CHUNKS_PER_POLL = 25;
@@ -16,11 +16,17 @@ export type ScannedLog = {
   logIndex: number;
 };
 
-const FEED_EVENTS: AbiEvent[] = [
-  ...["PausedSet", "HolderBlocked", "Reversion"].map((name) => getAbiItem({ abi: handoffRegistryAbi, name }) as AbiEvent),
-  ...["OrderAnnounced", "OrderCancelled", "OrderFilled"].map((name) => getAbiItem({ abi: handoffSettlementAbi, name }) as AbiEvent),
-];
-const TRANSFER = getAbiItem({ abi: erc20Abi, name: "Transfer" }) as AbiEvent;
+const FEED_EVENT_NAMES = ["PausedSet", "HolderBlocked", "Reversion", "OrderAnnounced", "OrderCancelled", "OrderFilled"];
+const FEED_EVENTS = [...handoffRegistryAbi, ...handoffSettlementAbi].filter(
+  (item) => item.type === "event" && FEED_EVENT_NAMES.includes(item.name),
+) as unknown as AbiEvent[];
+const TRANSFER = erc20Abi.find((item) => item.type === "event" && item.name === "Transfer") as AbiEvent;
+
+/** The cap named in a "block range too large" refusal, or null for any other failure. */
+function rangeCap(error: unknown): bigint | null {
+  const match = /maximum of (\d+) blocks/.exec(String((error as Error)?.message));
+  return match ? BigInt(match[1]) : null;
+}
 
 function startBlock(): bigint {
   const start = deployment?.startBlock;
@@ -36,12 +42,21 @@ export class LogScanner {
   readonly transfers = new Map<Address, ScannedLog[]>();
   private readonly cursors = new Map<string, bigint>();
   private readonly blockTimes = new Map<bigint, number>();
+  private chunkBlocks = CHUNK_BLOCKS;
 
   private async advance(source: string, address: Address | Address[], events: AbiEvent[], head: bigint, into: ScannedLog[]) {
     let from = this.cursors.get(source) ?? startBlock();
     for (let chunk = 0; from <= head && chunk < MAX_CHUNKS_PER_POLL; chunk++) {
-      const to = from + CHUNK_BLOCKS - 1n < head ? from + CHUNK_BLOCKS - 1n : head;
-      const logs = await publicClient.getLogs({ address, events, fromBlock: from, toBlock: to });
+      const to = from + this.chunkBlocks - 1n < head ? from + this.chunkBlocks - 1n : head;
+      let logs;
+      try {
+        logs = await publicClient.getLogs({ address, events, fromBlock: from, toBlock: to });
+      } catch (error) {
+        const cap = rangeCap(error);
+        if (cap === null || cap >= this.chunkBlocks) throw error;
+        this.chunkBlocks = cap;
+        continue;
+      }
       into.push(...(logs as unknown as ScannedLog[]));
       from = to + 1n;
       this.cursors.set(source, from);

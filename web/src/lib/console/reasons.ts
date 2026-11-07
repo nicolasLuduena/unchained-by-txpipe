@@ -1,7 +1,7 @@
 /** Reason codes in plain words. The code itself is always shown next to the sentence. */
 const REASONS: Record<string, string> = {
-  KumplyNotBusiness: "KUMPLY no devuelve atestación de empresa para esta dirección. Sin ella no opera como emisor.",
-  KumplyUnavailable: "No pudimos leer la atestación en KUMPLY. Probá de nuevo en unos segundos.",
+  NotBusiness: "Esta dirección no tiene atestación de empresa. Sin ella no opera como emisor.",
+  BusinessReadFailed: "No pudimos leer la atestación. Probá de nuevo en unos segundos.",
   IssuerNotBusiness: "El contrato rechazó el registro: esta dirección no tiene atestación de empresa.",
   MissingAuthorizationRef: "Falta la referencia de autorización de la CNV.",
   NotIssuer: "Solo el emisor del token puede hacer esto.",
@@ -26,7 +26,7 @@ const REASONS: Record<string, string> = {
   BandNotSet: "El token todavía no tiene banda.",
   TradingDisabled: "El token no está abierto a negociación.",
   NotRoutedThroughVenue: "La transferencia no pasó por la liquidación de una plataforma.",
-  KeyNotConfigured: "Este rol no tiene clave configurada en el servidor.",
+  KeyNotConfigured: "Este rol no tiene clave disponible en el servidor.",
   TransactionReverted: "La transacción se revirtió en la cadena.",
   SendFailed: "No pudimos enviar la transacción.",
   RouteUnavailable: "La ruta de envío de la consola no respondió.",

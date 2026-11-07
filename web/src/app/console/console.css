@@ -29,7 +29,7 @@
   align-items: start;
 }
 .desk__main { display: grid; gap: var(--space-6); min-width: 0; }
-.desk__section { display: grid; gap: var(--space-3); min-width: 0; }
+.desk__section { display: grid; gap: var(--space-3); align-content: start; min-width: 0; }
 .desk__actions { position: sticky; top: var(--space-4); max-height: calc(100dvh - 2 * var(--space-4)); overflow-y: auto; }
 
 .desk__accordion { border-top: 1px solid var(--rule-soft); }

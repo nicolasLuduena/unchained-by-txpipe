@@ -71,8 +71,8 @@ function useConsoleState() {
 }
 
 function businessStamp(read: boolean | null | undefined) {
-  if (read === undefined) return <Stamp status="pending">Leyendo KUMPLY</Stamp>;
-  if (read === null) return <Stamp status="pending">KUMPLY sin respuesta</Stamp>;
+  if (read === undefined) return <Stamp status="pending">Leyendo</Stamp>;
+  if (read === null) return <Stamp status="pending">Sin respuesta</Stamp>;
   return read ? <Stamp status="verified">Empresa</Stamp> : <Stamp status="blocked">Sin atestación de empresa</Stamp>;
 }
 
@@ -130,7 +130,7 @@ export function Console() {
           {address ? <Hash value={address} href={explorerUrl("address", address)} /> : <span className="t-caption">Sin clave configurada</span>}
         </span>
         <span className="desk__who">
-          <span className="t-field-label">KUMPLY isBusiness</span>
+          <span className="t-field-label">SDK isBusiness</span>
           {businessStamp(state?.business[role])}
         </span>
         <span className="desk__sync t-caption">
@@ -140,7 +140,10 @@ export function Console() {
 
       <p className="caveat">
         {CAVEAT}
-        {chainName === "local" ? " Cadena local: el SDK de KUMPLY lee el stub de atestaciones." : ""}
+        {" "}
+        {chainName === "local"
+          ? "Cadena local: el SDK de KUMPLY lee un stub de prueba."
+          : "El SDK de KUMPLY lee una instancia de demostración del contrato de KUMPLY, sin verificación de identidad. No es el almacén oficial de KUMPLY."}
       </p>
 
       {failed ? (
@@ -151,7 +154,7 @@ export function Console() {
 
       <div className="desk__columns">
         <ActionPanel
-          key={token?.address ?? "sin-token"}
+          key={role}
           role={role}
           address={address}
           token={token}
@@ -172,9 +175,8 @@ export function Console() {
                   <AssetRow
                     key={t.address}
                     name={t.name}
-                    meta={`${t.symbol}, ${units(t.totalSupply)} de ${units(t.authorizedSupply)} unidades`}
+                    meta={`${t.symbol}, ${units(t.totalSupply)} de ${units(t.authorizedSupply)} unidades${t.paused ? ", pausado" : ""}`}
                     price={usdc(t.band.price)}
-                    status={t.paused ? "blocked" : t.address === token?.address ? "verified" : undefined}
                     className={t.address === token?.address ? "desk__token--current" : undefined}
                     onClick={() => setSelected(t.address)}
                   />

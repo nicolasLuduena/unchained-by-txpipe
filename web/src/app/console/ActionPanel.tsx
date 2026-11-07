@@ -60,7 +60,7 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
   // The PSAV acts as a venue, which the contract checks itself. Everyone else needs the business read.
   const gated = action.gated && role !== "psav";
   const refusedBySdk = gated && business !== true;
-  const sdkCode = business === null ? "KumplyUnavailable" : "KumplyNotBusiness";
+  const sdkCode = business === null ? "BusinessReadFailed" : "NotBusiness";
 
   function logRefusal(code: string, hash?: string) {
     const at = Math.floor(Date.now() / 1000);
@@ -172,7 +172,8 @@ export function ActionPanel(props: PanelProps) {
             {action.needsToken && !token ? (
               <p className="t-caption desk__empty">Elegí o registrá un token primero.</p>
             ) : (
-              <ActionForm action={action} ctx={ctx} props={props} />
+              // Keyed by token so its defaults follow the selection; registering must survive the switch it causes.
+              <ActionForm key={action.needsToken ? token?.address : action.id} action={action} ctx={ctx} props={props} />
             )}
           </details>
         ))}

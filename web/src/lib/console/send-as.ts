@@ -9,20 +9,12 @@ import {
   type AbiParameter,
   type Account,
   type Address,
-  type Hex,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { handoffRegistryAbi, handoffTokenAbi } from "@/lib/abi";
 import { chain, chainName, deployment, publicClient } from "@/lib/chain";
 import { anvilAccount } from "./dev-keys";
+import { fujiAccount } from "./fuji-keys";
 import { REGISTRY_WRITES, ROLES, type JsonArg, type RegistryCall, type Role, type RoleAddresses, type SendResult } from "./roles";
-
-/** Server-side env on Fuji. Never NEXT_PUBLIC_: these keys must not reach the browser. */
-const FUJI_KEY_ENV: Record<Role, string> = {
-  emisor: "CONSOLE_EMISOR_KEY",
-  psav: "CONSOLE_PSAV_KEY",
-  "sin-atestacion": "CONSOLE_SIN_ATESTACION_KEY",
-};
 
 // The registry calls into the token, so its errors and OpenZeppelin's can surface through a registry call.
 const REVERT_ABI = [
@@ -32,9 +24,7 @@ const REVERT_ABI = [
 ] as Abi;
 
 function accountFor(role: Role): Account | null {
-  if (chainName === "local") return anvilAccount(role);
-  const key = process.env[FUJI_KEY_ENV[role]];
-  return key ? privateKeyToAccount(key as Hex) : null;
+  return chainName === "local" ? anvilAccount(role) : fujiAccount(role);
 }
 
 export function roleAddresses(): RoleAddresses {
@@ -69,7 +59,7 @@ export async function sendAs(role: Role, call: RegistryCall): Promise<SendResult
   const registry = deployment?.contracts?.HandoffRegistry;
   if (!registry) return { ok: false, code: "NoDeployment" };
   const account = accountFor(role);
-  if (!account) return { ok: false, code: "KeyNotConfigured", detail: FUJI_KEY_ENV[role] };
+  if (!account) return { ok: false, code: "KeyNotConfigured", detail: role };
 
   try {
     const fn = handoffRegistryAbi.find((item) => item.type === "function" && item.name === call.fn);

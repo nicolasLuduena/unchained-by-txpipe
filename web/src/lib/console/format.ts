@@ -30,7 +30,7 @@ export function clock(seconds: number): string {
 
 export function fullTime(seconds: number): string {
   const { timeZone } = AR_TIME;
-  return new Intl.DateTimeFormat("es-AR", { timeZone, dateStyle: "short", timeStyle: "medium" }).format(seconds * 1000);
+  return new Intl.DateTimeFormat("es-AR", { timeZone, hourCycle: "h23", dateStyle: "short", timeStyle: "medium" }).format(seconds * 1000);
 }
 
 export function shortAddress(value: string): string {
