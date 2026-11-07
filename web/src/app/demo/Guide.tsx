@@ -570,7 +570,7 @@ export function Guide({ config, book, seller, buyer, feed, onRefusal, caveat, st
             <a className="wallet-link" href="/console">
               Open the issuer and PSAV console
             </a>
-            <a className="wallet-link" href="/">
+            <a className="wallet-link" href="/?actor=seller&tab=mercado">
               Open the wallet
             </a>
           </p>
