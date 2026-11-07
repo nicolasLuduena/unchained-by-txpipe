@@ -33,4 +33,7 @@
 
 .wallet-link { color: var(--text); }
 
+/* The verification button has to say there is no identity check, so its label wraps instead of clipping. */
+.wallet-long-button { height: auto; min-height: 44px; padding-block: var(--space-2); line-height: 1.25; white-space: normal; }
+
 .wallet-foot { display: grid; gap: var(--space-2); }

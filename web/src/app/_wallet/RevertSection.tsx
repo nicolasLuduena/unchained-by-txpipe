@@ -17,7 +17,7 @@ export function RevertSection({ config, actor, wallet }: Props) {
   const requesting = useAction();
 
   if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en la cadena.</Notice>;
-  if (precheck === "blocked") return <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
+  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
 
   const amount = parseTokens(amountText);
   const amountError = amount === null || amount === 0n ? "Ingresá una cantidad entera." : amount > snapshot.tokens ? `Tenés ${tokensLabel(snapshot.tokens)}.` : undefined;

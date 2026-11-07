@@ -63,6 +63,29 @@ Three things to read correctly:
 - **The refused fill carried a co-signature the venue would normally withhold.** It was issued on purpose so the refusal comes from the token hook instead of `InvalidVenueSignature`. The wallet route does this only with `VENUE_DEMO_COSIGN=1`, and logs it.
 - **The reason names are checkable.** The explorer shows the revert. Replaying each call against the block before it returns the same custom error.
 
+## Bring your own MetaMask
+
+The wallet has a fourth actor on Fuji, "Mi billetera", at `/?actor=metamask`. **It is a demo verification with no identity check:** anyone who signs gets a tier 2 demo attestation from the team's demo instance of KUMPLY's contract, not from KUMPLY's official store.
+
+1. The page connects to the injected provider and switches to Fuji, adding the network if needed. With no provider it says so.
+2. The MetaMask EOA owns a 0xGasless smart account (the same Fuji contracts, index 0). The page shows it, and the KUMPLY SDK pre-check blocks it.
+3. "Obtener verificación de demostración (sin control de identidad)" signs a message and calls `POST /api/onboard`. The server deploys the account from the deployer, attests it, mints 5 demo units from the issuer, and sends USDC 5 from the seller in a sponsored operation. When the seller holds under USDC 5 it skips the USDC and says the holder can still sell.
+4. Orders, fills and cancels then work as for the other actors, except that MetaMask signs in the browser. The SDK runs client-side and reaches the paymaster through `POST /api/paymaster`, a same-origin proxy that keeps the key on the server. It allows only `pm_sponsorUserOperation`, only for senders attested in the deployment's store, 10 times a minute per sender.
+
+Onboarding is idempotent per owner, serialized by a Redis lock and capped at 20 owners. It needs no new environment variables, only the `AA_*`, Upstash and mnemonic values above. The proxy does not inspect what an attested sender's operation calls, so the rate limit is its only bound on sponsorship spend.
+
+**One cycle ran on live Fuji with a fake injected EIP-1193 provider in headless Chromium, backed by a throwaway key. Real MetaMask was not exercised:** a person cannot be driven headless, so its prompts and its handling of these signatures are unproven.
+
+| Step | Transaction |
+|---|---|
+| Account deployed by the deployer | [`0x195c...637e`](https://testnet.snowtrace.io/tx/0x195c24358f3c2d9331e9bd0966e0bd0d68ba0a14c1797f2073b34493a9bd637e) |
+| Tier 2 demo attestation | [`0xdec0...c2df`](https://testnet.snowtrace.io/tx/0xdec0be923a95eb6921efb613b1d8107ae501cfa31b404610b9d330fd5ebfc2df) |
+| 5 demo units minted | [`0x0000...a301`](https://testnet.snowtrace.io/tx/0x0000861fada871bc32c7cb0913fd93607dbc5e394646393cbefaba850c37a301) |
+| USDC 5 from the seller, sponsored | [`0x6629...2cbb`](https://testnet.snowtrace.io/tx/0x6629e2a277f3285da00157e96eebae18c492f4886de780f66abee236c48d2cbb) |
+| Order signed in the browser, announced | [`0xd4b9...2af2`](https://testnet.snowtrace.io/tx/0xd4b9336e8d2a96eb76789d91632c5e5fb532c88bd92b1719a8aed4e6c08d2af2) |
+| Cancel, sponsored, signed in the browser | [`0xe686...8c58`](https://testnet.snowtrace.io/tx/0xe6869f1cec32fa5821b5fb86c85f8f55dcd7e64062b08b55eb5490a3961a8c58) |
+| Buy of 1 unit at USDC 2.50, approve and fill in one sponsored operation signed in the browser | [`0xb47b...5e0d`](https://testnet.snowtrace.io/tx/0xb47b9e9a3ad746ae82b97d04e80e204578458668e36ad3c7e4f71d2c64cf5e0d) |
+
 ## Why Avalanche
 
 The regime describes a closed group of at most five operators who must keep one real-time record. That is the shape of a permissioned Avalanche L1. Fuji C-Chain is what runs today; the L1 is the roadmap.
@@ -304,7 +327,7 @@ The 0xGasless bundler, paymaster, EntryPoint and smart-account contracts are thi
 - **The order book is sell-only.** There are no buy orders, so the spec's "best bid" is shown as the lowest ask, under the label "Mejor oferta". There is no matching engine: it is a bulletin board.
 - **The registry acknowledgment is a labelled mock.** It reads "Acuse de demostración, sin llamada real". No call to BYMA or anyone else happens.
 - **The console has no auth and is run locally.** Its route signs as issuer or PSAV for whoever can reach it, so it must not be exposed.
-- **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. There is no real wallet connection or login.
+- **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. The exception is [Mi billetera](#bring-your-own-metamask), where the visitor's MetaMask signs.
 - **The linked transactions came from scripts,** see [What ran on Fuji](#what-ran-on-fuji).
 - **The direct-transfer refusals used the issuer EOA,** and the refused fill used a deliberately issued co-signature.
 - **The order book is one in-memory instance,** labelled as the PSAV's. Restarting it loses open orders. One venue is listed on Fuji, so synchronization between PSAVs is not exercised; the five-venue cap lives in the contract and its tests.

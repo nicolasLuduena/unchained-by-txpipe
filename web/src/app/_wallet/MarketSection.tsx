@@ -98,7 +98,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
           <p className="caveat">Todavía no hay ofertas abiertas. Precio de referencia: USDC {formatUsdc(snapshot.reference)}.</p>
         )}
 
-        {precheck === "blocked" && <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>}
+        {precheck === "blocked" && actor !== "metamask" && <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>}
 
         {ask && !ownAsk && precheck === "passed" && (
           <>

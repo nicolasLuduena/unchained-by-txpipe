@@ -27,7 +27,7 @@ export function SellSection({ config, actor, wallet }: Props) {
 
   // The SDK pre-check gates the ticket: nothing below renders until it has passed.
   if (precheck === "checking") return <Notice status="pending">Comprobando tu verificación.</Notice>;
-  if (precheck === "blocked") return <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
+  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
   if (precheck === "unavailable" || !snapshot) {
     return <Notice status="pending">No pudimos comprobar tu verificación. Probá de nuevo en un momento.</Notice>;
   }

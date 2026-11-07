@@ -58,7 +58,7 @@ export function MetaMaskPanel({ metamask, wallet }: { metamask: MetaMask; wallet
       {wallet.precheck === "blocked" && (
         <>
           <Notice status="blocked">Primero verificá esta cuenta. La comprobación del SDK de KUMPLY la bloquea hasta que tenga una atestación.</Notice>
-          <Button variant="primary" size="lg" busy={verifying.busy} onClick={() => verify(wallet.refresh)}>
+          <Button className="wallet-long-button" variant="primary" busy={verifying.busy} onClick={() => verify(wallet.refresh)}>
             Obtener verificación de demostración (sin control de identidad)
           </Button>
           <p className="caveat">Es una atestación de demostración, sin control de identidad. La emite una instancia de demostración del contrato de KUMPLY, no su registro oficial. Recibís 5 tokens de demostración y, si queda saldo, USDC 5.</p>
@@ -71,7 +71,7 @@ export function MetaMaskPanel({ metamask, wallet }: { metamask: MetaMask; wallet
       )}
       {record?.done && wallet.precheck === "passed" && (
         <Notice status="verified" word="Lista">
-          {record.usdcSkipped ? "Tu cuenta tiene una verificación de demostración y 5 tokens." : "Tu cuenta tiene una verificación de demostración, 5 tokens y USDC 5."}
+          {record.usdcSkipped ? "Recibiste una verificación de demostración y 5 tokens." : "Recibiste una verificación de demostración, 5 tokens y USDC 5."}
         </Notice>
       )}
       {record?.usdcSkipped && <Notice status="pending">Se agotaron los USDC de demostración, así que no recibiste USDC. Igual podés vender tus tokens.</Notice>}
