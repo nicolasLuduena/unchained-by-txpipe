@@ -4,8 +4,9 @@ import { chain } from "@/lib/chain";
 
 /**
  * The real SDK on both chains: it has no chain-id check, so rpcUrl and contractAddress point it anywhere.
- * contractAddress is always the deployment's store, never DEPLOYMENTS.fuji. That store is the team's demo
- * attester on Fuji and a stub on local, read through the same surface. It is not KUMPLY's store.
+ * contractAddress is always the deployment's store, never DEPLOYMENTS.fuji. On Fuji that is a demo instance
+ * of KUMPLY's unmodified contract under the team's admin key, not KUMPLY's official store; on local, a stub.
+ * Neither performs an identity check.
  */
 export function passesPrecheck(attestationStore: Address, account: Address): Promise<boolean> {
   const client = new KumplyClient({

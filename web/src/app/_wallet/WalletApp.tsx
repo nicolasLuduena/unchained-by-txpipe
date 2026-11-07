@@ -27,6 +27,7 @@ function Frame({ stamp, children }: { stamp?: StampStatus; children: ReactNode }
       {children}
       <footer className="host__foot wallet-foot">
         <p className="caveat">Atestaciones de demostración en Fuji, sin verificación de identidad.</p>
+        {chainName === "fuji" && <p className="caveat">Las emite una instancia de demostración del contrato de KUMPLY.</p>}
         <p className="caveat">Libro de órdenes y co-firma operados por el PSAV.</p>
         <OperatedBy />
       </footer>

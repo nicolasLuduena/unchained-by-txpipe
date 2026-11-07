@@ -1,5 +1,10 @@
 /* Layout for the wallet screen. Everything visual comes from the design system's tokens and components. */
-.wallet-stack { display: grid; gap: var(--space-3); min-width: 0; }
+
+/* minmax(0, 1fr) so a long unbroken revert reason wraps instead of widening the page. */
+.host .host__main { grid-template-columns: minmax(0, 1fr); }
+.wallet-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+
+.host__main .hf-notice p { max-width: 100%; overflow-wrap: anywhere; }
 
 .wallet-demo {
   display: grid;
@@ -8,16 +13,23 @@
   border-bottom: 1px dashed var(--rule-soft);
 }
 
-.wallet-tabs { padding-inline: var(--space-4); }
+/* Five tabs have to fit at phone width. */
+.wallet-tabs { justify-content: space-between; gap: 0; padding-inline: var(--space-3); }
+.wallet-tabs a { padding-inline: var(--space-1); }
 
 .wallet-demo-control {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   padding: var(--space-4);
   border: 1px dashed var(--rule);
 }
 
-.wallet-history { display: grid; gap: var(--space-1); min-width: 0; }
+/* FeedRow switches to its narrow layout through this container. */
+.wallet-history { display: grid; gap: var(--space-1); container: feed / inline-size; }
+
+.wallet-doc { display: grid; gap: var(--space-1); }
+.wallet-doc p { overflow-wrap: anywhere; }
 
 .wallet-link { color: var(--text); }
 

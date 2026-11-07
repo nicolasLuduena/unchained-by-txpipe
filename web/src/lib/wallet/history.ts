@@ -3,7 +3,7 @@ import type { StampStatus } from "@/design";
 import { handoffRegistryAbi, handoffSettlementAbi } from "@/lib/abi";
 import { publicClient } from "@/lib/chain";
 import type { WalletConfig } from "./deployment";
-import { formatCount, formatUsdc, tokensLabel } from "./format";
+import { formatUsdc, tokensLabel } from "./format";
 
 /** Fuji's public RPC refuses wide getLogs ranges. History shows the recent window. */
 const LOG_WINDOW_BLOCKS = 2000n;
@@ -83,7 +83,8 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
   for (const e of reversions) {
     const { amount, holder } = e.args;
     if (amount === undefined || !holder) continue;
-    entries.push({ ...located(e), event: "Revertido", status: "reverted", detail: "A certificado en papel", from: holder, price: formatCount(amount), currency: "tokens" });
+    // Amount prints the currency first, so a blank one keeps this reading "1 token" rather than "tokens 1".
+    entries.push({ ...located(e), event: "Revertido", status: "reverted", detail: "A certificado en papel", from: holder, price: tokensLabel(amount), currency: " " });
   }
 
   entries.sort(newestFirst);
@@ -93,6 +94,6 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
   );
   return entries.map((e) => ({
     ...e,
-    time: new Date(Number(times.get(e.blockNumber)) * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+    time: new Date(Number(times.get(e.blockNumber)) * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   }));
 }

@@ -89,7 +89,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
         {ask ? (
           <OrderCoupon
             view={ask}
-            label="Mejor oferta"
+            label="Orden de venta"
             tokenName={snapshot.tokenName}
             reference={snapshot.reference}
             note={ownAsk ? "Esta oferta es tuya." : "Pagás y recibís los tokens en una sola transacción."}

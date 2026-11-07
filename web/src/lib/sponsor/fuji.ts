@@ -1,18 +1,25 @@
 import { createECDSAOwnershipValidationModule, createSmartAccountClient, PaymasterMode } from "@0xgasless/smart-account";
 import { isAddressEqual, type Address, type Hash, type Hex } from "viem";
-import { publicClient } from "@/lib/chain";
+import { chain, publicClient } from "@/lib/chain";
 import { walletConfig } from "@/lib/wallet/deployment";
 import type { Actor, Call, Sponsor } from "./index";
 import { ownerWallet } from "./owner-keys";
 
-/** Fuji overrides from spike/README.md. The SDK defaults are mainnet addresses. */
-const FUJI_ACCOUNT = {
-  chainId: 43113,
-  factoryAddress: "0xF0b3f5146c2725e36d78F5029bc560eDfc67ADe0",
-  implementationAddress: "0x8aF33bE7af021A6075aeB19b076fC75Bfbd2c5c3",
-  defaultFallbackHandler: "0xdA62055b0730d1d0621aD0A446DcD6057a6d951E",
-  ecdsaModule: "0xcfb0BA514aa398085D63eC70cfEa6EC7f1094E8F",
-} as const;
+/**
+ * The SDK defaults are mainnet addresses, so all four must be set. Values: spike/README.md, "Fuji addresses".
+ * Each process.env read is spelled out because Next inlines NEXT_PUBLIC variables by their literal name.
+ */
+function accountContracts() {
+  const contracts = {
+    factoryAddress: process.env.NEXT_PUBLIC_AA_FACTORY,
+    implementationAddress: process.env.NEXT_PUBLIC_AA_IMPLEMENTATION,
+    defaultFallbackHandler: process.env.NEXT_PUBLIC_AA_FALLBACK_HANDLER,
+    moduleAddress: process.env.NEXT_PUBLIC_AA_ECDSA_MODULE,
+  };
+  const missing = Object.entries(contracts).filter(([, value]) => !value);
+  if (missing.length) throw new Error(`Falta configurar la cuenta inteligente: ${missing.map(([name]) => name).join(", ")}`);
+  return contracts;
+}
 
 const BUNDLER_URL = process.env.NEXT_PUBLIC_BUNDLER_URL ?? "https://bundler.0xgasless.com/43113";
 const SPONSORED = { paymasterServiceData: { mode: PaymasterMode.SPONSORED } };
@@ -31,19 +38,18 @@ function accountAddress(actor: Actor): Address {
  */
 async function freshClient(actor: Actor) {
   const signer = ownerWallet(actor);
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL ?? publicClient.chain.rpcUrls.default.http[0];
-  const ecdsa = await createECDSAOwnershipValidationModule({ signer, moduleAddress: FUJI_ACCOUNT.ecdsaModule } as never);
+  const { moduleAddress, ...account } = accountContracts();
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL ?? chain.rpcUrls.default.http[0];
+  const ecdsa = await createECDSAOwnershipValidationModule({ signer, moduleAddress } as never);
   const client = await createSmartAccountClient({
     signer,
-    chainId: FUJI_ACCOUNT.chainId,
+    chainId: chain.id,
     rpcUrl,
     bundlerUrl: BUNDLER_URL,
     // Same-origin route: the keyed paymaster URL stays on the server.
     paymasterUrl: `${window.location.origin}/api/venue/paymaster`,
     index: 0,
-    factoryAddress: FUJI_ACCOUNT.factoryAddress,
-    implementationAddress: FUJI_ACCOUNT.implementationAddress,
-    defaultFallbackHandler: FUJI_ACCOUNT.defaultFallbackHandler,
+    ...account,
     defaultValidationModule: ecdsa,
     activeValidationModule: ecdsa,
   } as never);

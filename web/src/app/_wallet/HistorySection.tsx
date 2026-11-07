@@ -1,6 +1,6 @@
 "use client";
 
-import { FeedRow, Fields, Hash as HashText, Notice } from "@/design";
+import { FeedRow, Hash as HashText, Notice } from "@/design";
 import { explorerUrl } from "@/lib/chain";
 import type { WalletConfig } from "@/lib/wallet/deployment";
 import type { Wallet } from "./useWallet";
@@ -33,14 +33,18 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
 
       <section className="wallet-stack">
         <h2 className="t-title">Documento de emisión</h2>
-        <Fields
-          items={[
-            { label: "Autorización CNV", value: snapshot.cnvAuthRef },
-            { label: "Depósito", value: snapshot.depositRef },
-          ]}
-        />
-        <span className="t-field-label">Hash del documento, registrado en la cadena</span>
-        <HashText value={snapshot.issuanceDocHash} href={explorerUrl("address", config.registry)} />
+        <div className="wallet-doc">
+          <span className="t-field-label">Autorización CNV</span>
+          <p>{snapshot.cnvAuthRef}</p>
+        </div>
+        <div className="wallet-doc">
+          <span className="t-field-label">Depósito</span>
+          <p>{snapshot.depositRef}</p>
+        </div>
+        <div className="wallet-doc">
+          <span className="t-field-label">Hash del documento, registrado en la cadena</span>
+          <HashText value={snapshot.issuanceDocHash} href={explorerUrl("address", config.registry)} />
+        </div>
       </section>
     </>
   );
