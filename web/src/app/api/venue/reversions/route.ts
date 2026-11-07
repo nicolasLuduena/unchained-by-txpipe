@@ -3,7 +3,7 @@ import { listReversions, requestReversion } from "@/lib/orders/service";
 
 /** Reversion requests held by the PSAV. The console acts on them through revertToPaper. */
 export function GET() {
-  return venueRoute("list-reversions", async () => ({ reversions: await listReversions() }));
+  return venueRoute("list-reversions", async () => ({ reversions: await listReversions() }), "shared");
 }
 
 export function POST(request: Request) {
