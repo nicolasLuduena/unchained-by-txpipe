@@ -2,14 +2,20 @@ import "server-only";
 import { logRefusal, Refused } from "./service";
 import { OPERATED_BY } from "./types";
 
-function respond(body: object, status = 200) {
-  return Response.json({ operatedBy: OPERATED_BY, ...body }, { status, headers: { "X-Operated-By": OPERATED_BY } });
+function respond(body: object, status = 200, headers: HeadersInit = {}) {
+  return Response.json({ operatedBy: OPERATED_BY, ...body }, { status, headers: { "X-Operated-By": OPERATED_BY, ...headers } });
 }
 
-/** Runs a venue route: labels the response as the PSAV's and logs every refusal. */
-export async function venueRoute(route: string, run: () => Promise<object>): Promise<Response> {
+/**
+ * For Vercel's CDN only, so browsers still ask every time. Viewers polling the same list share one read of the store.
+ * One second, because the wallet polls every 15: a list older than that could hide a new order until the next poll.
+ */
+const SHARED_LIST = { "Vercel-CDN-Cache-Control": "max-age=1" };
+
+/** Runs a venue route: labels the response as the PSAV's and logs every refusal. Only a successful list is shared. */
+export async function venueRoute(route: string, run: () => Promise<object>, cache: "shared" | "none" = "none"): Promise<Response> {
   try {
-    return respond(await run());
+    return respond(await run(), 200, cache === "shared" ? SHARED_LIST : {});
   } catch (error) {
     if (error instanceof Refused) {
       await logRefusal(route, error).catch((failure: unknown) => console.error("refusal not logged", failure));

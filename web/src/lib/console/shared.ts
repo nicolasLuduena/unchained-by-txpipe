@@ -78,7 +78,10 @@ export async function sharedLogs() {
 /** Runs a shared read as a route: bigints survive the trip, and a throttled RPC is a 503 the screens retry. */
 export async function chainRoute(read: () => Promise<object>): Promise<Response> {
   try {
-    return new Response(stringifyBig(await read()), { headers: { "content-type": "application/json" } });
+    // The scan itself moves at most every 15 seconds, so five seconds on the CDN costs nothing a viewer can see.
+    return new Response(stringifyBig(await read()), {
+      headers: { "content-type": "application/json", "Vercel-CDN-Cache-Control": "max-age=5" },
+    });
   } catch (error) {
     console.error("chain read failed", error);
     return Response.json({ error: "rpc_unavailable" }, { status: 503 });
