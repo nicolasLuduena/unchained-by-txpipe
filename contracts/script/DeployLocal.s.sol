@@ -13,7 +13,6 @@ import {StubUSDC} from "../src/stubs/StubUSDC.sol";
 /// Anvil default accounts: 0 owner, 1 seller, 2 buyer, 3 issuer, 4 unverified, 5 venue PSAV, 6 venue order key.
 contract DeployLocal is Script {
     string internal constant MNEMONIC = "test test test test test test test test test test test junk";
-    string internal constant OUT_DIR = "../deployments";
     string internal constant OUT_FILE = "../deployments/local.json";
 
     uint256 internal constant SELLER_UNITS = 100;
@@ -128,7 +127,6 @@ contract DeployLocal is Script {
         vm.serializeString("deployment", "contracts", contracts);
         string memory out = vm.serializeString("deployment", "actors", actors);
 
-        vm.createDir(OUT_DIR, true);
         vm.writeJson(out, OUT_FILE);
         console2.log("Wrote", OUT_FILE);
     }

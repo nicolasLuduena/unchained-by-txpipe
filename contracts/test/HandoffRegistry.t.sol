@@ -10,7 +10,7 @@ import {HandoffBase} from "./HandoffBase.t.sol";
 contract HandoffRegistryTest is HandoffBase {
     // Registration
 
-    function test_registerStoresTheIssuance() public holdsNothing {
+    function test_registerStoresTheIssuance() public view holdsNothing {
         assertEq(registry.tokenCount(), 1);
         assertEq(registry.tokenAt(0), address(token));
         assertTrue(registry.isRegistered(address(token)));
@@ -30,7 +30,7 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(registry.attesters(address(token)).length, 1);
     }
 
-    function test_registerEmitsTokenRegistered() public {
+    function test_registerEmitsTokenRegistered() public holdsNothing {
         IHandoffRegistry.RegisterParams memory p = _params("Second", "SEC");
         vm.expectEmit(false, true, false, true, address(registry));
         emit IHandoffRegistry.TokenRegistered(address(0), issuer, "Second", "SEC", p.cnvAuthRef, p.issuanceDocHash);
@@ -38,7 +38,7 @@ contract HandoffRegistryTest is HandoffBase {
         registry.registerToken(p);
     }
 
-    function test_registerWithoutAuthorizationRefReverts() public {
+    function test_registerWithoutAuthorizationRefReverts() public holdsNothing {
         IHandoffRegistry.RegisterParams memory p = _params("X", "X");
         p.cnvAuthRef = "";
         vm.expectRevert(IHandoffRegistry.MissingAuthorizationRef.selector);
@@ -46,21 +46,21 @@ contract HandoffRegistryTest is HandoffBase {
         registry.registerToken(p);
     }
 
-    function test_registerWithoutAttestationReverts() public {
+    function test_registerWithoutAttestationReverts() public holdsNothing {
         _expectRegisterRefused(stranger);
     }
 
-    function test_registerFromPersonReverts() public {
+    function test_registerFromPersonReverts() public holdsNothing {
         _attest(stranger, 2);
         _expectRegisterRefused(stranger);
     }
 
-    function test_registerFromTierFiveAgentReverts() public {
+    function test_registerFromTierFiveAgentReverts() public holdsNothing {
         _attest(stranger, 5);
         _expectRegisterRefused(stranger);
     }
 
-    function test_registerAfterBusinessAttestationExpiredReverts() public {
+    function test_registerAfterBusinessAttestationExpiredReverts() public holdsNothing {
         vm.warp(block.timestamp + 366 days);
         _expectRegisterRefused(issuer);
     }
@@ -90,7 +90,7 @@ contract HandoffRegistryTest is HandoffBase {
         registry.addVenue(address(token), address(0x9999), address(0x9998));
     }
 
-    function test_removeThenAddStaysWithinTheCap() public {
+    function test_removeThenAddStaysWithinTheCap() public holdsNothing {
         _fillVenues();
         vm.startPrank(issuer);
         registry.removeVenue(address(token), venue);
@@ -101,7 +101,7 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(registry.venueKey(address(token), address(0x9999)), address(0x9998));
     }
 
-    function test_addVenueRefusals() public {
+    function test_addVenueRefusals() public holdsNothing {
         vm.startPrank(issuer);
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.VenueAlreadyListed.selector, venue));
         registry.addVenue(address(token), venue, orderKey);
@@ -114,7 +114,7 @@ contract HandoffRegistryTest is HandoffBase {
         vm.stopPrank();
     }
 
-    function test_repointByOwnerIssuerOrOldVenue() public {
+    function test_repointByOwnerIssuerOrOldVenue() public holdsNothing {
         address venue2 = makeAddr("venue2");
         address venue3 = makeAddr("venue3");
         address venue4 = makeAddr("venue4");
@@ -136,14 +136,14 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(list[0], venue4);
     }
 
-    function test_repointSameVenueRotatesTheKey() public {
+    function test_repointSameVenueRotatesTheKey() public holdsNothing {
         vm.prank(venue);
         registry.repointVenue(address(token), venue, venue, address(0xA2));
         assertEq(registry.venueKey(address(token), venue), address(0xA2));
         assertEq(registry.venues(address(token)).length, 1);
     }
 
-    function test_repointRefusals() public {
+    function test_repointRefusals() public holdsNothing {
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.NotAuthorized.selector, stranger));
         vm.prank(stranger);
         registry.repointVenue(address(token), venue, stranger, stranger);
@@ -177,7 +177,7 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(token.balanceOf(stranger), 0);
     }
 
-    function test_mintStaysWithinAuthorizedSupply() public {
+    function test_mintStaysWithinAuthorizedSupply() public holdsNothing {
         vm.startPrank(issuer);
         registry.mint(address(token), buyer, AUTHORIZED - SELLER_UNITS);
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.SupplyExceeded.selector, AUTHORIZED + 1, AUTHORIZED));
@@ -186,7 +186,7 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(token.totalSupply(), AUTHORIZED);
     }
 
-    function test_reMintAfterBurnStaysWithinAuthorizedSupply() public {
+    function test_reMintAfterBurnStaysWithinAuthorizedSupply() public holdsNothing {
         vm.prank(issuer);
         registry.mint(address(token), buyer, AUTHORIZED - SELLER_UNITS);
 
@@ -203,7 +203,7 @@ contract HandoffRegistryTest is HandoffBase {
 
     // Attester set
 
-    function test_holderEligibilityIsTierTwoToFive() public {
+    function test_holderEligibilityIsTierTwoToFive() public holdsNothing {
         address[6] memory subjects;
         uint32[6] memory tiers = [uint32(1), 2, 3, 4, 5, 6];
         bool[6] memory expected = [false, true, true, true, true, false];
@@ -214,7 +214,7 @@ contract HandoffRegistryTest is HandoffBase {
         }
     }
 
-    function test_anyStoreInTheSetCounts() public {
+    function test_anyStoreInTheSetCounts() public holdsNothing {
         StubAttestationStore other = new StubAttestationStore();
         other.attest(stranger, 2, uint64(block.timestamp + 1 days));
         assertFalse(registry.isAttested(address(token), stranger));
@@ -232,7 +232,7 @@ contract HandoffRegistryTest is HandoffBase {
         assertEq(registry.attesters(address(token)).length, 1);
     }
 
-    function test_setAttesterTwiceKeepsOneEntry() public {
+    function test_setAttesterTwiceKeepsOneEntry() public holdsNothing {
         vm.prank(issuer);
         registry.setAttester(address(token), address(store), true);
         assertEq(registry.attesters(address(token)).length, 1);
@@ -240,7 +240,7 @@ contract HandoffRegistryTest is HandoffBase {
 
     // Access control
 
-    function test_setSettlementIsOwnerOnly() public {
+    function test_setSettlementIsOwnerOnly() public holdsNothing {
         vm.expectRevert(IHandoffRegistry.NotOwner.selector);
         registry.setSettlement(stranger);
         vm.expectRevert(IHandoffRegistry.ZeroAddress.selector);
@@ -248,14 +248,14 @@ contract HandoffRegistryTest is HandoffBase {
         registry.setSettlement(address(0));
     }
 
-    function test_constructorRefusesZeroAddresses() public {
+    function test_constructorRefusesZeroAddresses() public holdsNothing {
         vm.expectRevert(IHandoffRegistry.ZeroAddress.selector);
         new HandoffRegistry(address(0), address(store));
         vm.expectRevert(IHandoffRegistry.ZeroAddress.selector);
         new HandoffRegistry(owner, address(0));
     }
 
-    function test_issuerActionsAreIssuerOnly() public {
+    function test_issuerActionsAreIssuerOnly() public holdsNothing {
         address t = address(token);
         bytes memory notIssuer = abi.encodeWithSelector(IHandoffRegistry.NotIssuer.selector, stranger);
         vm.startPrank(stranger);
@@ -274,13 +274,13 @@ contract HandoffRegistryTest is HandoffBase {
         vm.stopPrank();
     }
 
-    function test_venueCannotMint() public {
+    function test_venueCannotMint() public holdsNothing {
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.NotIssuer.selector, venue));
         vm.prank(venue);
         registry.mint(address(token), buyer, 1);
     }
 
-    function test_issuerOrVenueActions() public {
+    function test_issuerOrVenueActions() public holdsNothing {
         address t = address(token);
         vm.startPrank(stranger);
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.NotIssuerOrVenue.selector, stranger));
@@ -307,13 +307,13 @@ contract HandoffRegistryTest is HandoffBase {
         assertTrue(registry.tokenInfo(t).paused);
     }
 
-    function test_bandWidthAboveOneHundredPercentReverts() public {
+    function test_bandWidthAboveOneHundredPercentReverts() public holdsNothing {
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.InvalidBandWidth.selector, 10_001));
         vm.prank(issuer);
         registry.setBand(address(token), PRICE, 10_001, 0);
     }
 
-    function test_venueActionsAreVenueOnly() public {
+    function test_venueActionsAreVenueOnly() public holdsNothing {
         address t = address(token);
         vm.startPrank(issuer);
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.NotVenue.selector, issuer));
@@ -323,7 +323,7 @@ contract HandoffRegistryTest is HandoffBase {
         vm.stopPrank();
     }
 
-    function test_unknownTokenReverts() public {
+    function test_unknownTokenReverts() public holdsNothing {
         address t = makeAddr("notAToken");
         vm.expectRevert(abi.encodeWithSelector(IHandoffRegistry.UnknownToken.selector, t));
         registry.addVenue(t, venue, orderKey);
