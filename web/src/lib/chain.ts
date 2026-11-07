@@ -1,4 +1,4 @@
-import { createPublicClient, http, type Address, type Chain, type Hash, type Transport } from "viem";
+import { createPublicClient, fallback, http, type Address, type Chain, type Hash, type Transport } from "viem";
 import { avalancheFuji, foundry } from "viem/chains";
 
 const CHAINS = { local: foundry, fuji: avalancheFuji } satisfies Record<string, Chain>;
@@ -64,9 +64,15 @@ function pacedLogs(inner: Transport): Transport {
   };
 }
 
-const rpc = http(process.env.NEXT_PUBLIC_RPC_URL, { retryCount: 6 });
+const BACKUP_FUJI_RPC = "https://avalanche-fuji-c-chain-rpc.publicnode.com";
+const primaryRpc = process.env.NEXT_PUBLIC_RPC_URL ?? chain.rpcUrls.default.http[0];
 
-/** On Fuji, reads made together go out as one multicall. A 429 that gets through waits out its Retry-After in viem. */
+/** Where reads go, in order. Fuji's public RPC blocks a whole IP for 60 seconds, so a second provider keeps the screens up. */
+export const readRpcUrls = chainName === "fuji" ? [primaryRpc, BACKUP_FUJI_RPC] : [primaryRpc];
+
+const rpc = chainName === "fuji" ? fallback(readRpcUrls.map((url) => http(url, { retryCount: 1 }))) : http(primaryRpc, { retryCount: 6 });
+
+/** On Fuji, reads made together go out as one multicall. A read the first provider refuses goes to the next. */
 export const publicClient = createPublicClient({
   chain,
   transport: chainName === "fuji" ? pacedLogs(rpc) : rpc,
