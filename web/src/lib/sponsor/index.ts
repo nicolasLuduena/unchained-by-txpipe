@@ -2,8 +2,11 @@ import type { Address, Hash, Hex } from "viem";
 import { chainName } from "@/lib/chain";
 import type { Order, ReversionRequest } from "@/lib/orders/types";
 
-/** The demo actors a browser can act as. */
-export type Actor = "seller" | "buyer" | "unverified";
+/** The demo actors whose keys the team holds. */
+export type DemoActor = "seller" | "buyer" | "unverified";
+
+/** Who a browser can act as. "metamask" is the visitor's own wallet: its key never leaves the browser. */
+export type Actor = DemoActor | "metamask";
 
 export type Call = { to: Address; data: Hex; value?: bigint };
 
@@ -21,7 +24,8 @@ export interface Sponsor {
 export const SPONSOR_LABEL = chainName === "local" ? "Sin gas: patrocinio simulado en la red local." : "Sin gas: el patrocinio cubre la operación.";
 
 /** Loaded on demand so a Fuji page never fetches the local fake or its dev keys. */
-export async function getSponsor(): Promise<Sponsor> {
+export async function getSponsor(actor?: Actor): Promise<Sponsor> {
+  if (actor === "metamask") return (await import("./metamask")).metamaskSponsor;
   if (chainName === "local") return (await import("./local")).localSponsor;
   return (await import("./fuji")).fujiSponsor;
 }

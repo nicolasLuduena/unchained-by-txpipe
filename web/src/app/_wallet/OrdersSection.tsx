@@ -24,7 +24,7 @@ export function OrdersSection({ config, actor, wallet }: Props) {
 
   function cancel(view: OrderView) {
     return cancelling.run(async () => {
-      const sponsor = await getSponsor();
+      const sponsor = await getSponsor(actor);
       const data = encodeFunctionData({ abi: handoffSettlementAbi, functionName: "cancel", args: [BigInt(view.order.nonce)] });
       await sponsor.sendCalls(actor, [{ to: config.settlement, data }]);
       await venue.markCancelled(view.orderHash);

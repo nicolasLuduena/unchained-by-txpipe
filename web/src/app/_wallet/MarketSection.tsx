@@ -43,7 +43,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
   function buy(view: OrderView) {
     return buying.run(async () => {
       const venueSig = await venue.coSign(view.orderHash, address);
-      const sponsor = await getSponsor();
+      const sponsor = await getSponsor(actor);
       const amount = BigInt(view.order.amount) * BigInt(view.order.price);
       const { userOpHash } = await sponsor.sendCalls(actor, [
         { to: config.usdc, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [config.settlement, amount] }) },
@@ -116,7 +116,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
         )}
       </section>
 
-      {ask && precheck === "blocked" && (
+      {ask && precheck === "blocked" && actor !== "metamask" && (
         <section className="wallet-demo-control">
           <span className="t-field-label">Control de demostración</span>
           <p className="caveat">Saltea la billetera y llama a la cadena desde esta cuenta, pagando su propio gas.</p>

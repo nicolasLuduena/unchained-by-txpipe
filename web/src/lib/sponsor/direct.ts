@@ -26,6 +26,7 @@ export async function sendFrom(wallet: WalletClient<Transport, Chain, Account>, 
 
 /** An unsponsored transaction the actor pays for: the refusal demo, where a revert with a hash is the point. */
 export async function sendDirect(actor: Actor, call: Call): Promise<DirectResult> {
+  if (actor === "metamask") throw new Error("Mi billetera opera solo con patrocinio.");
   if (chainName === "local") return sendFrom((await import("./dev-keys")).devWallet(actor), call);
   return venue.sponsor<DirectResult>({ action: "direct", actor, call });
 }

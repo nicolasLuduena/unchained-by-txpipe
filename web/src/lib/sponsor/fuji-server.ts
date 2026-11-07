@@ -1,7 +1,7 @@
 import "server-only";
 import { createECDSAOwnershipValidationModule, createSmartAccountClient, PaymasterMode } from "@0xgasless/smart-account";
-import { createWalletClient, decodeFunctionData, erc20Abi, http, isAddress, isAddressEqual, type Address, type Hash, type Hex } from "viem";
-import { mnemonicToAccount } from "viem/accounts";
+import { createWalletClient, decodeFunctionData, erc20Abi, http, isAddress, isAddressEqual, type Account, type Address, type Chain, type Hash, type Hex, type Transport, type WalletClient } from "viem";
+import { mnemonicToAccount, toAccount } from "viem/accounts";
 import { handoffSettlementAbi } from "@/lib/abi";
 import { chain, chainName, publicClient } from "@/lib/chain";
 import { assertPostable, assertRequestable, hashOrder, parseAddress, parseOrder, parseUint, Refused } from "@/lib/orders/service";
@@ -9,10 +9,10 @@ import { reversionDigest, type WireOrder } from "@/lib/orders/types";
 import { readSecret } from "@/lib/secrets";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { sendFrom } from "./direct";
-import type { Actor, Call } from "./index";
+import type { Call, DemoActor } from "./index";
 
 /** Mnemonic address index per demo actor, the same table as spike/scripts/lib.ts. */
-const OWNER_INDEX: Record<Actor, number> = { unverified: 2, seller: 3, buyer: 4 };
+const OWNER_INDEX: Record<DemoActor, number> = { unverified: 2, seller: 3, buyer: 4 };
 const SPONSORED = { paymasterServiceData: { mode: PaymasterMode.SPONSORED } };
 const ERC6492_SUFFIX = "6492".repeat(16);
 
@@ -26,22 +26,22 @@ function requireSecret(name: "MNEMONIC" | "ZEROXGASLESS_KEY") {
   return secret;
 }
 
-function requireConfig(): WalletConfig {
+export function requireConfig(): WalletConfig {
   const config = walletConfig();
   if (!config) throw notConfigured("deployment");
   return config;
 }
 
-function owner(actor: Actor) {
+function owner(actor: DemoActor) {
   return mnemonicToAccount(requireSecret("MNEMONIC"), { addressIndex: OWNER_INDEX[actor] });
 }
 
-function ownerWallet(actor: Actor) {
+function ownerWallet(actor: DemoActor) {
   return createWalletClient({ account: owner(actor), chain, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
 }
 
 /** The SDK defaults are mainnet addresses, so all four are required. Values: spike/README.md, "Fuji addresses". */
-function accountContracts() {
+export function accountContracts() {
   const { AA_FACTORY, AA_IMPLEMENTATION, AA_FALLBACK_HANDLER, AA_ECDSA_MODULE } = process.env;
   if (!AA_FACTORY || !AA_IMPLEMENTATION || !AA_FALLBACK_HANDLER || !AA_ECDSA_MODULE) throw notConfigured("AA_*");
   return { factoryAddress: AA_FACTORY, implementationAddress: AA_IMPLEMENTATION, defaultFallbackHandler: AA_FALLBACK_HANDLER, moduleAddress: AA_ECDSA_MODULE };
@@ -53,21 +53,7 @@ function accountContracts() {
  * Both modules must be passed, or the client silently computes another address; the result is checked for that.
  */
 async function freshClient(actor: "seller" | "buyer", paymasterUrl: string) {
-  const signer = ownerWallet(actor);
-  const { moduleAddress, ...account } = accountContracts();
-  const ecdsa = await createECDSAOwnershipValidationModule({ signer, moduleAddress } as never);
-  const client = await createSmartAccountClient({
-    signer,
-    chainId: chain.id,
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL ?? chain.rpcUrls.default.http[0],
-    bundlerUrl: process.env.BUNDLER_URL ?? `https://bundler.0xgasless.com/${chain.id}`,
-    paymasterUrl,
-    index: 0,
-    ...account,
-    defaultValidationModule: ecdsa,
-    activeValidationModule: ecdsa,
-  } as never);
-
+  const client = await buildClient(ownerWallet(actor), paymasterUrl);
   const computed = (await client.getAccountAddress()) as Address;
   if (!isAddressEqual(computed, requireConfig()[actor])) {
     throw new Refused("wrong_owner", "La clave del dueño no corresponde a esta cuenta.", 503);
@@ -75,8 +61,44 @@ async function freshClient(actor: "seller" | "buyer", paymasterUrl: string) {
   return client;
 }
 
+async function buildClient(signer: WalletClient<Transport, Chain, Account>, paymasterUrl?: string) {
+  const { moduleAddress, ...account } = accountContracts();
+  const ecdsa = await createECDSAOwnershipValidationModule({ signer, moduleAddress } as never);
+  const client = await createSmartAccountClient({
+    signer,
+    chainId: chain.id,
+    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL ?? chain.rpcUrls.default.http[0],
+    bundlerUrl: bundlerUrl(),
+    paymasterUrl,
+    index: 0,
+    ...account,
+    defaultValidationModule: ecdsa,
+    activeValidationModule: ecdsa,
+  } as never);
+  return client;
+}
+
+export function bundlerUrl() {
+  return process.env.BUNDLER_URL ?? `https://bundler.0xgasless.com/${chain.id}`;
+}
+
+/** The team key at this mnemonic index: 0 is the deployer and the store's verifier, 1 the issuer. */
+export function teamWallet(addressIndex: number) {
+  return createWalletClient({ account: mnemonicToAccount(requireSecret("MNEMONIC"), { addressIndex }), chain, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+}
+
+/** The smart account a visitor's EOA owns, read through the SDK so it matches the browser's client. It can never sign. */
+export async function ownedAccount(ownerAddress: Address): Promise<{ address: Address; initCode: Hex }> {
+  const refuse = async (): Promise<never> => {
+    throw new Error("This account is watch-only.");
+  };
+  const account = toAccount({ address: ownerAddress, signMessage: refuse, signTransaction: refuse, signTypedData: refuse });
+  const client = await buildClient(createWalletClient({ account, chain, transport: http(process.env.NEXT_PUBLIC_RPC_URL) }));
+  return { address: (await client.getAccountAddress()) as Address, initCode: (await client.getAccountInitCode()) as Hex };
+}
+
 /** Runs SDK work with the keyed URL in scope. SDK errors can quote that URL and refusals are readable, so all are redacted. */
-async function withPaymaster<T>(run: (paymasterUrl: string) => Promise<T>): Promise<T> {
+export async function withPaymaster<T>(run: (paymasterUrl: string) => Promise<T>): Promise<T> {
   const key = requireSecret("ZEROXGASLESS_KEY");
   try {
     return await run(`https://paymaster.0xgasless.com/v1/${chain.id}/rpc/${key}`);
@@ -87,7 +109,7 @@ async function withPaymaster<T>(run: (paymasterUrl: string) => Promise<T>): Prom
   }
 }
 
-async function sendSponsored(actor: "seller" | "buyer", calls: Call[], paymasterUrl: string) {
+export async function sendSponsored(actor: "seller" | "buyer", calls: Call[], paymasterUrl: string) {
   const client = await freshClient(actor, paymasterUrl);
   const transactions = calls.map((call) => ({ to: call.to, data: call.data, value: 0n }));
   // calculateGasLimits stays unset: false estimates first, which fails with AA21 on an unfunded account.

@@ -56,7 +56,7 @@ export function SellSection({ config, actor, wallet }: Props) {
         expiry: BigInt(Math.floor(Date.now() / 1000)) + ORDER_LIFETIME_S,
         nonce: randomNonce(),
       };
-      const sponsor = await getSponsor();
+      const sponsor = await getSponsor(actor);
       const signature = await sponsor.signOrder(actor, order);
       setPosted(await venue.postOrder(toWireOrder(order), signature));
       wallet.refresh();

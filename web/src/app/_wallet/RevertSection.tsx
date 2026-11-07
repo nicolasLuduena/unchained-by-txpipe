@@ -27,7 +27,7 @@ export function RevertSection({ config, actor, wallet }: Props) {
     if (amount === null || amountError) return;
     return requesting.run(async () => {
       const requestedAt = BigInt(Math.floor(Date.now() / 1000));
-      const sponsor = await getSponsor();
+      const sponsor = await getSponsor(actor);
       const signature = await sponsor.signReversion(actor, { chainId: BigInt(chain.id), token: config.token, holder: address, amount, requestedAt });
       await venue.requestReversion({
         token: config.token,
