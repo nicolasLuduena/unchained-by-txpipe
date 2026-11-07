@@ -87,6 +87,7 @@ Create a Vercel project with root directory `web` and the Next.js preset, and at
 | `MNEMONIC` | The deployment seed, as a value. **Testnet only:** it sits in the hosting provider's settings, so it must never hold real funds. |
 | `ZEROXGASLESS_KEY` | The 0xGasless paymaster key, as a value. |
 | `VENUE_ORDER_KEY` | The venue order key: mnemonic index 6, as a hex private key. |
+| `VENUE_ORDER_KEY_2` | The second venue's order key: mnemonic index 8, as a hex private key. Signs orders that name venue 2. |
 | `VENUE_DEMO_COSIGN` | `1`, so the unverified demo reaches the token hook. |
 | `AA_FACTORY`, `AA_IMPLEMENTATION`, `AA_FALLBACK_HANDLER`, `AA_ECDSA_MODULE` | The smart-account contracts, in [`web/.env.example`](web/.env.example). |
 | `DEMO_PASSWORD` | Puts the whole app behind HTTP Basic auth: any username, this password. Unset, the app is open. |

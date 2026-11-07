@@ -68,7 +68,7 @@ Swapping to KUMPLY's official store means redeploying the registry, and then the
 | Registry owner | `setSettlement`, `repointVenue` | Deployer EOA. A multisig of issuer and PSAVs is a production note |
 | Issuer | Venues, attesters, band, floor, mint, pause | EOA, on the console's server side |
 | Venue | `revertToPaper`, `setBlocked`, band, pause | EOA, on the console's server side |
-| Order key | `announceOrder`, co-sign fills | Server env `VENUE_ORDER_KEY` |
+| Order key | `announceOrder`, co-sign fills; an order uses its own venue's key | Server env `VENUE_ORDER_KEY`, `VENUE_ORDER_KEY_2` |
 | Seller and buyer owners | Sign for their smart accounts | App server on Fuji, behind the sponsor route. A demo shortcut: in production these belong to the user's wallet |
 | Paymaster key | Spend sponsorship | Server file, read by path, never `NEXT_PUBLIC` |
 
