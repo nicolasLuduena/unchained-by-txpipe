@@ -1,0 +1,104 @@
+/* The issuer and PSAV console. Desktop layout; design tokens only. */
+.desk {
+  display: grid;
+  gap: var(--space-5);
+  width: min(1440px, 100%);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-6);
+}
+.desk__head { display: flex; align-items: center; gap: var(--space-5); }
+.desk__logo { display: block; height: 36px; }
+
+.desk__role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  padding-block: var(--space-2);
+  border-block: 1px solid var(--rule-soft);
+}
+.desk__tabs { justify-content: flex-start; }
+.desk__who { display: inline-flex; align-items: center; gap: var(--space-2); }
+.desk__who .t-field-label { color: var(--text-muted); }
+.desk__sync { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.desk__columns {
+  display: grid;
+  grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+.desk__main { display: grid; gap: var(--space-6); min-width: 0; }
+.desk__section { display: grid; gap: var(--space-3); align-content: start; min-width: 0; }
+.desk__actions { position: sticky; top: var(--space-4); max-height: calc(100dvh - 2 * var(--space-4)); overflow-y: auto; }
+
+.desk__accordion { border-top: 1px solid var(--rule-soft); }
+.desk__action { border-bottom: 1px solid var(--rule-soft); background: var(--coupon); }
+.desk__action summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  cursor: pointer;
+  transition: color var(--duration-state) ease;
+}
+.desk__action summary:hover { color: var(--amber-bright); }
+.desk__action summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.desk__action[open] summary .t-label { color: var(--amber); }
+.desk__action summary .t-caption { color: var(--text-muted); }
+.desk__form { display: grid; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-4); }
+.desk__empty { padding: var(--space-3); color: var(--text-muted); }
+.desk__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.desk__flag { display: flex; align-items: flex-start; gap: var(--space-2); }
+.desk__flag input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--amber); }
+.desk__flag input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.desk__flaghelp { display: block; color: var(--text-muted); }
+
+.desk__tokens { display: grid; gap: 1px; background: var(--rule-soft); }
+.desk__tokens .hf-row { width: 100%; background: var(--coupon); }
+.desk__token--current { box-shadow: inset 2px 0 0 var(--amber); }
+
+.desk__titled { display: flex; align-items: baseline; gap: var(--space-3); }
+.desk .desk__fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.desk__refs { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-3); margin: 0; }
+.desk__refs dt { color: var(--text-muted); }
+.desk__refs dd { margin: 0; }
+.desk__split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+
+.desk__venues { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule-soft); }
+.desk__venues li { display: flex; align-items: center; gap: var(--space-2); min-height: 36px; border-bottom: 1px solid var(--rule-soft); }
+.desk__venues .t-caption { color: var(--text-muted); }
+.desk__slot { width: var(--space-4); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.desk__table { width: 100%; border-collapse: collapse; background: var(--coupon); }
+.desk__table th {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  color: var(--text-muted);
+  font: 500 12px/16px var(--font-sans);
+  letter-spacing: .06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.desk__table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--rule-soft); }
+.desk__table .desk__num { text-align: right; }
+
+.desk__feed { container: feed / inline-size; }
+.desk__entry { border-bottom: 1px solid var(--rule-soft); background: var(--coupon); }
+.desk__entry .hf-feed { border-bottom: 0; }
+/* FeedRow prints "Vende" for every row. On a block, pause or reversion that party is no seller. */
+.desk__feedrow--relabel .hf-feed__who { display: none; }
+.desk__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-2);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.desk__code { color: var(--text); font: 500 13px/18px var(--font-mono); }
