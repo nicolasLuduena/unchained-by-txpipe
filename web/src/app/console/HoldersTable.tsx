@@ -1,10 +1,9 @@
 import { Amount, Hash, Stamp, type StampStatus } from "@/design";
 import { explorerUrl } from "@/lib/chain";
 import { share, units } from "@/lib/console/format";
-import type { TokenView } from "@/lib/console/state";
+import type { HolderState, TokenView } from "@/lib/console/state";
 
-// Keyed by string, not HolderState, so this builds while web/src/lib moves to the same English words.
-const STATE_STAMP: Record<string, StampStatus> = {
+const STATE_STAMP: Record<HolderState, StampStatus> = {
   Verified: "verified",
   Blocked: "blocked",
   "On paper": "verified",
@@ -37,7 +36,7 @@ export function HoldersTable({ token }: { token: TokenView }) {
                 <td>{holder.category}</td>
                 <td className="desk__num"><Amount value={units(holder.units)} /></td>
                 <td className="desk__num"><Amount value={share(holder.units, token.totalSupply)} /></td>
-                <td><Stamp status={STATE_STAMP[holder.state] ?? "unused"}>{holder.state}</Stamp></td>
+                <td><Stamp status={STATE_STAMP[holder.state]}>{holder.state}</Stamp></td>
               </tr>
             ))}
           </tbody>
