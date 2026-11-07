@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"Handoff","components":[{"name":"Button"},{"name":"StatusPill"},{"name":"AssetRow"},{"name":"Amount"}]} */
+/* @ds-bundle: {"format":4,"namespace":"Handoff","components":[{"name":"Button"},{"name":"Stamp"},{"name":"Amount"},{"name":"Hash"},{"name":"Fields"},{"name":"Coupon"},{"name":"AssetRow"},{"name":"TextField"},{"name":"PriceBand"},{"name":"Tabs"},{"name":"Notice"},{"name":"Sheet"},{"name":"FeedRow"},{"name":"OperatedBy"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -15,50 +15,149 @@
     return h('button', {
       type: props.type || 'button',
       className: cx('hf-btn', 'hf-btn--' + variant, size !== 'md' && 'hf-btn--' + size, props.className),
-      disabled: props.disabled,
-      onClick: props.onClick,
-      'aria-label': props.ariaLabel
+      disabled: props.disabled || props.busy,
+      'aria-busy': props.busy ? 'true' : undefined,
+      'aria-label': props.ariaLabel,
+      onClick: props.onClick
     }, props.children);
   }
 
-  var ICONS = {
-    verified: h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, h('path', { d: 'M20 6 9 17l-5-5' })),
-    blocked: h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, h('path', { d: 'M18 6 6 18M6 6l12 12' })),
-    pending: h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, h('circle', { cx: 12, cy: 12, r: 9 }), h('path', { d: 'M12 7v5l3 2' })),
-    sponsored: h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, h('path', { d: 'M13 2 3 14h8l-1 8 10-12h-8l1-8z' })),
-    agent: h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, h('rect', { x: 4, y: 6, width: 16, height: 14, rx: 3 }), h('path', { d: 'M9 12h.01M15 12h.01M12 3v3' }))
+  var LABELS = {
+    verified: 'Verificado', blocked: 'Bloqueado', pending: 'Pendiente', sponsored: 'Sin gas',
+    agent: 'Agente', sold: 'Vendido', cancelled: 'Cancelada', reverted: 'Revertida', unused: 'Sin usar'
   };
-  var LABELS = { verified: 'Verificado', blocked: 'Bloqueado', pending: 'Pendiente', sponsored: 'Gas patrocinado', agent: 'Agente' };
 
-  function StatusPill(props) {
+  function Stamp(props) {
     var status = props.status || 'verified';
-    return h('span', { className: cx('hf-pill', 'hf-pill--' + status, props.className) },
-      ICONS[status], props.children || LABELS[status]);
+    return h('span', { className: cx('hf-stamp', 'hf-stamp--' + status, props.className) }, props.children || LABELS[status]);
   }
 
   function Amount(props) {
-    var value = props.value;
-    var cur = props.currency;
-    return h('span', { className: cx('hf-amount', props.size === 'l' && 'hf-amount--l', props.muted && 'hf-amount--muted', props.className) },
-      cur ? h('span', { className: 'hf-amount__cur' }, cur) : null, value);
+    var size = props.size || 's';
+    return h('span', { className: cx('hf-amount', size !== 's' && 'hf-amount--' + size, props.muted && 'hf-amount--muted', props.className) },
+      props.currency ? h('span', { className: 'hf-amount__cur' }, props.currency) : null, props.value);
   }
 
-  var ROW_ICON = h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' },
-    h('rect', { x: 5, y: 3, width: 14, height: 18, rx: 1.5 }),
-    h('path', { d: 'M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2' }));
+  function Hash(props) {
+    var v = props.value || '';
+    var text = v.length > 12 ? v.slice(0, 6) + '…' + v.slice(-4) : v;
+    return h(props.href ? 'a' : 'span', { className: cx('hf-hash', props.className), href: props.href, title: v }, text);
+  }
+
+  function Fields(props) {
+    return h('div', { className: cx('hf-fields', props.className) }, (props.items || []).map(function (f) {
+      return h('div', { className: 'hf-field', key: f.label },
+        h('span', { className: 'hf-field__label' }, f.label),
+        h(Amount, { value: f.value, size: 'm' }));
+    }));
+  }
+
+  function Coupon(props) {
+    var state = props.state || 'open';
+    var stamp = { open: 'unused', sold: 'sold' }[state];
+    var voided = state === 'cancelled' || state === 'reverted';
+    return h('article', { className: cx('hf-coupon', 'hf-coupon--' + state, props.torn && 'hf-coupon--torn', props.className) },
+      h('div', { className: 'hf-coupon__body' },
+        h('header', { className: 'hf-coupon__head' }, h('span', null, props.label), props.number ? h('span', null, props.number) : null),
+        h('h3', { className: 'hf-coupon__title' }, props.title),
+        props.fields ? h(Fields, { items: props.fields }) : null,
+        props.children,
+        props.note ? h('p', { className: 'hf-coupon__note' }, props.note) : null),
+      h('div', { className: 'hf-coupon__stub' },
+        h('div', { className: 'hf-coupon__stubhead' }, h('span', null, props.stubLabel || 'Talón de liquidación'), stamp ? h(Stamp, { status: stamp }) : null),
+        h(Amount, { value: props.total, currency: props.currency || 'USDC', size: 'm' }),
+        props.reason ? h('p', { className: 'hf-coupon__proof' }, props.reason) : null,
+        props.hash ? h('p', { className: 'hf-coupon__proof' }, h(Hash, { value: props.hash, href: props.hashHref })) : null),
+      voided ? h(VoidStamp, { status: state }) : null);
+  }
+
+  // Sits across the perforation, so it measures the stub it belongs to.
+  function VoidStamp(props) {
+    var ref = React.useRef(null);
+    React.useLayoutEffect(function () {
+      var el = ref.current, stub = el.parentNode.querySelector('.hf-coupon__stub');
+      el.style.setProperty('--void-y', -(stub.offsetHeight - el.offsetHeight / 2) + 'px');
+    });
+    return h('span', { className: 'hf-coupon__void', ref: ref }, h(Stamp, { status: props.status }));
+  }
 
   function AssetRow(props) {
-    var tone = props.deltaTone || (props.delta && props.delta[0] === '-' ? 'down' : props.delta ? 'up' : 'flat');
-    var Tag = props.href ? 'a' : 'div';
-    return h(Tag, { className: cx('hf-row', props.className), href: props.href, onClick: props.onClick },
-      h('span', { className: 'hf-row__icon' }, props.icon || ROW_ICON),
+    return h(props.href ? 'a' : props.onClick ? 'button' : 'div', { className: cx('hf-row', props.className), href: props.href, type: !props.href && props.onClick ? 'button' : undefined, onClick: props.onClick },
       h('span', { className: 'hf-row__main' },
         h('span', { className: 'hf-row__name' }, props.name),
         props.meta ? h('span', { className: 'hf-row__meta' }, props.meta) : null),
       h('span', { className: 'hf-row__side' },
         h(Amount, { value: props.price, currency: props.currency || 'USDC' }),
-        props.delta ? h('span', { className: cx('hf-row__delta', 'hf-row__delta--' + tone) }, props.delta) : null));
+        props.status ? h(Stamp, { status: props.status }) : null));
   }
 
-  window.Handoff = { Button: Button, StatusPill: StatusPill, AssetRow: AssetRow, Amount: Amount };
+  function TextField(props) {
+    var help = props.error || props.help;
+    return h('label', { className: cx('hf-input-wrap', props.className) },
+      h('span', null, props.label),
+      h('input', {
+        className: 'hf-input', value: props.value, defaultValue: props.defaultValue, placeholder: props.placeholder,
+        inputMode: props.inputMode || 'decimal', disabled: props.disabled, onChange: props.onChange,
+        'aria-invalid': props.error ? 'true' : undefined
+      }),
+      help ? h('span', { className: cx('hf-input-wrap__help', props.error && 'hf-input-wrap__help--error') }, help) : null);
+  }
+
+  function PriceBand(props) {
+    var pos = (props.value - props.min) / (props.max - props.min) * 100;
+    var out = pos < 0 || pos > 100;
+    var fmt = props.format || function (n) { return n.toFixed(2).replace('.', ','); };
+    return h('div', { className: cx('hf-band', props.className) },
+      h('div', { className: 'hf-band__scale', 'aria-hidden': 'true' },
+        h('span', { className: cx('hf-band__mark', out && 'hf-band__mark--out'), style: { left: Math.max(0, Math.min(100, pos)) + '%' } })),
+      h('div', { className: 'hf-band__labels' },
+        h(Amount, { value: fmt(props.min), muted: true }),
+        h('span', { className: cx('hf-band__value', out && 'hf-band__value--out') }, h(Amount, { value: fmt(props.value) }), out ? ' · Fuera de banda' : ''),
+        h(Amount, { value: fmt(props.max), muted: true })));
+  }
+
+  function Tabs(props) {
+    return h('nav', { className: cx('hf-tabs', props.className), 'aria-label': props.ariaLabel }, (props.items || []).map(function (t) {
+      return h('a', { key: t.label, href: t.href || '#', 'aria-current': t.current ? 'page' : undefined }, t.label);
+    }));
+  }
+
+  function Notice(props) {
+    return h('div', { className: cx('hf-notice', props.className), role: props.status === 'blocked' ? 'alert' : undefined },
+      h(Stamp, { status: props.status || 'blocked' }, props.word), h('p', null, props.children));
+  }
+
+  function Sheet(props) {
+    return h('section', { className: cx('hf-sheet', props.className), 'aria-label': props.title },
+      h('h3', { className: 'hf-sheet__title' }, props.title), props.children,
+      props.caveat ? h('p', { className: 'hf-sheet__caveat' }, props.caveat) : null);
+  }
+
+  function FeedRow(props) {
+    return h('div', { className: cx('hf-feed', props.className) },
+      h('span', { className: 'hf-feed__time' }, props.time),
+      h(Stamp, { status: props.status }, props.event),
+      h('span', { className: 'hf-feed__asset' }, props.asset),
+      h('span', { className: 'hf-feed__parties' },
+        h('span', null, h('span', { className: 'hf-feed__who' }, 'Vende'), h(Hash, { value: props.from })),
+        props.to ? h('span', null, h('span', { className: 'hf-feed__who' }, 'Compra'), h(Hash, { value: props.to })) : null),
+      h('span', { className: 'hf-feed__price' }, h(Amount, { value: props.price, currency: props.currency || 'USDC' })));
+  }
+
+  function OperatedBy(props) {
+    return h('span', { className: cx('hf-operated', props.className) },
+      h('svg', { viewBox: '0 0 64 64', 'aria-hidden': 'true' },
+        h('rect', { x: 12, y: 8, width: 12, height: 48, fill: 'currentColor' }),
+        h('rect', { x: 40, y: 8, width: 12, height: 48, fill: 'currentColor' }),
+        h('rect', { x: 26, y: 29, width: 3, height: 6, fill: 'currentColor' }),
+        h('rect', { x: 30.5, y: 29, width: 3, height: 6, fill: 'currentColor' }),
+        h('rect', { x: 35, y: 29, width: 3, height: 6, fill: 'currentColor' })),
+      'Operado con Handoff');
+  }
+
+  window.Handoff = {
+    Button: Button, Stamp: Stamp, Amount: Amount, Hash: Hash, Fields: Fields, Coupon: Coupon,
+    AssetRow: AssetRow, TextField: TextField, PriceBand: PriceBand, Tabs: Tabs, Notice: Notice,
+    Sheet: Sheet, FeedRow: FeedRow, OperatedBy: OperatedBy
+  };
 })();

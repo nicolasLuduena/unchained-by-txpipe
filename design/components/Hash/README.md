@@ -1,0 +1,1 @@
+Addresses and transaction hashes, in Spline Sans Mono so `0` and `O` differ. Provide the full `value`; it truncates to `0x8a1f…c42e` and keeps the whole hash in the title. Pass `href` to link to the explorer.

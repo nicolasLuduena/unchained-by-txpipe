@@ -1,0 +1,15 @@
+<!-- @dsCard group="Forms" height=280 width=390 subtitle="help, error and disabled" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="display:grid;gap:12px;padding:16px;background:var(--ground);width:390px;box-sizing:border-box"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.TextField, { label: 'Precio por token', defaultValue: '112,00', help: 'Banda permitida: 104,00 a 116,00' }),
+    h(H.TextField, { label: 'Precio por token', defaultValue: '120,00', error: 'Fuera de banda. Probá entre 104,00 y 116,00.' })
+  ));
+</script>

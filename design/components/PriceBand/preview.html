@@ -1,0 +1,15 @@
+<!-- @dsCard group="Figures" height=120 width=390 subtitle="the allowed range, drawn to scale" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="display:grid;gap:12px;padding:16px;background:var(--ground);width:390px;box-sizing:border-box"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.PriceBand, { min: 104, max: 116, value: 112 }),
+    h(H.PriceBand, { min: 104, max: 116, value: 120 })
+  ));
+</script>

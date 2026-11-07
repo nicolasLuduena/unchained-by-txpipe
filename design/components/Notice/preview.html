@@ -1,0 +1,15 @@
+<!-- @dsCard group="Status" height=200 width=390 subtitle="what happened and what to do" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="display:grid;gap:12px;padding:16px;background:var(--ground);width:390px;box-sizing:border-box"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Notice, { status: 'blocked' }, 'Verificá tu identidad en la billetera para operar.'),
+    h(H.Notice, { status: 'pending', word: 'Reporte pendiente' }, 'El registro todavía no confirmó esta venta.')
+  ));
+</script>

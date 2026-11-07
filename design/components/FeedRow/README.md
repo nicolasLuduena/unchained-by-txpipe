@@ -1,0 +1,1 @@
+One line of the compliance feed the PSAV reads: every order, cancel and fill with its time, event, asset, counterparties and price. Provide `time`, `event` with a matching `status`, `asset`, `from` (labelled "Vende"), `price`, and `to` (labelled "Compra") for a fill. Wrap rows in a container named `feed` so they reflow at narrow widths.

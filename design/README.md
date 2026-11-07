@@ -1,71 +1,63 @@
-Handoff is a white-label trading layer that licensed wallets embed. The screen carries the wallet's brand around it, so Handoff's own identity has to be quiet, trustworthy and recognisable from one mark. These rules exist so a second teammate can refine the system without re-deciding anything.
+Handoff is a white-label trading layer that licensed wallets embed. Its system has one idea: every order is a coupon that validates, tears or voids, and nothing disappears. These rules exist so a teammate can extend the system without re-deciding anything. Open `index.html` to see all of it.
+
+Screens are dark. There are no white or near-white grounds.
 
 ## Voice
 
 - Write in Spanish for the wallet screen and the issuer console. Argentine register: "vos", "vendé", "tenés". English only in the README and pitch when the audience is international.
-- Say what happens, in the user's words: "Vender 4 tokens", "Pagada · sin gas", "Bloqueado · verificá tu identidad". Never "ejecutar orden", never "userOp".
-- One accent per screen. The one thing the user is here to do is in `ember`; everything else is `brand` or `ink`.
+- Say what happens, in the user's words: "Vender 4 tokens", "Sin gas", "Verificá tu identidad". Never "ejecutar orden", never "userOp".
 - State the demo caveat in `caption` on every screen that shows an attestation: "Atestaciones de demostración en Fuji, sin verificación de identidad."
-- No exclamation marks, no emoji, no "¡Felicitaciones!". A fill confirms with "Vendido" and a hash.
+- No exclamation marks, no emoji. A fill confirms with "Vendido" and a hash.
+- Never say "compliant". `PRODUCT.md` lists the other wording limits; they are legal in origin.
 
 ## Color
 
-- Ground every screen on `surface`. Put cards, rows and sheets on `surface-raised`, inputs on `surface-sunken`.
-- Text is `ink`; secondary text is `ink-muted`. Both are tested on all three surfaces in both themes.
-- `brand` is the Handoff teal: links, secondary buttons, selected tabs, the logo bars. Text on a brand fill is `on-brand`.
-- `ember` is the handoff moment: the primary button and nothing else on that screen. Text on it is `on-ember`. `ember-bright` is reserved for the token disc in the logo.
-- Status is always a word plus a color, never color alone: `good` for verified, filled, acknowledged; `warn` for pending or outside band; `bad` for blocked, reverted, unverified. Each sits on its `-soft` background in chips and panels.
-- Borders are `line`; borders that must be seen are `line-strong`. Cards use a border, not a shadow. The only shadow is `shadow-sheet` on the bottom sheet.
-- Dark theme is not an inversion: `brand` and `ember` lighten, so their `on-` tokens darken. Use the tokens, never a literal hex.
+- Ground every screen on `ground`, old navy. Put coupons, rows and panels on `coupon`, the part below a perforation on `stub`, and inputs on `well`.
+- Text is `text`, a buff; secondary text is `text-muted`. Both pass 4.5:1 on all four grounds.
+- `amber` is the only ink for value and action: figures, stub heads, the band mark, the current tab, selection, the caret and the one primary action. Text on it is `on-amber`. Ghost buttons and links stay `text`.
+- `good` and `bad` belong to words and the marks beside them: a stamp, an error line, the danger outline, the invalid input, the out-of-band mark. Never a fill behind text.
+- `rule` draws the structure of a coupon. `rule-soft` separates rows and is decorative.
+- Use the tokens, never a literal hex. Edit `tokens.json` and run `node design/build-tokens.mjs` to regenerate `tokens.css`.
 
 ## Type
 
-- Three families, hosted on Google Fonts: Schibsted Grotesk for `display-*` and `title`, IBM Plex Sans for text, IBM Plex Mono for every number.
-- Load them with one link: `https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap`.
-- Screen titles use `display-l` in the issuer console and `title` inside the wallet screen. `display-xl` is for slides.
-- Running text is `body`; names and button labels are `body-strong`; helper lines are `caption` in `ink-muted`; section labels are `label`, uppercase.
-- Every price, quantity, balance and address is set in the mono styles: `amount`, `amount-l`, `hash`. Never set a number in the sans. Format amounts as `USDC 112,00`, Argentine decimal comma, thin space thousands.
-- Truncate addresses and hashes to four plus four with an ellipsis: `0x8a1f…c42e`.
+- Barlow Condensed for titles, coupon heads, buttons, tabs and stamps, always uppercase. Barlow for running text, field labels and every figure, with tabular numerals. Spline Sans Mono only for hashes and addresses, where `0` and `O` must differ.
+- All three are self-hosted in `fonts/` under the SIL OFL (`fonts/OFL.txt`). Link `fonts/fonts.css`; nothing is fetched from a CDN, so the system renders offline.
+- `display-xl` is for slides. `display-l` titles a coupon or console screen. `label` heads coupons.
+- Every price, quantity, balance and address is a figure: `Amount` or `Hash`. Format amounts as `USDC 112,00`, with a decimal comma and a dot for thousands: `3.418,00`.
+- Truncate addresses and hashes: `0x8a1f…c42e`.
 
-## Spacing and radius
+## Shape
 
-- Phone gutter is `space-4`. Sections are `space-5` apart. Card padding is `space-4`, chip padding `space-3` horizontally and `space-1` vertically.
-- Buttons and rows take `radius-md`; cards and sheets `radius-lg`; chips and the account badge `radius-pill`; inputs `radius-sm` on desktop, `radius-md` on phone.
-- Touch targets are at least 44px tall. The primary button is 48px.
-
-## Logo
-
-The mark is an H: two rounded bars (the two verified holders) and a token disc crossing the track between them. The wordmark is "handoff", lowercase, set in Schibsted Grotesk Bold and converted to outlines.
-
-- Files live under `assets/Logos/`. Use them as they are; never redraw, never retype the wordmark in live text.
-- `handoff-lockup-horizontal.svg` is the default. Use it in headers and the README. `handoff-lockup-stacked.svg` is for square spaces and slides. `handoff-mark.svg` alone when the name is already on screen or the space is under 120px wide. `handoff-app-icon.svg` for favicons and app tiles.
-- On dark or `brand` backgrounds use the `-reverse` files. On photographs use `handoff-mark-mono.svg` or the reverse mark, never the color mark.
-- Clear space around any lockup is the width of one bar (12 units at 64px). Minimum size is 24px for the mark and 96px wide for the horizontal lockup.
-- Inside a host wallet the Handoff mark appears once, small, in the footer line "Operado con Handoff", in `ink-muted`. The wallet's brand owns the header.
-- Do not recolor the bars, rotate the mark, add a gradient, outline the disc, or place the wordmark above the mark.
-
-## Components
-
-- `Button`: `primary` is `ember` and appears once per screen. `secondary` is a `brand` outline. `ghost` is text-only in `brand`. `danger` is `bad` and only for revoke and cancel. Labels are verbs: "Confirmar venta", "Cancelar orden", "Revocar".
-- `StatusPill`: a word plus a color on a `-soft` ground. Statuses are `verified`, `blocked`, `pending`, `sponsored`, `agent`. Never show a pill without its word.
-- `AssetRow`: name in `body-strong`, meta in `caption`, price in `amount`, delta in `good` or `warn` with its sign. Rows are 64px and separated by `line`.
-- `Amount`: wraps a number in the mono style so no number escapes into the sans.
-- Everything else (inputs, tabs, sheets) is plain HTML styled with the tokens until a teammate adds it here.
+- Every corner is square. Coupons are cut stock; the only curves are the notches at each end of the perforation. A `rule-soft` hairline holds the coupon's long edges on a projector.
+- Fields share hairlines in a ruled grid. Cards are not used; the coupon is the container, and coupons never nest.
+- Phone gutter is `space-4`. Sections are `space-5` apart. Touch targets are at least 44px; the confirm button is 56px.
+- The only elevation is `shadow-sheet`, on the bottom sheet. Inset strokes on coupon edges and the current tab are lines, not shadows.
 
 ## States
 
-- Verified, blocked, pending and sponsored are the four states a user meets. Each has a `StatusPill` and, for blocked, a `bad-soft` panel that says what to do: "Verificá tu identidad en la billetera para operar."
-- A reverted transaction is shown, not hidden: `bad` pill, the hash, and a one-line reason.
-- A pending registry report shows a `warn` pill reading "Reporte pendiente", never a spinner alone.
+- A status is a word in a ruled box, and the border carries it without colour: solid for done, dashed for pending, double for blocked or voided, hairline for an agent, dotted for unused. It must read in grayscale, because a projector washes colour out.
+- There is no icon set, by choice: states are words, and words are what a regulated state needs.
+- Nothing disappears. A cancelled or reverted order stays on screen, its total struck through, a large stamp across the perforation, and a one-line reason.
+- A reverted transaction shows its hash and reason.
+- A blocked state is a `Notice` that says what to do: "Verificá tu identidad en la billetera para operar."
+- A pending registry report is a stamp reading "Reporte pendiente", never a spinner alone.
 - Focus is a solid 2px `focus` ring with 2px offset on every interactive element.
-
-## Iconography
-
-- Use Lucide icons at 20px with a 1.75px stroke in `currentColor`. Stroke, not fill. No emoji anywhere.
-- Status pills use check, x, clock and zap (for sponsored). Keep the set under twenty icons.
-- The logo mark is not an icon. Do not use it inline at 16px.
 
 ## Motion
 
-- One transition: 150ms ease on color and background for hover and focus. No slide-ins, no confetti on a fill. The confirmation is the hash appearing.
-- Respect `prefers-reduced-motion` by disabling the one transition.
+- One signature moment: when a fill lands, the stub tears away along the perforation, stays parted, and the stamp lands, once, in `duration-tear`. Nothing else moves except 150ms color changes on hover and focus.
+- `prefers-reduced-motion` removes the motion; the stub still rests parted.
+- `Sheet` ships as a static surface. Placement, scrim and dismissal belong to the app.
+
+## Inside a host wallet
+
+The wallet's brand owns the header and navigation. Handoff appears once, small, through `OperatedBy`: "Operado con Handoff". How far a host may restyle the coupon is still undecided.
+
+## Components
+
+`Button`, `Stamp`, `Amount`, `Hash`, `Fields`, `Coupon`, `AssetRow`, `TextField`, `PriceBand`, `Tabs`, `Notice`, `Sheet`, `FeedRow` and `OperatedBy` are in `components/`. Each folder has a README and a `preview.html`, and `index.d.ts` types the API.
+
+## Logo
+
+See `logos/README.md`. The mark is an H whose crossbar is a perforation. `OperatedBy` is the one exception to "never recolor": it takes the text color so the host's brand stays first.

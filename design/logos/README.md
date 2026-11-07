@@ -1,19 +1,21 @@
 # Logos
 
-Nine SVG files, all outlines, no live text, no gradients.
+Nine SVG files, all outlines, no live text, no gradients. The mark is an H: two square bars, the two verified holders, joined by a perforation instead of a crossbar. The left bar is buff, the right bar is amber.
+
+Screens are dark, so the default files are drawn for dark grounds. The `-reverse` files are navy, for amber and light grounds such as print or a GitHub README.
 
 | File | Use |
 | --- | --- |
-| `handoff-lockup-horizontal.svg` | Default. Headers, README, documents. Minimum 96px wide. |
-| `handoff-lockup-horizontal-reverse.svg` | Same lockup on dark or `brand` backgrounds. |
+| `handoff-lockup-horizontal.svg` | Default, on dark. Headers and documents. Minimum 96px wide. |
+| `handoff-lockup-horizontal-reverse.svg` | Same lockup in navy, for amber and light grounds. |
 | `handoff-lockup-stacked.svg` | Square spaces, slides, social avatars. |
 | `handoff-mark.svg` | Mark alone when the name is already on screen. Minimum 24px. |
-| `handoff-mark-mono.svg` | Single ink (`ink`, #121a1d) for photographs and print. |
-| `handoff-mark-reverse.svg` | White bars with the ember disc, for dark and `brand` backgrounds. |
-| `handoff-wordmark.svg` | Wordmark alone in `ink`. Rare; prefer a lockup. |
-| `handoff-wordmark-reverse.svg` | Wordmark alone in white. |
-| `handoff-app-icon.svg` | 128px rounded square, `brand` ground, reversed mark. Favicon and app tile. |
+| `handoff-mark-mono.svg` | Single buff, for photographs. |
+| `handoff-mark-reverse.svg` | Single navy, for amber and light grounds. |
+| `handoff-wordmark.svg` | Wordmark alone in buff. Rare; prefer a lockup. |
+| `handoff-wordmark-reverse.svg` | Wordmark alone in navy. |
+| `handoff-app-icon.svg` | 128px navy square with the mark. Favicon and app tile. |
 
-Colors in the files: bars `brand` #0c6b6b, track `brand` at 35% opacity, disc `ember-bright` #f26b2e, wordmark `ink` #121a1d. The reverse files use white bars at full and 40% opacity and keep the ember disc.
+The wordmark is Barlow Condensed Bold, uppercase, converted to outlines. Colors in the files: buff `text` #e8dfcb, amber `amber` #e9a23b, navy `ground` #141c2b.
 
 Clear space is one bar width on every side. Never recolor, rotate, outline or add effects.

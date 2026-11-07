@@ -1,13 +1,18 @@
 <!-- @dsCard group="Actions" height=120 subtitle="primary, secondary, ghost, danger; sizes sm, md, lg" -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<div id="root" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px;background:var(--surface)"></div>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px;background:var(--ground)"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
 <script>
   var H = window.Handoff, h = React.createElement;
   ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
-    h(H.Button, { variant: 'primary', size: 'lg' }, 'Confirmar venta'),
+    h(H.Button, { variant: 'primary' }, 'Vender 4 tokens'),
     h(H.Button, { variant: 'secondary' }, 'Ver orden'),
-    h(H.Button, { variant: 'ghost' }, 'Cancelar'),
-    h(H.Button, { variant: 'danger', size: 'sm' }, 'Revocar'),
-    h(H.Button, { variant: 'primary', disabled: true }, 'Confirmar venta')
+    h(H.Button, { variant: 'ghost' }, 'Historial'),
+    h(H.Button, { variant: 'danger', size: 'sm' }, 'Cancelar orden'),
+    h(H.Button, { variant: 'primary', disabled: true }, 'Vender 4 tokens')
   ));
 </script>

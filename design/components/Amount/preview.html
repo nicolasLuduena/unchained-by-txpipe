@@ -1,11 +1,16 @@
-<!-- @dsCard group="Lists" height=120 subtitle="headline balance, row price, muted fee" -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
-<div id="root" style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--surface)"></div>
+<!-- @dsCard group="Figures" height=120 subtitle="every number; sizes s, m, l" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px;background:var(--ground)"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
 <script>
   var H = window.Handoff, h = React.createElement;
   ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
-    h(H.Amount, { value: '3.418', currency: 'USDC', size: 'l' }),
-    h(H.Amount, { value: '112,00', currency: 'USDC' }),
-    h(H.Amount, { value: '2,24', currency: 'Comisión USDC', muted: true })
+    h(H.Amount, { value: '41,30', currency: 'USDC' }),
+    h(H.Amount, { value: '112,00', size: 'm' }),
+    h(H.Amount, { value: '448,00', currency: 'USDC', size: 'l' })
   ));
 </script>

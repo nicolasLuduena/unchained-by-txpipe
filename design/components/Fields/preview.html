@@ -1,0 +1,14 @@
+<!-- @dsCard group="Figures" height=180 width=390 subtitle="ruled two-column grid of figures" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="padding:16px;background:var(--ground);box-sizing:border-box"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Fields, { items: [{ label: 'Cantidad', value: '4' }, { label: 'Mejor compra', value: '112,00' }, { label: 'Banda', value: '104–116' }, { label: 'Gas', value: '0,00' }] })
+  ));
+</script>

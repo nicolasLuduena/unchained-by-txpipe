@@ -1,6 +1,6 @@
 # unchained-by-txpipe
 
-Cuota: a white-label trading layer for Argentina's tokenized securities, built for the HackaTwin Blockchain track on Avalanche Fuji. The spec is GitHub issue #1.
+Handoff: a white-label trading layer for Argentina's tokenized securities, built for the HackaTwin Blockchain track on Avalanche Fuji. The spec is GitHub issue #1.
 
 ## Agent skills
 

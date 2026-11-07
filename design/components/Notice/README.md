@@ -1,0 +1,1 @@
+A stamp and one sentence: what happened and what to do next. Use it for blocked states and pending reports. `word` overrides the stamp's label. A blocked notice is announced to assistive technology as an alert.

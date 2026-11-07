@@ -1,3 +1,3 @@
-Every number on a Handoff screen goes through this: prices, quantities, balances, fees. It sets the mono family with tabular figures so columns align and a 1 is as wide as an 8.
+Every price, quantity, balance and fee goes through this. It sets the figure in Barlow amber with tabular numerals so columns align.
 
-Provide `value` already formatted (`112,00`, `3.418`) and optionally `currency` (shown lighter before the value), `size="l"` for the headline balance, and `muted` for secondary figures. Format with an Argentine decimal comma and a dot for thousands. Never put a number in a plain span.
+Provide `value` already formatted with an Argentine decimal comma and a dot for thousands (`3.418,00`). `currency` sits before the value. Sizes: `s` in rows, `m` in fields, `l` for the one headline figure on a screen. `muted` is for secondary figures. `Hash` is its sibling for addresses and transaction hashes, truncated to `0x8a1f…c42e`, and links to the explorer when `href` is set.
