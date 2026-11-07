@@ -135,7 +135,7 @@ export function Console() {
           <span className="t-field-label">Dirección</span>
           {address ? <Hash value={address} href={explorerUrl("address", address)} /> : <span className="t-caption">Sin clave configurada</span>}
         </span>
-        {state?.business[role] !== true && (
+        {role !== "psav" && state?.business[role] !== true && (
           <span className="desk__who">
             <span className="t-field-label">SDK isBusiness</span>
             {businessStamp(state?.business[role])}

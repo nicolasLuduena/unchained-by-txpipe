@@ -71,8 +71,8 @@ function BookStrip({ book }: { book: Book }) {
   );
 }
 
-function Phone(props: { brand: string; role: string; venueName: string; wallet: Wallet; book: Book; children: ReactNode; nav?: ReactNode }) {
-  const { brand, role, venueName, wallet, book, children, nav } = props;
+function Phone(props: { brand: string; role: string; venueName: string; wallet: Wallet; book: Book; children: ReactNode; nav?: ReactNode; view?: string }) {
+  const { brand, role, venueName, wallet, book, children, nav, view } = props;
   return (
     <article className="host demo-phone" aria-label={brand}>
       <header className="host__bar">
@@ -85,7 +85,7 @@ function Phone(props: { brand: string; role: string; venueName: string; wallet: 
         <Hash value={wallet.address} href={explorerUrl("address", wallet.address)} />
       </div>
       {nav}
-      <main className="host__main demo-phone__body">
+      <main className="host__main demo-phone__body" key={view}>
         {wallet.offline && <Notice status="pending">No pudimos leer {networkLabel}. Reintentando.</Notice>}
         {children}
       </main>
@@ -131,7 +131,7 @@ function SellerPhone({ config, wallet, book }: { config: WalletConfig; wallet: W
   );
 
   return (
-    <Phone brand="Billetera Sur" role="Vendedora" venueName={VENUES[0]?.label ?? "PSAV 1"} wallet={wallet} book={book} nav={nav}>
+    <Phone brand="Billetera Sur" role="Vendedora" venueName={VENUES[0]?.label ?? "PSAV 1"} wallet={wallet} book={book} nav={nav} view={tab}>
       {tab === "vender" ? (
         <SellSection config={config} actor="seller" wallet={wallet} />
       ) : (
