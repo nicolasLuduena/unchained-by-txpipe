@@ -43,7 +43,16 @@ export function feedFromLogs(logs: readonly ScannedLog[], timeOf: (block: bigint
     announced.set(orderKey(order.seller, order.nonce), order);
   }
 
-  return logs.map((log) => {
+  const sold = new Set(logs.filter((log) => log.eventName === "OrderFilled").map((log) => orderKey(log.args.seller as Address, log.args.nonce as bigint)));
+
+  // Anyone can call cancel on any nonce. Only a cancel that closed a live order belongs in the record.
+  const relevant = logs.filter((log) => {
+    if (log.eventName !== "OrderCancelled") return true;
+    const key = orderKey(log.args.seller as Address, log.args.nonce as bigint);
+    return announced.has(key) && !sold.has(key);
+  });
+
+  return relevant.map((log) => {
     const base = {
       id: `${log.transactionHash}:${log.logIndex}`,
       at: timeOf(log.blockNumber),

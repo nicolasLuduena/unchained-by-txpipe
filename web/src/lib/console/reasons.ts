@@ -1,6 +1,8 @@
 import { networkLabel } from "@/lib/chain";
 /** Reason codes in plain words. The code itself is always shown next to the sentence. */
 const REASONS: Record<string, string> = {
+  buyer_blocked: "El PSAV no co-firma: la cuenta compradora está bloqueada.",
+  nonce_used: "La orden repite un nonce ya usado.",
   buyer_not_attested: "El PSAV no co-firma: la cuenta compradora no está verificada.",
   NotBusiness: "Esta dirección no tiene atestación de empresa. Sin ella no opera como emisor.",
   BusinessReadFailed: "No pudimos leer la atestación. Probá de nuevo en unos segundos.",

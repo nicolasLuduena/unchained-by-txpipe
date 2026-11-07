@@ -142,11 +142,15 @@ export async function assertPostable(order: Order) {
   const info = await assertTradable(order.token);
   await assertInBand(order.token, order.price, info.floor, seller);
 
-  const [attested, blocked, balance] = await Promise.all([
+  const [attested, blocked, balance, filled, cancelled] = await Promise.all([
     publicClient.readContract({ ...registry(), functionName: "isAttested", args: [order.token, seller] }),
     publicClient.readContract({ ...registry(), functionName: "isBlocked", args: [order.token, seller] }),
     publicClient.readContract({ address: order.token, abi: handoffTokenAbi, functionName: "balanceOf", args: [seller] }),
+    publicClient.readContract({ ...settlement(), functionName: "filled", args: [seller, order.nonce] }),
+    publicClient.readContract({ ...settlement(), functionName: "cancelled", args: [seller, order.nonce] }),
   ]);
+  // The contract announces a spent nonce without complaint, and that order could never fill.
+  if (filled || cancelled) throw new Refused("nonce_used", "Esta orden ya se usó. Firmá una nueva.", 409, context);
   if (!attested) throw new Refused("seller_not_attested", "La cuenta vendedora no está verificada.", 403, context);
   if (blocked) throw new Refused("seller_blocked", "La cuenta vendedora está bloqueada por el PSAV.", 403, context);
   if (balance < order.amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
@@ -322,7 +326,11 @@ export async function coSign(orderHash: string, body: { buyer?: unknown; demoDir
   if (buyer === stored.order.seller) throw new Refused("self_trade", "No podés comprar tu propia orden.", 422, context);
   await assertTradable(stored.order.token);
 
-  const attested = await publicClient.readContract({ ...registry(), functionName: "isAttested", args: [stored.order.token, buyer] });
+  const [attested, blocked] = await Promise.all([
+    publicClient.readContract({ ...registry(), functionName: "isAttested", args: [stored.order.token, buyer] }),
+    publicClient.readContract({ ...registry(), functionName: "isBlocked", args: [stored.order.token, buyer] }),
+  ]);
+  if (blocked) throw new Refused("buyer_blocked", "La cuenta compradora está bloqueada por el PSAV.", 403, context);
   if (!attested) {
     const refused = new Refused("buyer_not_attested", "La cuenta compradora no está verificada.", 403, context);
     const demoAllowed = chainName === "local" || process.env.VENUE_DEMO_COSIGN === "1";
