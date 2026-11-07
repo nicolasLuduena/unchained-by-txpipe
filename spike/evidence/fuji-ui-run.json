@@ -1,0 +1,64 @@
+{
+  "ranAt": "2026-11-07T17:44:26.556Z",
+  "browser": "headless Chromium through playwright-core against the production build",
+  "chain": "fuji",
+  "firstOrder": {
+    "orderHash": "0x8c3fc0fd44c26fb0b20e0d3122708ef8353ee3e74eced110d293ddee96fa0966",
+    "nonce": "14420371819761344438",
+    "announceTx": "0xa06bd9d6a0ad9e4afc784e467273b5beef1938504c293733dbd665a34d9f307a",
+    "status": "success",
+    "block": 60691985,
+    "link": "https://testnet.snowtrace.io/tx/0xa06bd9d6a0ad9e4afc784e467273b5beef1938504c293733dbd665a34d9f307a"
+  },
+  "secondOrder": {
+    "orderHash": "0x541d079a0a1ff632d7f831ce8db2c9de4083bd243adffe0c7a600572b13d2f23",
+    "nonce": "9990435377796810324",
+    "announceTx": "0x4c6cb31edf6101f61655dae8f7a926b2a95d6e7b96ba9e89b2658c78efe0e93d",
+    "status": "success",
+    "block": 60692030,
+    "link": "https://testnet.snowtrace.io/tx/0x4c6cb31edf6101f61655dae8f7a926b2a95d6e7b96ba9e89b2658c78efe0e93d"
+  },
+  "sponsoredFill": {
+    "transactionHash": "0x26616f522366c4ce57c33e2a581f93ca8a455ecd115ddb5ee5a955b947ca1cac",
+    "userOpHash": "0xee4be7f63949e6515c2516e7ec040d6b049b7c50d80178ce2ac866ec3ae226c9",
+    "status": "success",
+    "block": 60692002,
+    "filledOnChain": "true",
+    "from": "0xba9cfe6a44979adddbf9f4342c65c4da9c5b207b",
+    "link": "https://testnet.snowtrace.io/tx/0x26616f522366c4ce57c33e2a581f93ca8a455ecd115ddb5ee5a955b947ca1cac"
+  },
+  "sponsoredCancel": {
+    "transactionHash": "0xbf5a16175eae85acf9cd369ece755e1669997d83645a3762b05c59c1dc6e1eb9",
+    "userOpHash": "0xc435fd89dcf228f596fb048f066f5e587d27946fef398d097b850d66637d789d",
+    "status": "success",
+    "block": 60692060,
+    "cancelledOnChain": "true",
+    "link": "https://testnet.snowtrace.io/tx/0xbf5a16175eae85acf9cd369ece755e1669997d83645a3762b05c59c1dc6e1eb9"
+  },
+  "unverifiedDirectFill": {
+    "transactionHash": "0x1e39e2e4e7c53b93675b4fb97f62d331bc9c2a2db576481835a2fcea8a46bb75",
+    "status": "reverted",
+    "block": 60692035,
+    "reasonInApp": "ReceiverNotAttested(0x2b54F241C9281cEf9cBC6BC4164dd6e91A8682f9)",
+    "castReplayAtPreviousBlock": "Error: server returned an error response: error code 3: execution reverted, data: \"0xe9ab43060000000000000000000000002b54f241c9281cef9cbc6bc4164dd6e91a8682f9\"",
+    "link": "https://testnet.snowtrace.io/tx/0x1e39e2e4e7c53b93675b4fb97f62d331bc9c2a2db576481835a2fcea8a46bb75"
+  },
+  "reversion": {
+    "transactionHash": "0xcccd8864036b93684191fb703f84f740b96d9eb3c51ca9ed01a59060d7674ee8",
+    "status": "success",
+    "block": 60692074,
+    "eventData": "1\n\"DEMO-CERT-0002\"\n0x99135fc5f69b807dfd8c95bbb2bc3c0eb599f827d72263d9d2db939f2fd484d5",
+    "link": "https://testnet.snowtrace.io/tx/0xcccd8864036b93684191fb703f84f740b96d9eb3c51ca9ed01a59060d7674ee8"
+  },
+  "balancesAfter": {
+    "sellerToken": "96",
+    "buyerToken": "22",
+    "sellerUsdc": "7500000",
+    "buyerUsdc": "12500000",
+    "settlementToken": "0",
+    "settlementUsdc": "0",
+    "tokenTotalSupply": "119"
+  },
+  "browserRpcFailures": 0,
+  "pageErrors": 0
+}
