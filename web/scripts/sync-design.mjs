@@ -1,7 +1,8 @@
-// Turns design/ into something Next can import. Run by predev and prebuild; output is gitignored.
+// Turns design/ into something Next can import. Run by predev and prebuild. The output is committed, so a
+// build that only has web/, such as Vercel without the files outside its root directory, keeps the last copy.
 // design/ stays untouched: the bundle's IIFE runs unchanged against a module-local `window`,
 // so it never touches the browser global and renders on the server as well.
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,6 +10,11 @@ const web = join(dirname(fileURLToPath(import.meta.url)), "..");
 const design = join(web, "..", "design");
 const out = join(web, "src", "design", "generated");
 const publicOut = join(web, "public", "design");
+
+if (!existsSync(design)) {
+  console.log("sync-design: no design/ here, keeping the committed copy");
+  process.exit(0);
+}
 
 rmSync(out, { recursive: true, force: true });
 rmSync(publicOut, { recursive: true, force: true });

@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync:design": "node scripts/sync-design.mjs",
+    "sync": "node scripts/sync-design.mjs && node scripts/sync-deployments.mjs",
     "gen:abi": "node scripts/gen-abi.mjs",
-    "predev": "pnpm run sync:design",
+    "predev": "pnpm run sync",
     "dev": "next dev",
-    "prebuild": "pnpm run sync:design",
+    "prebuild": "pnpm run sync",
     "build": "next build",
     "start": "next start",
-    "pretypecheck": "pnpm run sync:design",
+    "pretypecheck": "pnpm run sync",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
