@@ -29,6 +29,7 @@ export const venue = {
   markCancelled: (orderHash: Hash) => call<{ order: OrderView }>(`/orders/${orderHash}/cancel`, {}).then((r) => r.order),
   coSign: (orderHash: Hash, buyer: Address, demoDirectAttempt = false) =>
     call<{ venueSig: Hex }>(`/orders/${orderHash}/cosign`, { buyer, demoDirectAttempt }).then((r) => r.venueSig),
+  sponsor: <T = { hash: Hash; userOpHash?: Hash }>(request: object) => call<T>("/sponsor", request),
   listReversions: () => call<{ reversions: ReversionView[] }>("/reversions").then((r) => r.reversions),
   requestReversion: (request: { token: Address; holder: Address; amount: string; requestedAt: string; signature: Hex }) =>
     call<{ reversion: ReversionView }>("/reversions", request).then((r) => r.reversion),

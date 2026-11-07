@@ -2,7 +2,7 @@ import { isAddressEqual, parseEventLogs, type Address, type Hash, type Log } fro
 import type { StampStatus } from "@/design";
 import { handoffRegistryAbi, handoffSettlementAbi } from "@/lib/abi";
 import { publicClient } from "@/lib/chain";
-import type { WalletConfig } from "./deployment";
+import { deployedAtBlock, type WalletConfig } from "./deployment";
 import { formatUsdc, tokensLabel } from "./format";
 import { MAX_LOG_SPAN } from "./logs";
 
@@ -29,13 +29,15 @@ const tail: { next: bigint | null; logs: Log[]; running: Promise<void> | null } 
 const blockTimes = new Map<bigint, bigint>();
 
 async function advanceTail(config: WalletConfig) {
-  const latest = await publicClient.getBlockNumber();
-  tail.next ??= latest > LOOKBACK_BLOCKS ? latest - LOOKBACK_BLOCKS : 0n;
-  while (tail.next <= latest) {
-    const end = tail.next + MAX_LOG_SPAN - 1n;
+  const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
+  const lookback = latest > LOOKBACK_BLOCKS ? latest - LOOKBACK_BLOCKS : 0n;
+  let fromBlock: bigint = tail.next ?? (lookback > deployedAtBlock ? lookback : deployedAtBlock);
+  while (fromBlock <= latest) {
+    const end: bigint = fromBlock + MAX_LOG_SPAN - 1n;
     const toBlock = end < latest ? end : latest;
-    tail.logs.push(...(await publicClient.getLogs({ address: [config.settlement, config.registry], fromBlock: tail.next, toBlock })));
-    tail.next = toBlock + 1n;
+    tail.logs.push(...(await publicClient.getLogs({ address: [config.settlement, config.registry], fromBlock, toBlock })));
+    fromBlock = toBlock + 1n;
+    tail.next = fromBlock;
   }
 }
 

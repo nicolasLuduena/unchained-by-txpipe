@@ -200,7 +200,7 @@ async function syncWithChain(stored: StoredOrder) {
   if (!filled && !cancelled) return;
 
   // The flag proves the event exists, so this scan runs once per order and always ends.
-  const latest = await publicClient.getBlockNumber();
+  const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
   if (filled) {
     const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
       publicClient.getContractEvents({ ...settlement(), eventName: "OrderFilled", args: { orderHash: stored.orderHash }, fromBlock, toBlock }),
@@ -326,7 +326,7 @@ export async function requestReversion(body: {
     holder,
     amount,
     requestedAt,
-    scanFrom: await publicClient.getBlockNumber(),
+    scanFrom: await publicClient.getBlockNumber({ cacheTime: 0 }),
     status: "pending",
   };
   store.reversions.set(id, stored);
@@ -336,7 +336,7 @@ export async function requestReversion(body: {
 /** A request is done when the PSAV's revertToPaper shows up as a Reversion event; the console writes nothing here. */
 async function syncReversion(r: StoredReversion) {
   if (r.status === "done") return;
-  const latest = await publicClient.getBlockNumber();
+  const latest = await publicClient.getBlockNumber({ cacheTime: 0 });
   const [event] = await firstInSpans(r.scanFrom, latest, async (fromBlock, toBlock) => {
     const events = await publicClient.getContractEvents({ ...registry(), eventName: "Reversion", args: { token: r.token, holder: r.holder }, fromBlock, toBlock });
     return events.filter((e) => e.args.amount === r.amount);

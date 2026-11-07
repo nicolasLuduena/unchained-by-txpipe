@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { isAddressEqual, type Address } from "viem";
+import { chainName } from "@/lib/chain";
 import { venue, VenueRefusal } from "@/lib/orders/client";
 import type { OrderView, ReversionView } from "@/lib/orders/types";
 import type { WalletConfig } from "@/lib/wallet/deployment";
@@ -10,7 +11,8 @@ import { readSnapshot, type Snapshot } from "@/lib/wallet/market";
 import { passesPrecheck } from "@/lib/wallet/precheck";
 import { revertReason } from "@/lib/wallet/revert-reason";
 
-const POLL_MS = 2500;
+/** Fuji's public RPC answers 429 at about four reads a second, and a throttled response reads as a CORS failure. */
+const POLL_MS = chainName === "local" ? 2500 : 15_000;
 
 export type Precheck = "checking" | "passed" | "blocked" | "unavailable";
 
@@ -69,8 +71,9 @@ export function useWallet(config: WalletConfig, address: Address) {
         }
       } catch (error) {
         console.error("wallet refresh failed", error);
-        // Fail closed: without a reading, the ticket stays shut.
-        if (live) setData((d) => ({ ...(d.address === address ? d : empty(address)), precheck: "unavailable", offline: true }));
+        // Fail closed until there is a first reading. After that a throttled poll keeps it, and says it is stale:
+        // the venue and the chain both check again on every order, so this is never the last word.
+        if (live) setData((d) => (d.address === address && d.snapshot ? { ...d, offline: true } : { ...empty(address), precheck: "unavailable", offline: true }));
       }
     }
     load();

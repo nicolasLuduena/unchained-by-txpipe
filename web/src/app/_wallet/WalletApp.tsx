@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type MouseEvent, type ReactNode } from "react";
-import { Notice, OperatedBy, Stamp, Tabs, TextField, type StampStatus } from "@/design";
+import type { MouseEvent, ReactNode } from "react";
+import { Notice, OperatedBy, Stamp, Tabs, type StampStatus } from "@/design";
 import { chainName } from "@/lib/chain";
 import type { Actor } from "@/lib/sponsor";
-import { readOwnerKey, saveOwnerKey } from "@/lib/sponsor/owner-keys";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { HistorySection } from "./HistorySection";
 import { MarketSection } from "./MarketSection";
@@ -35,24 +34,6 @@ function Frame({ stamp, children }: { stamp?: StampStatus; children: ReactNode }
   );
 }
 
-/** Fuji only: the operator hands the demo actor's owner key to this browser session. */
-function OwnerKeyField({ actor }: { actor: Actor }) {
-  const [saved, setSaved] = useState(() => readOwnerKey(actor) !== null);
-  const [invalid, setInvalid] = useState(false);
-  if (saved) return null;
-  return (
-    <TextField
-      label="Clave del dueño, solo para esta sesión"
-      error={invalid ? "No es una clave válida." : undefined}
-      onChange={(e) => {
-        const accepted = saveOwnerKey(actor, e.target.value.trim());
-        setSaved(accepted);
-        setInvalid(!accepted);
-      }}
-    />
-  );
-}
-
 function Wallet({ config, actor, section }: { config: WalletConfig; actor: Actor; section: Section }) {
   const router = useRouter();
   const wallet = useWallet(config, config[actor]);
@@ -73,7 +54,6 @@ function Wallet({ config, actor, section }: { config: WalletConfig; actor: Actor
         <div className="wallet-demo">
           <span className="t-field-label">Demostración: ver la billetera como</span>
           <Tabs ariaLabel="Cuenta de demostración" items={ACTORS.map((a) => ({ label: a.label, href: href(a.id, section), current: a.id === actor }))} />
-          {chainName !== "local" && <OwnerKeyField key={actor} actor={actor} />}
         </div>
         <Tabs ariaLabel="Secciones" className="wallet-tabs" items={SECTIONS.map((s) => ({ label: s.label, href: href(actor, s.id), current: s.id === section }))} />
       </div>
