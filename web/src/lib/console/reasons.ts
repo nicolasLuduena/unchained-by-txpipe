@@ -1,5 +1,6 @@
 /** Reason codes in plain words. The code itself is always shown next to the sentence. */
 const REASONS: Record<string, string> = {
+  buyer_not_attested: "El PSAV no co-firma: la cuenta compradora no está verificada.",
   NotBusiness: "Esta dirección no tiene atestación de empresa. Sin ella no opera como emisor.",
   BusinessReadFailed: "No pudimos leer la atestación. Probá de nuevo en unos segundos.",
   IssuerNotBusiness: "El contrato rechazó el registro: esta dirección no tiene atestación de empresa.",

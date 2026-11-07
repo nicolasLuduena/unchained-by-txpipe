@@ -29,7 +29,7 @@ type Order = { token: Address; venue: Address; seller: Address; amount: bigint; 
 const orderKey = (seller: unknown, nonce: unknown) => `${String(seller).toLowerCase()}:${String(nonce)}`;
 
 function lots(amount: bigint, price: bigint): string {
-  return `${units(amount)} unidades, total USDC ${usdc(amount * price)}`;
+  return `${units(amount)} ${amount === 1n ? "unidad" : "unidades"}, total USDC ${usdc(amount * price)}`;
 }
 
 const announcedDetail = (amount: bigint, price: bigint, venue: Address) => `${lots(amount, price)}. Publicada por ${venueLabel(venue)}.`;

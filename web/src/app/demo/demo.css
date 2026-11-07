@@ -22,13 +22,18 @@
 .host.demo-phone { width: 100%; min-width: 0; min-height: 0; margin: 0; border: 1px solid var(--rule); }
 .demo-phone__who {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0 var(--space-3);
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
   padding: var(--space-2) var(--space-4);
   border-bottom: 1px dashed var(--rule-soft);
 }
-.demo-phone__who .hf-hash { grid-column: 1 / -1; }
-.demo-phone__body { flex: 1 1 0; min-height: 0; overflow-y: auto; }
+.host .demo-phone__body { flex: 1 1 0; gap: var(--space-3); min-height: 0; padding-block: var(--space-3); overflow-y: auto; }
+/* The action has to fit a projected phone without scrolling, so the coupon's title steps down here. */
+.demo-phone .hf-coupon__title { margin-block: var(--space-2); font-size: 26px; line-height: 30px; }
+.demo-phone .hf-coupon__body { padding-block: var(--space-3); }
+.demo-phone .host__balance { padding: 0; }
+.demo-phone .host__balance .hf-amount { font-size: 36px; line-height: 40px; }
 .demo-phone__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2); }
 
 .demo-book {
@@ -38,7 +43,7 @@
   border-top: 1px solid var(--rule);
   background: var(--stub);
 }
-.demo-book__rows { display: grid; max-height: 116px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.demo-book__rows { display: grid; max-height: 78px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .demo-book__rows li {
   display: grid;
   grid-template-columns: 62px 66px minmax(0, 1fr) 52px auto;

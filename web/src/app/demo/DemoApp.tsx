@@ -38,8 +38,9 @@ const BOOK_STAMP: Record<OrderStatus, { status: StampStatus; word: string }> = {
 
 const couponNumber = (view: OrderView) => `N.º ${(BigInt(view.order.nonce) % 10_000n).toString().padStart(4, "0")}`;
 
+/** Oldest first, the order the market takes them in. */
 function firstOpen(orders: OrderView[]) {
-  return orders.find((o) => o.status === "open");
+  return orders.findLast((o) => o.status === "open");
 }
 
 /** The shared set, the same rows on both phones. */
@@ -47,6 +48,7 @@ function BookStrip({ book }: { book: Book }) {
   return (
     <section className="demo-book" aria-label="Libro de órdenes compartido">
       <h3 className="t-field-label">Libro compartido entre las dos billeteras</h3>
+      <p className="caveat">Cada orden la co-firma su propia plataforma, no la de quien compra.</p>
       {book.orders.length === 0 ? (
         <p className="caveat">{book.loaded ? "Todavía no hay órdenes." : "Leyendo el libro."}</p>
       ) : (
@@ -156,16 +158,9 @@ function SellerPhone({ config, wallet, book }: { config: WalletConfig; wallet: W
 }
 
 function BuyerPhone({ config, wallet, book }: { config: WalletConfig; wallet: Wallet; book: Book }) {
-  const open = firstOpen(book.orders);
-  const buyerVenue = VENUES[1]?.label ?? "PSAV 2";
   return (
-    <Phone brand="Banco Norte" role="Comprador" venueName={buyerVenue} wallet={wallet} book={book}>
+    <Phone brand="Banco Norte" role="Comprador" venueName={VENUES[1]?.label ?? "PSAV 2"} wallet={wallet} book={book}>
       <MarketSection config={config} actor="buyer" wallet={wallet} />
-      {open && (
-        <p className="caveat">
-          Operás por {buyerVenue}. Esta orden la publicó {venueLabel(open.order.venue)}, así que la co-firma {venueLabel(open.order.venue)}: siempre firma la plataforma de la orden.
-        </p>
-      )}
     </Phone>
   );
 }
