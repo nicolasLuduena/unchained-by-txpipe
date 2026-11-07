@@ -1,3 +1,4 @@
+import { networkLabel } from "@/lib/chain";
 /** Reason codes in plain words. The code itself is always shown next to the sentence. */
 const REASONS: Record<string, string> = {
   buyer_not_attested: "El PSAV no co-firma: la cuenta compradora no está verificada.",
@@ -28,7 +29,7 @@ const REASONS: Record<string, string> = {
   TradingDisabled: "El token no está abierto a negociación.",
   NotRoutedThroughVenue: "La transferencia no pasó por la liquidación de una plataforma.",
   KeyNotConfigured: "Este rol no tiene clave disponible en el servidor.",
-  TransactionReverted: "La transacción se revirtió en la cadena.",
+  TransactionReverted: `La transacción se revirtió en ${networkLabel}.`,
   SendFailed: "No pudimos enviar la transacción.",
   RouteUnavailable: "La ruta de envío de la consola no respondió.",
 };

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Address } from "viem";
 import { Button, Hash, Notice, TextField } from "@/design";
-import { explorerUrl } from "@/lib/chain";
+import { explorerUrl, networkLabel } from "@/lib/chain";
 import { ACTIONS, fieldError, type ActionContext, type ActionDef, type Values } from "@/lib/console/actions";
 import type { FeedEntry } from "@/lib/console/feed";
 import { reasonText } from "@/lib/console/reasons";
@@ -145,7 +145,7 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
         </Button>
         {refusedBySdk ? (
           <Button variant="ghost" busy={busy} onClick={() => submit(true)}>
-            Probar en la cadena
+            Probar en {networkLabel}
           </Button>
         ) : null}
       </div>

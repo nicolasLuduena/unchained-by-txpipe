@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Hash as HashText, Notice, TextField } from "@/design";
-import { chain, explorerUrl } from "@/lib/chain";
+import { chain, explorerUrl, networkLabel } from "@/lib/chain";
 import { venue } from "@/lib/orders/client";
 import { getSponsor, type Actor } from "@/lib/sponsor";
 import type { WalletConfig } from "@/lib/wallet/deployment";
@@ -16,7 +16,7 @@ export function RevertSection({ config, actor, wallet }: Props) {
   const [amountText, setAmountText] = useState("1");
   const requesting = useAction();
 
-  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en la cadena.</Notice>;
+  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en {networkLabel}.</Notice>;
   if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
 
   const amount = parseTokens(amountText);

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 import type { Address } from "viem";
 import { Notice, OperatedBy, Stamp, Tabs, type StampStatus } from "@/design";
-import { chainName } from "@/lib/chain";
+import { chainName, networkLabel } from "@/lib/chain";
 import type { Actor } from "@/lib/sponsor";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { HistorySection } from "./HistorySection";
@@ -77,7 +77,7 @@ function Wallet({ config, address, metamask, ...place }: Place & { config: Walle
   return (
     <Shell {...place} stamp={HOST_STAMP[wallet.precheck]}>
       <main className="host__main">
-        {wallet.offline && <Notice status="pending">No pudimos leer la cadena o el servicio de órdenes. Reintentando.</Notice>}
+        {wallet.offline && <Notice status="pending">No pudimos leer {networkLabel} o el servicio de órdenes. Reintentando.</Notice>}
         {metamask && <MetaMaskPanel metamask={metamask} wallet={wallet} />}
         {section === "mercado" && <MarketSection config={config} actor={actor} wallet={wallet} />}
         {section === "vender" && <SellSection config={config} actor={actor} wallet={wallet} />}

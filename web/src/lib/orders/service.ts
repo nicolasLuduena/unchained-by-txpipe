@@ -185,7 +185,7 @@ async function announce(order: Order, sellerSig: Hex, hashed: { address: Address
       if (reason.startsWith("InvalidSellerSignature")) {
         throw new Refused("invalid_seller_signature", "La firma no corresponde a la cuenta vendedora.", 422, hashed);
       }
-      throw new Refused("announce_reverted", `La cadena rechazó la orden: ${reason}`, 422, hashed);
+      throw new Refused("announce_reverted", `El contrato rechazó la orden: ${reason}`, 422, hashed);
     });
   const announceTx = await orderKeyClient(order.venue).writeContract(simulated.request);
   const receipt = await publicClient.waitForTransactionReceipt({ hash: announceTx, pollingInterval: RECEIPT_POLL_MS });
@@ -302,7 +302,7 @@ async function findOrder(orderHash: string): Promise<StoredOrder> {
 export async function markCancelled(orderHash: string): Promise<OrderView> {
   const stored = await syncWithChain(await findOrder(orderHash));
   if (!stored.cancelled) {
-    throw new Refused("not_cancelled_on_chain", "La orden sigue vigente en la cadena.", 409, { address: stored.order.seller, orderHash: stored.orderHash });
+    throw new Refused("not_cancelled_on_chain", "La orden sigue vigente en el contrato.", 409, { address: stored.order.seller, orderHash: stored.orderHash });
   }
   return view(stored);
 }
@@ -327,7 +327,7 @@ export async function coSign(orderHash: string, body: { buyer?: unknown; demoDir
     const refused = new Refused("buyer_not_attested", "La cuenta compradora no está verificada.", 403, context);
     const demoAllowed = chainName === "local" || process.env.VENUE_DEMO_COSIGN === "1";
     if (body.demoDirectAttempt !== true || !demoAllowed) throw refused;
-    await logRefusal("co-sign (demo: firma entregada para mostrar el rechazo en la cadena)", refused);
+    await logRefusal("co-sign (demo: firma entregada para mostrar el rechazo en el contrato)", refused);
   }
 
   const digest = await publicClient.readContract({ ...settlement(), functionName: "hashVenueFill", args: [stored.orderHash, buyer] });

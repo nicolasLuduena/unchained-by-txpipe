@@ -5,7 +5,7 @@ import { encodeFunctionData, isAddressEqual, type Address } from "viem";
 import { Button, Hash, Notice, OperatedBy, Stamp, Tabs, type StampStatus } from "@/design";
 import { handoffSettlementAbi } from "@/lib/abi";
 import { parseBig } from "@/lib/big-json";
-import { chainName, explorerUrl } from "@/lib/chain";
+import { chainName, explorerUrl, networkLabel } from "@/lib/chain";
 import { feedFromOrders, mergeFeed, type FeedEntry } from "@/lib/console/feed";
 import type { ConsoleState } from "@/lib/console/state";
 import { venue, VenueRefusal } from "@/lib/orders/client";
@@ -25,7 +25,7 @@ const FEED_POLL_MS = chainName === "local" ? 3000 : 15_000;
 const CAVEAT = "Atestaciones de demostración en Fuji, sin verificación de identidad.";
 const STORE_NOTE =
   chainName === "local"
-    ? "Cadena local: el SDK de KUMPLY lee un stub de prueba."
+    ? "Red local: el SDK de KUMPLY lee un stub de prueba."
     : "Instancia de demostración del contrato de KUMPLY. No es el almacén oficial de KUMPLY.";
 
 const HOST_STAMP: Record<Precheck, StampStatus> = { checking: "pending", passed: "verified", blocked: "blocked", unavailable: "pending" };
@@ -86,7 +86,7 @@ function Phone(props: { brand: string; role: string; venueName: string; wallet: 
       </div>
       {nav}
       <main className="host__main demo-phone__body">
-        {wallet.offline && <Notice status="pending">No pudimos leer la cadena. Reintentando.</Notice>}
+        {wallet.offline && <Notice status="pending">No pudimos leer {networkLabel}. Reintentando.</Notice>}
         {children}
       </main>
       <BookStrip book={book} />
@@ -189,7 +189,7 @@ function UnverifiedControl({ config, order, onResult }: { config: WalletConfig; 
         <span className="t-field-label">Cuenta sin verificar</span>
         <Hash value={config.unverified} href={explorerUrl("address", config.unverified)} />
       </div>
-      <p className="caveat">Saltea la billetera y llama a la cadena, pagando su propio gas.</p>
+      <p className="caveat">Saltea la billetera y llama al contrato, pagando su propio gas.</p>
       <Button variant="secondary" size="sm" busy={action.busy} disabled={!order} onClick={() => order && run(order)}>
         Intentar compra directa
       </Button>
@@ -202,7 +202,7 @@ function UnverifiedControl({ config, order, onResult }: { config: WalletConfig; 
       {attempt && (
         <div className="demo-panel__result">
           <Stamp status={attempt.reverted ? "reverted" : "sold"}>{attempt.reverted ? "Rechazada" : "Sin revertir"}</Stamp>
-          {attempt.reverted && <p className="caveat">La cadena rechazó la compra: {attempt.reason}</p>}
+          {attempt.reverted && <p className="caveat">El contrato rechazó la compra: {attempt.reason}</p>}
           <Hash value={attempt.hash} href={explorerUrl("tx", attempt.hash)} />
         </div>
       )}
@@ -287,7 +287,7 @@ function refusalRow(result: DirectResult, from: Address, asset: string): FeedEnt
 /** One plain sentence for what just happened, so the page reads without narration. */
 function storyLine(book: Book, refused: boolean) {
   if (!book.loaded) return "Leyendo el libro de órdenes.";
-  if (refused) return "La cadena rechazó la compra de la cuenta sin verificar. No se movieron tokens ni USDC.";
+  if (refused) return "El contrato rechazó la compra de la cuenta sin verificar. No se movieron tokens ni USDC.";
   const latest = book.orders[0];
   if (latest?.status === "open") return "Orden publicada. Los tokens siguen en la billetera de la vendedora. Ahora Banco Norte puede comprar.";
   if (latest?.status === "filled") return "Venta liquidada en una sola transacción: tokens al comprador, USDC a la vendedora. Ninguno pagó gas.";

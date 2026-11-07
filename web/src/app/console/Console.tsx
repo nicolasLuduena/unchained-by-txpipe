@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 import { AssetRow, Hash, Notice, Stamp, Tabs } from "@/design";
 import { parseBig } from "@/lib/big-json";
-import { chainName, deployment, explorerUrl } from "@/lib/chain";
+import { chainName, deployment, explorerUrl, networkLabel } from "@/lib/chain";
 import type { FeedEntry } from "@/lib/console/feed";
 import { units, usdc } from "@/lib/console/format";
 import { isRole, ROLE_LABEL, ROLES, type Role, type RoleAddresses } from "@/lib/console/roles";
@@ -143,7 +143,7 @@ export function Console() {
         )}
         {behind(state) && (
           <span className="desk__sync t-caption">
-            {state ? `Leyendo la cadena: bloque ${units(state.scannedTo)} de ${units(state.head)}` : "Leyendo la cadena"}
+            {state ? `Leyendo ${networkLabel}: bloque ${units(state.scannedTo)} de ${units(state.head)}` : `Leyendo ${networkLabel}`}
           </span>
         )}
       </section>
@@ -152,7 +152,7 @@ export function Console() {
         {CAVEAT}
         {" "}
         {chainName === "local"
-          ? "Cadena local: el SDK de KUMPLY lee un stub de prueba."
+          ? "Red local: el SDK de KUMPLY lee un stub de prueba."
           : "El SDK de KUMPLY lee una instancia de demostración del contrato de KUMPLY, sin verificación de identidad. No es el almacén oficial de KUMPLY."}
       </p>
 

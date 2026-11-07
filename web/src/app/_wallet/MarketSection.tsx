@@ -4,7 +4,7 @@ import { useState } from "react";
 import { encodeFunctionData, erc20Abi, isAddressEqual, type Hash } from "viem";
 import { Amount, AssetRow, Button, Hash as HashText, Notice } from "@/design";
 import { handoffSettlementAbi } from "@/lib/abi";
-import { explorerUrl } from "@/lib/chain";
+import { explorerUrl, networkLabel } from "@/lib/chain";
 import { venue, VenueRefusal } from "@/lib/orders/client";
 import { fromWireOrder, type OrderView } from "@/lib/orders/types";
 import { getSponsor, SPONSOR_LABEL, type Actor } from "@/lib/sponsor";
@@ -33,7 +33,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
   const buying = useAction();
   const direct = useAction();
 
-  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en la cadena.</Notice>;
+  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en {networkLabel}.</Notice>;
 
   const ask = lowestAsk(orders);
   const ownAsk = ask && isAddressEqual(ask.order.seller, address);
@@ -119,7 +119,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
       {ask && precheck === "blocked" && actor !== "metamask" && (
         <section className="wallet-demo-control">
           <span className="t-field-label">Control de demostración</span>
-          <p className="caveat">Saltea la billetera y llama a la cadena desde esta cuenta, pagando su propio gas.</p>
+          <p className="caveat">Saltea la billetera y llama al contrato desde esta cuenta, pagando su propio gas.</p>
           <Button variant="secondary" busy={direct.busy} onClick={() => attemptDirect(ask)}>
             Intentar compra directa
           </Button>
@@ -131,7 +131,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
           {attempt && (
             <div className="wallet-stack">
               <Notice status={attempt.reverted ? "reverted" : "sold"} word={attempt.reverted ? "Rechazada" : undefined}>
-                {attempt.reverted ? `La cadena rechazó la compra: ${attempt.reason}` : "La transacción no se revirtió."}
+                {attempt.reverted ? `El contrato rechazó la compra: ${attempt.reason}` : "La transacción no se revirtió."}
               </Notice>
               <HashText value={attempt.hash} href={explorerUrl("tx", attempt.hash)} />
             </div>

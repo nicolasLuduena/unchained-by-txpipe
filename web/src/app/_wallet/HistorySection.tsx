@@ -1,19 +1,19 @@
 "use client";
 
 import { FeedRow, Hash as HashText, Notice } from "@/design";
-import { explorerUrl } from "@/lib/chain";
+import { explorerUrl, networkLabel } from "@/lib/chain";
 import type { WalletConfig } from "@/lib/wallet/deployment";
 import type { Wallet } from "./useWallet";
 
 export function HistorySection({ config, wallet }: { config: WalletConfig; wallet: Wallet }) {
   const { snapshot, history, historyPartial } = wallet;
-  if (!snapshot) return <Notice status="pending">Leyendo la cadena.</Notice>;
+  if (!snapshot) return <Notice status="pending">Leyendo {networkLabel}.</Notice>;
 
   return (
     <>
       <section className="wallet-stack">
         <h2 className="t-title">Historial</h2>
-        {historyPartial && <p className="caveat">Seguimos leyendo la cadena: puede haber movimientos que todavía no aparecen.</p>}
+        {historyPartial && <p className="caveat">Seguimos leyendo {networkLabel}: puede haber movimientos que todavía no aparecen.</p>}
         {history.length === 0 && !historyPartial && <p className="caveat">Todavía no hay movimientos en esta cuenta.</p>}
         {history.map((entry) => (
           <div className="wallet-history" key={entry.id}>
@@ -43,7 +43,7 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
           <p>{snapshot.depositRef}</p>
         </div>
         <div className="wallet-doc">
-          <span className="t-field-label">Hash del documento, registrado en la cadena</span>
+          <span className="t-field-label">Hash del documento, registrado en {networkLabel}</span>
           <HashText value={snapshot.issuanceDocHash} href={explorerUrl("address", config.registry)} />
         </div>
       </section>
