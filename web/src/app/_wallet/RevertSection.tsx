@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button, Hash as HashText, Notice, TextField } from "@/design";
 import { chain, explorerUrl } from "@/lib/chain";
 import { venue } from "@/lib/orders/client";
-import { reversionDigest } from "@/lib/orders/types";
 import { getSponsor, type Actor } from "@/lib/sponsor";
 import type { WalletConfig } from "@/lib/wallet/deployment";
 import { parseTokens, tokensLabel } from "@/lib/wallet/format";
@@ -28,9 +27,8 @@ export function RevertSection({ config, actor, wallet }: Props) {
     if (amount === null || amountError) return;
     return requesting.run(async () => {
       const requestedAt = BigInt(Math.floor(Date.now() / 1000));
-      const digest = reversionDigest({ chainId: BigInt(chain.id), token: config.token, holder: address, amount, requestedAt });
       const sponsor = await getSponsor();
-      const signature = await sponsor.signDigest(actor, digest);
+      const signature = await sponsor.signReversion(actor, { chainId: BigInt(chain.id), token: config.token, holder: address, amount, requestedAt });
       await venue.requestReversion({
         token: config.token,
         holder: address,

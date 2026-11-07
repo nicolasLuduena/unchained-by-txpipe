@@ -83,14 +83,17 @@ export function fromWireOrder(order: WireOrder): Order {
   };
 }
 
-/** The digest a holder signs to ask for reversion. Binds the chain, so a request cannot be replayed elsewhere. */
-export function reversionDigest(r: {
+/** A holder's ask to go back to paper, as it is signed. */
+export type ReversionRequest = {
   chainId: bigint;
   token: Address;
   holder: Address;
   amount: bigint;
   requestedAt: bigint;
-}): Hash {
+};
+
+/** The digest a holder signs to ask for reversion. Binds the chain, so a request cannot be replayed elsewhere. */
+export function reversionDigest(r: ReversionRequest): Hash {
   return keccak256(
     encodeAbiParameters(
       [{ type: "string" }, { type: "uint256" }, { type: "address" }, { type: "address" }, { type: "uint256" }, { type: "uint256" }],

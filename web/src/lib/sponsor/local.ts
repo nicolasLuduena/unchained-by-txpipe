@@ -1,5 +1,8 @@
 import type { Hash } from "viem";
+import { handoffSettlementAbi } from "@/lib/abi";
 import { publicClient } from "@/lib/chain";
+import { reversionDigest } from "@/lib/orders/types";
+import { coreContracts } from "@/lib/wallet/deployment";
 import { devAccount, devWallet } from "./dev-keys";
 import type { Sponsor } from "./index";
 
@@ -24,7 +27,14 @@ export const localSponsor: Sponsor = {
     return { hash: hash as Hash };
   },
 
-  signDigest(actor, digest) {
-    return devAccount(actor).sign({ hash: digest });
+  async signOrder(actor, order) {
+    const address = coreContracts()?.settlement;
+    if (!address) throw new Error("Los contratos todavía no están desplegados.");
+    const hash = await publicClient.readContract({ address, abi: handoffSettlementAbi, functionName: "hashOrder", args: [order] });
+    return devAccount(actor).sign({ hash });
+  },
+
+  signReversion(actor, request) {
+    return devAccount(actor).sign({ hash: reversionDigest(request) });
   },
 };

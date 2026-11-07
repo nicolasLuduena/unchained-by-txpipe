@@ -11,7 +11,7 @@ import { store, type StoredOrder, type StoredReversion } from "./store";
 import { reversionDigest, toWireOrder, type Order, type OrderView, type Refusal, type ReversionView, type WireOrder } from "./types";
 import { orderKeyAccount, orderKeyClient } from "./venue";
 
-const RECEIPT_POLL_MS = 200;
+const RECEIPT_POLL_MS = chainName === "local" ? 200 : 1000;
 const REVERSION_MAX_AGE_S = 600n;
 const MAX_REFUSALS = 200;
 
@@ -61,7 +61,7 @@ function nowSeconds() {
   return BigInt(Math.floor(Date.now() / 1000));
 }
 
-function parseAddress(value: unknown, field: string): Address {
+export function parseAddress(value: unknown, field: string): Address {
   try {
     return getAddress(String(value));
   } catch {
@@ -69,14 +69,14 @@ function parseAddress(value: unknown, field: string): Address {
   }
 }
 
-function parseUint(value: unknown, field: string): bigint {
+export function parseUint(value: unknown, field: string): bigint {
   if (typeof value !== "string" || !/^\d+$/.test(value)) {
     throw new Refused("malformed", `El campo ${field} no es un entero positivo.`, 400);
   }
   return BigInt(value);
 }
 
-function parseOrder(raw: Partial<WireOrder> | undefined): Order {
+export function parseOrder(raw: Partial<WireOrder> | undefined): Order {
   if (!raw) throw new Refused("malformed", "Falta la orden.", 400);
   return {
     chainId: parseUint(raw.chainId, "chainId"),
@@ -127,14 +127,8 @@ async function assertHolderSigned(address: Address, digest: Hash, signature: Hex
   throw new Refused("invalid_holder_signature", "La firma no corresponde a esta cuenta.", 422, { address });
 }
 
-/**
- * Validates a signed order, announces it from the order key so it reaches the feed, and stores it.
- * The seller signature, venue and order key are judged by simulating announceOrder: the contract is the
- * one place that decides what a valid seller signature is.
- */
-export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: unknown }): Promise<OrderView> {
-  const order = parseOrder(body.order);
-  const sellerSig = parseSignature(body.sellerSig);
+/** Everything an order must be before the PSAV takes it. The sponsor checks the same before it signs one. */
+export async function assertPostable(order: Order) {
   const { seller } = order;
   const context = { address: seller };
 
@@ -153,9 +147,25 @@ export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: 
   if (!attested) throw new Refused("seller_not_attested", "La cuenta vendedora no está verificada.", 403, context);
   if (blocked) throw new Refused("seller_blocked", "La cuenta vendedora está bloqueada por el PSAV.", 403, context);
   if (balance < order.amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
+}
 
-  const orderHash = await publicClient.readContract({ ...settlement(), functionName: "hashOrder", args: [order] });
-  const hashed = { ...context, orderHash };
+/** The digest a seller signs, as the settlement contract computes it. */
+export function hashOrder(order: Order): Promise<Hash> {
+  return publicClient.readContract({ ...settlement(), functionName: "hashOrder", args: [order] });
+}
+
+/**
+ * Validates a signed order, announces it from the order key so it reaches the feed, and stores it.
+ * The seller signature, venue and order key are judged by simulating announceOrder: the contract is the
+ * one place that decides what a valid seller signature is.
+ */
+export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: unknown }): Promise<OrderView> {
+  const order = parseOrder(body.order);
+  const sellerSig = parseSignature(body.sellerSig);
+  await assertPostable(order);
+
+  const orderHash = await hashOrder(order);
+  const hashed = { address: order.seller, orderHash };
   if (store.orders.has(orderHash)) throw new Refused("duplicate", "Esta orden ya está publicada.", 409, hashed);
 
   const simulated = await publicClient
@@ -292,6 +302,17 @@ function reversionView(r: StoredReversion): ReversionView {
   };
 }
 
+/** Everything a reversion request must be. The sponsor checks the same before it signs one. */
+export async function assertRequestable(request: { token: Address; holder: Address; amount: bigint; requestedAt: bigint }) {
+  const { token, holder, amount, requestedAt } = request;
+  const context = { address: holder };
+  if (amount === 0n) throw new Refused("zero_amount", "La cantidad tiene que ser mayor a cero.", 422, context);
+  const age = nowSeconds() - requestedAt;
+  if (age > REVERSION_MAX_AGE_S || age < -REVERSION_MAX_AGE_S) throw new Refused("stale_request", "El pedido venció. Volvé a firmarlo.", 422, context);
+  const balance = await publicClient.readContract({ address: token, abi: handoffTokenAbi, functionName: "balanceOf", args: [holder] });
+  if (balance < amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
+}
+
 /** Stores a holder's request for the console's PSAV to act on. Only the holder's signature can open one. */
 export async function requestReversion(body: {
   token?: unknown;
@@ -307,18 +328,13 @@ export async function requestReversion(body: {
   const signature = parseSignature(body.signature);
   const context = { address: holder };
 
-  if (amount === 0n) throw new Refused("zero_amount", "La cantidad tiene que ser mayor a cero.", 422, context);
-  const age = nowSeconds() - requestedAt;
-  if (age > REVERSION_MAX_AGE_S || age < -REVERSION_MAX_AGE_S) throw new Refused("stale_request", "El pedido venció. Volvé a firmarlo.", 422, context);
+  await assertRequestable({ token, holder, amount, requestedAt });
 
   const id = reversionDigest({ chainId: BigInt(chain.id), token, holder, amount, requestedAt });
   await assertHolderSigned(holder, id, signature);
 
   const open = [...store.reversions.values()].some((r) => r.token === token && r.holder === holder && r.status === "pending");
   if (open) throw new Refused("already_pending", "Ya tenés un pedido de reversión pendiente.", 409, context);
-
-  const balance = await publicClient.readContract({ address: token, abi: handoffTokenAbi, functionName: "balanceOf", args: [holder] });
-  if (balance < amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
 
   const stored: StoredReversion = {
     id,

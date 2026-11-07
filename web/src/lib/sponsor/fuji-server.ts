@@ -5,7 +5,8 @@ import { createWalletClient, decodeFunctionData, erc20Abi, http, isAddress, isAd
 import { mnemonicToAccount } from "viem/accounts";
 import { handoffSettlementAbi } from "@/lib/abi";
 import { chain, chainName, publicClient } from "@/lib/chain";
-import { Refused } from "@/lib/orders/service";
+import { assertPostable, assertRequestable, hashOrder, parseAddress, parseOrder, parseUint, Refused } from "@/lib/orders/service";
+import { reversionDigest, type WireOrder } from "@/lib/orders/types";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { sendFrom } from "./direct";
 import type { Actor, Call } from "./index";
@@ -146,7 +147,43 @@ function assertWalletCall(call: Call, allowed: readonly string[]) {
   throw refused;
 }
 
-type SponsorRequest = { action?: unknown; actor?: unknown; calls?: unknown; call?: unknown; digest?: unknown };
+/** The digest of a real order from this actor, for the token and venue of this deployment. Nothing else gets signed. */
+async function orderDigest(actor: "seller" | "buyer", raw: Partial<WireOrder> | undefined): Promise<Hash> {
+  const config = requireConfig();
+  const order = parseOrder(raw);
+  const context = { address: order.seller };
+  if (!isAddressEqual(order.seller, config[actor])) throw new Refused("not_your_order", "Esta orden no es de esta cuenta.", 403, context);
+  if (!isAddressEqual(order.token, config.token)) throw new Refused("unknown_token", "Este token no está registrado.", 422, context);
+  if (!isAddressEqual(order.venue, config.venue)) throw new Refused("unknown_venue", "La orden es de otra plataforma.", 422, context);
+  await assertPostable(order);
+  return hashOrder(order);
+}
+
+/** The digest of this actor's own reversion request. The holder comes from the actor, never from the caller. */
+async function reversionRequestDigest(actor: "seller" | "buyer", body: SponsorRequest): Promise<Hash> {
+  const config = requireConfig();
+  const request = {
+    chainId: BigInt(chain.id),
+    token: parseAddress(body.token, "token"),
+    holder: config[actor],
+    amount: parseUint(body.amount, "amount"),
+    requestedAt: parseUint(body.requestedAt, "requestedAt"),
+  };
+  if (!isAddressEqual(request.token, config.token)) throw new Refused("unknown_token", "Este token no está registrado.", 422, { address: request.holder });
+  await assertRequestable(request);
+  return reversionDigest(request);
+}
+
+type SponsorRequest = {
+  action?: unknown;
+  actor?: unknown;
+  calls?: unknown;
+  call?: unknown;
+  order?: Partial<WireOrder>;
+  token?: unknown;
+  amount?: unknown;
+  requestedAt?: unknown;
+};
 
 /** The server half of the Fuji Sponsor: signing needs the mnemonic and the paymaster key, which stay here. */
 export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
@@ -160,10 +197,9 @@ export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
     return withPaymaster((paymasterUrl) => sendSponsored(actor, calls, paymasterUrl));
   }
 
-  if (body.action === "signDigest") {
+  if (body.action === "signOrder" || body.action === "signReversion") {
     const actor = sponsoredActor(body.actor);
-    if (typeof body.digest !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(body.digest)) throw new Refused("malformed", "El digest no es válido.", 400);
-    const digest = body.digest as Hash;
+    const digest = await (body.action === "signOrder" ? orderDigest(actor, body.order) : reversionRequestDigest(actor, body));
     return { signature: await withPaymaster((paymasterUrl) => signDigest(actor, digest, paymasterUrl)) };
   }
 

@@ -1,5 +1,6 @@
 import type { Address, Hash, Hex } from "viem";
 import { chainName } from "@/lib/chain";
+import type { Order, ReversionRequest } from "@/lib/orders/types";
 
 /** The demo actors a browser can act as. */
 export type Actor = "seller" | "buyer" | "unverified";
@@ -10,8 +11,10 @@ export type Call = { to: Address; data: Hex; value?: bigint };
 export interface Sponsor {
   /** Runs the calls in order on the actor's behalf, gas-free. Rejects if any of them fails. */
   sendCalls(actor: Actor, calls: Call[]): Promise<{ hash: Hash; userOpHash?: Hash }>;
-  /** Signs a 32-byte digest as the actor, for order and request signatures. */
-  signDigest(actor: Actor, digest: Hash): Promise<Hex>;
+  /** Signs a sell order as the actor. The signer works out the digest itself: it never signs one it is handed. */
+  signOrder(actor: Actor, order: Order): Promise<Hex>;
+  /** Signs a request to go back to paper as the actor, with the same rule. */
+  signReversion(actor: Actor, request: ReversionRequest): Promise<Hex>;
 }
 
 /** Says what the sponsorship is: a mock must say it is a mock. */

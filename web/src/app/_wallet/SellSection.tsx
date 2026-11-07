@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Button, Coupon, Hash as HashText, Notice, PriceBand, TextField } from "@/design";
-import { handoffSettlementAbi } from "@/lib/abi";
-import { chain, explorerUrl, publicClient } from "@/lib/chain";
+import { chain, explorerUrl } from "@/lib/chain";
 import { venue } from "@/lib/orders/client";
 import { toWireOrder, type Order, type OrderView } from "@/lib/orders/types";
 import { getSponsor, SPONSOR_LABEL, type Actor } from "@/lib/sponsor";
@@ -57,14 +56,8 @@ export function SellSection({ config, actor, wallet }: Props) {
         expiry: BigInt(Math.floor(Date.now() / 1000)) + ORDER_LIFETIME_S,
         nonce: randomNonce(),
       };
-      const digest = await publicClient.readContract({
-        address: config.settlement,
-        abi: handoffSettlementAbi,
-        functionName: "hashOrder",
-        args: [order],
-      });
       const sponsor = await getSponsor();
-      const signature = await sponsor.signDigest(actor, digest);
+      const signature = await sponsor.signOrder(actor, order);
       setPosted(await venue.postOrder(toWireOrder(order), signature));
       wallet.refresh();
     });
