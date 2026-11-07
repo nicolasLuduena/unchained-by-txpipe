@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+cache/
+broadcast/
+.env
+.env.local
+*.local
+.evidence/
+.DS_Store
+coverage/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
