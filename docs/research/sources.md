@@ -211,3 +211,74 @@ All retrieved on 2026-11-07 unless stated. "Fetched" means the page or file was 
 | URL | Retrieved | Status | Used for |
 |---|---|---|---|
 | https://coinpaprika.com/education/regulatory-sandboxes-tokenization/ | 2026-11-07 | Fetch failed (403) | Cross-jurisdiction sandbox summary; not used |
+
+## Argentina market (issue #27)
+
+All retrieved on 2026-11-07. Same status vocabulary as above. Feeds `docs/research/argentina-market.md`.
+
+| URL | Retrieved | Status | Used for |
+|---|---|---|---|
+| https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-1069-2025-414017/texto | 2026-11-07 | Fetched (primary) | RG 1069/2025: sanction 2025-06-11, BO 2025-06-13 No. 35687, art. 1 (FF and FCIC backed by RWA), one-year sandbox, vigencia art. 2 |
+| https://www.boletinoficial.gob.ar/detalleAviso/primera/326947/20250613 | 2026-11-07 | Search result (primary) | RG 1069/2025 Boletín Oficial aviso |
+| https://www.argentina.gob.ar/normativa/nacional/norma-416670/texto | 2026-11-07 | Fetched (primary) | RG 1081/2025: sanction 2025-08-20, BO 2025-08-21 No. 35732, replaces Cap. I of Título XXII, adds shares, ONs, CEDEARs, five PSAVs, sandbox to 2026-08-21 |
+| https://www.argentina.gob.ar/noticias/ampliacion-del-regimen-de-tokenizacion-para-emisiones-bajo-oferta-publica-automatica-de | 2026-11-07 | Fetched (primary, CNV release 2025-10-22) | RG 1087/2025 scope: mediano impacto, emisores frecuentes, FF frecuentes; listing exemption; Silva quotes; no application counts |
+| https://www.boletinoficial.gob.ar/#!DetalleNorma/333326/20251023 | 2026-11-07 | Search result (primary) | RG 1087/2025 BO publication 2025-10-23 |
+| https://www.colegio-escribanos.org.ar/noticias/2025_10_23_CNV-Res-Gral-1087-25.pdf | 2026-11-07 | Search result (copy of official text) | RG 1087/2025 text copy |
+| https://www.boletinoficial.gob.ar/detalleAviso/primera/340413/20260407 | 2026-11-07 | Search result (primary) | RG 1125/2026 BO 2026-04-07 |
+| https://www.argentina.gob.ar/normativa/nacional/norma-424560/texto | 2026-11-07 | Search result (primary) | RG 1125/2026 text: crowdfunding in automatic regimes, 15 million UVA cap |
+| https://abogados.com.ar/la-cnv-incorpora-el-financiamiento-colectivo-al-regimen-de-oferta-publica-automatica/38879 | 2026-11-07 | Search result (secondary) | RG 1125/2026 in force 2026-04-08, caps |
+| https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-1137-2026-425458 | 2026-11-07 | Fetched (primary) | RG 1137/2026: sanction 2026-04-30, BO 2026-05-04 No. 35901, Elaboración Participativa de Normas, draft "Tokenización - Oferta Automática y Prórroga Sandbox" |
+| https://jfcattorneys.com/es/news/cnv-rg-1137-tokenizacion-ampliacion-sandbox-2027 | 2026-11-07 | Search result (secondary) | RG 1137 consultation closing 2026-05-27 |
+| https://www.cronista.com/finanzas-mercados/la-cnv-acelera-la-tokenizacion-de-activos-que-cambia-con-la-propuesta/ | 2026-11-07 | Fetched (secondary, 2026-05-12) | RG 1137 proposal summary; no application counts |
+| https://www.boletinoficial.gob.ar/detalleAviso/primera/343010/20260611 | 2026-11-07 | Fetched (primary) | RG 1150/2026: sanction 2026-06-10, BO 2026-06-11, articles replaced, art. 1 list, sandbox to 2027-12-31, five PSAVs, five-investor dispersion, vigencia |
+| https://www.argentina.gob.ar/normativa/nacional/norma-426586/texto | 2026-11-07 | Search result (primary) | RG 1150/2026 text |
+| https://www.elobservador.com.uy/argentina/economia-y-negocios/la-cnv-amplio-el-regimen-tokenizacion-y-completo-el-bing-bang-regulatorio-n6047207 | 2026-11-07 | Search result (secondary) | RG 1150 as close of the "Big Bang" package |
+| https://www.argentina.gob.ar/normativa/nacional/norma-431259/texto | 2026-11-07 | Search result (primary) | RG 1172/2026: sanction 2026-10-14, BO 2026-10-15 No. 36013, PSAV chapter, 35,000 UVA threshold, US$150,000 net worth, vigencia art. 5 |
+| https://www.boletinoficial.gob.ar/detalleAviso/primera/348986/20261015 | 2026-11-07 | Search result (primary) | RG 1172/2026 BO aviso |
+| https://allende.com/fintech/la-cnv-actualiza-el-regimen-aplicable-a-los-proveedores-de-servicios-de-activos-virtuales-10-16-2026/ | 2026-11-07 | Fetched (secondary) | RG 1172 scope, monthly report contents, advertising of tokenized securities |
+| https://abogados.com.ar/la-cnv-aprueba-modificaciones-integrales-al-regimen-de-proveedores-de-servicios-de-activos-virtuales/40355 | 2026-11-07 | Fetched (secondary) | RG 1172 in force 2026-10-16, monthly reporting from 2026-11-01, net worth US$35,000 to 150,000 |
+| https://www.infobae.com/economia/2026/11/03/el-gobierno-propone-que-paguen-ganancias-las-inversiones-en-cedear-uno-de-los-instrumentos-mas-populares-del-mercado/ | 2026-11-07 | Fetched (secondary) | Ley de Competitividad Financiera sent to Diputados "este lunes" (2026-11-02), 240 articles, DLT securities, Otros Ámbitos de Negociación Autorizados, CEDEAR tax clause withdrawn |
+| https://www.diariobitcoin.com/argentina/argentina-propone-habilitar-valores-tokenizados-y-fondos-con-cripto-en-su-nueva-ley-financiera/ | 2026-11-07 | Fetched (secondary, 2026-11-04) | Bill content on tokenized securities and CNV competence |
+| https://www.iproup.com/argentina-fintech-forum/72741-bcra-cnv-uif-brujula-regulatoria-fintech-2027-agenda-octubre-2026 | 2026-11-07 | Fetch failed (headline only); search snippet | Fintech Forum 2026-10-29: Silva on native tokenization, digital registries, omnibus law |
+| https://mercado.com.ar/protagonistas/el-argentina-fintech-forum-2026-cerro-con-foco-en-inteligencia-artificial-regulacion-y-el-futuro-del-sistema-financier | 2026-11-07 | Search result (secondary) | Fintech Forum date and venue |
+| https://www.criptonoticias.com/regulacion/presidente-cnv-argentina-regimen-tokenizacion-bid/ | 2026-11-07 | Search result (secondary) | Silva presented the regime at the IDB, September 2026; no counts |
+| https://argentina.gob.ar/sites/default/files/anual_informe_financiamiento_diciembre_2025.pdf | 2026-11-07 | Fetched (primary, PDF text extracted) | 2025: total ARS 49,151,763 M (USD 33,679 M); 323 ONs USD 17,748 M; 128 FF ARS 2,904,541 M (USD 1,990 M, +71 percent); equity USD 169 M; FCIC USD 19 M; cheques USD 6,539 M; pagarés USD 6,940 M; Com. "A" 3500 of 2025-12-30 |
+| https://www.argentina.gob.ar/cnv/informes-del-mercado-de-capitales | 2026-11-07 | Fetched (primary) | Index of CNV financing reports |
+| https://www.lanacion.com.ar/economia/las-empresas-consiguen-un-volumen-record-de-dolares-para-financiar-los-proyectos-mas-prometedores-nid21072026/ | 2026-11-07 | Fetched (secondary, 2026-07-21) | ON 2024 USD 12,479 M and 356 issues; H1 2026 176 placements USD 8,285 M; H1 2026 total financing USD 20,716 M |
+| https://www.infobae.com/economia/2026/02/03/record-de-endeudamiento-corporativo-las-empresas-colocaron-mas-de-usd-20000-millones-en-2025-la-mayor-cifra-en-10-anos/ | 2026-11-07 | Fetched (secondary, PwC) | FF 2025 128 for USD 1,944 M at CCL; FF 2024 USD 987 M |
+| https://www.mdzol.com/economia/2026/10/26/emisiones-record-de-deuda-corporativa-en-septiembre-de-la-mano-de-las-petroleras-1990882.html | 2026-11-07 | Search result (secondary, PwC) | ON September 2026 USD 2,722 M |
+| https://www.sec.gov/Archives/edgar/data/0001034957/000165495426009074/cresud_20f.htm | 2026-11-07 | Downloaded with curl and grepped (primary, SEC filing) | ByMA market capitalization ARS 122,758 billion (2026-06-30) and 79,973 billion (2025-06-30); 83 listed companies; average daily share volume ARS 103,975 M |
+| https://www.byma.com.ar/en | 2026-11-07 | Fetched (primary, vendor) | "$9.4 B" domestic listed market value (no currency label, undated); 13.93 million investor accounts end Q2 2026; ADTV US$12,703 M Q2 2026 |
+| https://www.byma.com.ar/en/newsroom/nuevos-cedears-se-incorporan-a-byma | 2026-11-07 | Fetched (primary) | CEDEAR turnover H1 2026 more than USD 16,295 M MEP, +104 percent; release 2026-09-02 |
+| https://www.byma.com.ar/newsroom/byma-realizo-su-novena-asamblea-de-accionistas | 2026-11-07 | Fetched (primary) | 26.3 million investment accounts at December 2025; release 2026-04-10 |
+| https://www.iprofesional.com/finanzas/459024-nuevos-cedears-de-bonos-lo-que-viene-segun-lider-del-mercado-bursatil-argentino | 2026-11-07 | Search result (secondary) | CEDEARs 49 percent of BYMA volume Jan to May 2026; 878,000 accounts |
+| https://www.cronista.com/finanzas-mercados/crece-el-mercado-de-capitales-ya-hay-mas-de-24-millones-de-cuentas-abiertas-en-argentina/ | 2026-11-07 | Fetched (secondary, 2026-07-02, BYMA report) | 12.3 million persons, 24.6 million accounts, 1,087,847 active, 1 million CEDEAR holders, 878,000 traded, new accounts per year |
+| https://cajadevalores.com.ar/Servicios/Cedears | 2026-11-07 | Search result (primary) | More than 400 CEDEARs available |
+| https://fonditos.ar/fci | 2026-11-07 | Fetched (secondary, CAFCI data) | FCI industry ARS 118.86 billion, 1,119 funds, 59 managers, close 2026-11-05 |
+| https://www.cafci.org.ar/Publica/Estadistica/Resumenes/Mensual/20261101_Resumen_Industria.pdf | 2026-11-07 | Fetch failed (403) | CAFCI monthly report: not read |
+| https://www.cafci.org.ar/Publica/Estadistica/Resumenes/Mensual/20261001_Resumen_Industria.pdf | 2026-11-07 | Fetch failed (403) | CAFCI monthly report: not read |
+| https://www.valo.ar/productos-y-servicios/fondos-comunes-de-inversion/ | 2026-11-07 | Search result (secondary) | Real-estate FCIC examples (Allaria Residencial I, Puerto Nizuc) |
+| https://www.lanacion.com.ar/economia/mercado-pago-suma-fondos-de-inversion-a-las-opciones-de-su-billetera-virtual-nid11062026/ | 2026-11-07 | Fetched (secondary, 2026-06-11) | Mercado Pago about 20 million investment accounts; 1 million USD-yield users; 28.8 million operational accounts market estimate |
+| https://www.infobae.com/economia/2025/10/09/una-plataforma-cripto-argentina-obtuvo-usd-20-millones-de-inversores-extranjeros-para-expandirse-en-america-latina/ | 2026-11-07 | Fetched (secondary, 2025-10-09) | Lemon about 5 million users (Argentina and Peru), more than 1 million MAU, US$160 M user assets, Series B US$20 M |
+| https://www.blockchain.cl/criptomonedas-en-latam-adopcion-triplica-ritmo-de-crecimiento-en-ee-uu-segun-lemon/ | 2026-11-07 | Fetched (secondary, 2026-03-02) | Lemon 2.1 million active users Q1 2026 (report not seen); Argentina 11 million crypto users (Chainalysis) |
+| https://wiki.lemon.me/es-ar/institucional-2/ya-somos-2-millones-de-usuarios | 2026-11-07 | Search result (vendor, undated) | Lemon 2 million users milestone |
+| https://www.larepublica.co/finanzas/edwin-rager-cofundador-de-belo-destaco-que-colombia-es-su-tercer-mercado-4418421 | 2026-11-07 | Fetched (secondary, 2026-06-22) | Belo 3.3 to 3.5 million users |
+| https://www.infobae.com/tecno/2026/04/29/la-billetera-virtual-belo-asegura-su-expansion-en-latinoamerica-con-nueva-inversion-de-14-millones-de-dolares/ | 2026-11-07 | Search result (secondary) | Belo US$14 M from Tether, April 2026 |
+| https://www.cronista.com/infotechnology/finanzas-digitales/el-futuro-de-ripio-la-billetera-de-criptomonedas-que-usan-2-m-de-personas/ | 2026-11-07 | Fetched (secondary, 2021-12-09) | Ripio 2.1 million users in Argentina and Brazil (stale) |
+| https://jfcattorneys.com/en/guides/argentina-crypto-license | 2026-11-07 | Search result (secondary) | 81 PSAVs in the CNV registry as of 2026-10-13 |
+| https://www.cnv.gov.ar/SitioWeb/ProveedoresServiciosActivosVirtuales/RegistrosPSAV | 2026-11-07 | Fetched (primary; table rendered empty, totals 0) | PSAV registry: count not readable |
+| https://www.bymadigitalassets.com.ar/ | 2026-11-07 | Fetched (primary, vendor) | BYMA Token Registry live, PSAV 86, custody and tokenization "próximamente" |
+| https://www.iproup.com/economia-digital/59316-mercado-argentino-avanzo-con-la-tokenizacion-de-cedear-y-acciones | 2026-11-07 | Fetch failed (headline only); search snippet | BYMA Digital Assets launch 2025-08-24 |
+| https://www.crowdium.com.ar/ | 2026-11-07 | Fetched (primary, vendor, undated) | 205,129 registered investors, US$34 M invested, 157 funded properties |
+| https://www.roadshow.com.ar/landtoken-lanza-el-primer-fideicomiso-financiero-tokenizado-aprobado-por-la-cnv-invertir-en-campos-desde-usd-50-ya-es-posible/ | 2026-11-07 | Search result (secondary) | Landtoken pre-trust metrics: 12,000 users, 1,250 investments, US$2.2 M; subscription dates |
+| https://bichosdecampo.com/la-empresa-landtoken-logro-vender-en-apenas-dos-meses-el-primer-campo-tokenizado-en-la-argentina-y-desde-febrero-ofrece-otra-oportunidad-para-pequenos-inversores/ | 2026-11-07 | Fetched (secondary, 2024-03-04) | Landtoken pre-regime plot sale (US$850,000, 200 investors); not the fideicomiso |
+| https://www.forbesargentina.com/negocios/la-nueva-frontera-finanzas-asi-crece-tokenizacion-activos-reales-argentina-n78669 | 2026-11-07 | Fetched (secondary, 2025-09-23) | Justoken, WIN Investments, Raíz, Slice Token; no fee or amount figures |
+| https://volsmart.com/ | 2026-11-07 | Fetch failed (JavaScript shell); search snippet | Volsmart white-label model; fees disclosed per operation, not public |
+| https://tokenizestartup.com/platforms/tokenization-platform-fees/ | 2026-11-07 | Fetched (secondary, March 2026, updated October 2026) | Setup and monthly fee ranges: Securitize, Tokeny, DigiShares, Brickken, Polymesh, tZERO, Republic |
+| https://us.fitgap.com/products/057827/tokeny-t-rex-platform | 2026-11-07 | Search result (secondary) | Tokeny Standard EUR 3,000 and Advanced EUR 5,000 per month, 12-month minimum |
+| https://tokeny.com/pricing | 2026-11-07 | Fetch failed (404) | Tokeny official pricing: not read |
+| https://tokentool.bitbond.com/pricing | 2026-11-07 | Fetched (primary, vendor) | Bitbond Token Tool per-action fees: asset token US$499, token sale US$299, DvP US$289 |
+| https://www.bitbond.com/resources/best-tokenization-platforms | 2026-11-07 | Search result (vendor) | Bitbond buyer's guide; Token Tool from US$99 |
+| https://tristanyasociados.com/2026/11/ampliacin-de-inversiones-en-fondos-comunes/ | 2026-11-07 | Search result (secondary) | RG 1177/2026 of 2026-11-04: open funds up to 20 percent in FCIC de crédito (context only) |
+| https://www.lapoliticaonline.com/economia/resolucion-1150-la-jugada-de-sturzenegger-para-atraer-a-la-bolsa-a-los-inversores-cripto-2565/ | 2026-11-07 | Search result (secondary) | RG 1150 sandbox extension coverage |
+| https://frecuenciamoney.com/argentina-fintech-forum-2026-la-agenda-de-los-activos-virtuales/ | 2026-11-07 | Search result (secondary) | Fintech Forum agenda; sandbox originally to August 2026 |
