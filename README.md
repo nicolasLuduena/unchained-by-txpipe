@@ -8,7 +8,7 @@ A white-label trading layer for Argentina's tokenized securities, built for the 
 
 Handoff is software, built to the structure of Título XXII of the CNV Normas and operated by a PSAV. It holds no assets, holds no fiat and takes nothing from trades. The spec is [issue #1](https://github.com/nicolasLuduena/unchained-by-txpipe/issues/1), written under an earlier working name. The pitch script and Q&A are in [docs/pitch.md](docs/pitch.md), and the design in [docs/architecture.md](docs/architecture.md).
 
-**[Watch the guided demo](docs/demo/handoff-demo.mp4).** One real sale and one real on-chain refusal on Fuji.
+**[Watch the guided demo, narrated, under two minutes](docs/demo/handoff-demo.mp4).** One real sale and one real on-chain refusal, recorded on the hosted site. The voice is generated with ElevenLabs.
 
 ![The guided demo after a sale: the step explains what happened, beside two wallets sharing one order book](docs/demo/demo-sold.png)
 
