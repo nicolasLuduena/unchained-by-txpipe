@@ -1,0 +1,16 @@
+{
+  "orderHash": "0xea2a85c2a399f1472af963e3ad8407434db8a1a860acb83147a518bad99dddc0",
+  "announce": "0x55e7c57cbba5c134291e34af9ed79095d322d7e53fdcac9ccee0da437de5f0c2",
+  "userOpHash": "0x7037fe20011daea782453a578db824bdc988ef4916d291aa892791f95f37e6a4",
+  "transactionHash": "0xb5a2b229170c48f68b399327b594a4a7e979ea81fce3981eeef898e12c18ed2a",
+  "success": true,
+  "link": "https://testnet.snowtrace.io/tx/0xb5a2b229170c48f68b399327b594a4a7e979ea81fce3981eeef898e12c18ed2a",
+  "after": {
+    "sellerToken": "98",
+    "buyerToken": "22",
+    "sellerUsdc": "5000000",
+    "buyerUsdc": "15000000",
+    "settlementToken": "0",
+    "settlementUsdc": "0"
+  }
+}
