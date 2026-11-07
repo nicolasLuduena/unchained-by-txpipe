@@ -1,6 +1,6 @@
 import { KumplyClient, TIER } from "@kumply/sdk";
 import type { Address } from "viem";
-import { chain } from "@/lib/chain";
+import { readRpcUrls } from "@/lib/chain";
 
 /**
  * The real SDK on both chains: it has no chain-id check, so rpcUrl and contractAddress point it anywhere.
@@ -8,11 +8,16 @@ import { chain } from "@/lib/chain";
  * of KUMPLY's unmodified contract under the team's admin key, not KUMPLY's official store; on local, a stub.
  * Neither performs an identity check.
  */
-export function passesPrecheck(attestationStore: Address, account: Address): Promise<boolean> {
-  const client = new KumplyClient({
-    network: "fuji",
-    contractAddress: attestationStore,
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL ?? chain.rpcUrls.default.http[0],
-  });
-  return client.isPersonAtLeast(account, TIER.STANDARD);
+export async function passesPrecheck(attestationStore: Address, account: Address): Promise<boolean> {
+  // The SDK takes one URL, so moving to the next provider happens here.
+  let failure: unknown;
+  for (const rpcUrl of readRpcUrls) {
+    try {
+      const client = new KumplyClient({ network: "fuji", contractAddress: attestationStore, rpcUrl });
+      return await client.isPersonAtLeast(account, TIER.STANDARD);
+    } catch (error) {
+      failure = error;
+    }
+  }
+  throw failure;
 }
