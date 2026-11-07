@@ -9,12 +9,9 @@
 /* The chord fills the header and stops on the hairline above the rails, so no navigation sits on a crossing. */
 .host > .host__ribbons { position: absolute; inset: 0 0 auto 30%; height: 136px; }
 .wallet-head { min-height: 96px; align-items: flex-start; padding-top: var(--space-4); border-bottom: 0; }
-.wallet-head .hf-stamp { background: var(--ground); }
-.wallet-head .hf-stamp--pending { background: var(--saffron); }
-.wallet-head .hf-stamp--sold { background: var(--amber); }
 
 /* Held to the left of the ribbons: a longer state wraps instead of running onto a crossing. */
-.wallet-state { max-width: 64%; min-height: 40px; padding: var(--space-2) 0 var(--space-3) var(--space-4); color: var(--text); font: 400 14px/20px var(--font-sans); }
+.wallet-state { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-3); max-width: 64%; min-height: 40px; padding: var(--space-2) 0 var(--space-3) var(--space-4); color: var(--text); font: 400 14px/20px var(--font-sans); }
 
 /* Two vertical rails share one hairline grid: where you are, and whose account you are looking at. */
 .wallet-nav {

@@ -19,7 +19,7 @@ import { useWallet, type Precheck } from "./useWallet";
 
 const HOST_STAMP: Record<Precheck, StampStatus> = { checking: "pending", passed: "verified", blocked: "blocked", unavailable: "pending" };
 
-/** The header stamp is one word. This line says what it means for someone who has never seen a verified account. */
+/** The stamp is one word. This line, which carries it, says what it means for someone who has never seen a verified account. */
 const HOST_STATE: Record<Precheck, string> = {
   checking: "Checking whether this account can trade.",
   passed: "This account can buy and sell.",
@@ -29,13 +29,12 @@ const HOST_STATE: Record<Precheck, string> = {
 
 const DEFAULT_BRAND = "Billetera Sur";
 
-function Frame({ brand, stamp, children }: { brand: string; stamp?: StampStatus; children: ReactNode }) {
+function Frame({ brand, children }: { brand: string; children: ReactNode }) {
   return (
     <div className="host wallet-host">
       <Ribbons className="host__ribbons" />
       <header className="host__bar wallet-head">
         <span className="host__name">{brand}</span>
-        {stamp && <Stamp status={stamp} />}
       </header>
       {children}
       <footer className="host__foot wallet-foot">
@@ -66,8 +65,13 @@ function Shell({ brand, actor, section, stamp, state, children }: Place & { stam
   }
 
   return (
-    <Frame brand={brand} stamp={stamp}>
-      {state && <p className="wallet-state">{state}</p>}
+    <Frame brand={brand}>
+      {state && (
+        <p className="wallet-state">
+          {stamp && <Stamp status={stamp} />}
+          <span>{state}</span>
+        </p>
+      )}
       <div className="wallet-nav" onClick={navigate}>
         <div className="wallet-nav__col">
           <span className="t-field-label">Sections</span>

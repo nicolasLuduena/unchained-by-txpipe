@@ -30,7 +30,7 @@ a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
 /* Stamp: a word in a ruled box. The border style carries the state without colour. */
 .hf-stamp { display: inline-flex; align-items: center; min-height: 24px; padding: 0 calc(var(--space-2) - .16em) 0 var(--space-2); border: 1px solid currentColor; color: var(--text); font: 600 10.5px/1.2 var(--font-display); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
-.hf-stamp--verified, .hf-stamp--sponsored { color: var(--good); }
+.hf-stamp--verified, .hf-stamp--sponsored { min-height: 0; padding: 0; border: 0; color: var(--good); }
 .hf-stamp--sold { border-color: var(--amber); background: var(--amber); color: var(--on-amber); }
 .hf-stamp--blocked, .hf-stamp--cancelled, .hf-stamp--reverted { color: var(--bad); border-style: double; border-width: 3px; }
 .hf-stamp--pending { border: 1px dashed var(--indigo); background: var(--saffron); color: var(--indigo); }
