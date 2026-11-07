@@ -10,10 +10,10 @@
   },
   "chainId": 43113,
   "contracts": {
-    "AttestationStore": "0xbCbA3C7e11F2FE779Df710ACF34039814105EA27",
-    "HandoffRegistry": "0xC83fBB640EeEb8d8AEdcC10f66A64566a6Ee4465",
-    "HandoffSettlement": "0x09492CC6E64d1DEDd0a64Cc10fEe8F73dFb37133",
+    "AttestationStore": "0x94b711809FDb5dcFdD2eD488EE10790DaFdC1c10",
+    "HandoffRegistry": "0x38309B99e1c948485D84af640740796DF8D43e61",
+    "HandoffSettlement": "0xe8Fb478743079C72DAB6EE81cdAfc62AC4bc7201",
     "USDC": "0x5425890298aed601595a70AB815c96711a31Bc65",
-    "DemoToken": "0xAF68Db1623e9D37c7eCc821ede47d1d4D585F806"
+    "DemoToken": "0x4b5e259f9bA7fB2b88A2911aC1778963eC9953dE"
   }
 }
