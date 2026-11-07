@@ -10,7 +10,8 @@ import {StubUSDC} from "../src/stubs/StubUSDC.sol";
 
 /// @notice Full local demo state on a fresh anvil. Run from contracts/:
 ///   forge script script/DeployLocal.s.sol --rpc-url local --broadcast --slow
-/// Anvil default accounts: 0 owner, 1 seller, 2 buyer, 3 issuer, 4 unverified, 5 venue PSAV, 6 venue order key.
+/// Anvil default accounts: 0 owner, 1 seller, 2 buyer, 3 issuer, 4 unverified, 5 venue PSAV, 6 venue order key,
+/// 7 second venue PSAV, 8 second venue order key.
 contract DeployLocal is Script {
     string internal constant MNEMONIC = "test test test test test test test test test test test junk";
     string internal constant OUT_FILE = "../deployments/local.json";
@@ -26,6 +27,8 @@ contract DeployLocal is Script {
     address internal unverified;
     address internal venue;
     address internal orderKey;
+    address internal venue2;
+    address internal orderKey2;
 
     StubAttestationStore internal store;
     StubUSDC internal usdc;
@@ -50,6 +53,8 @@ contract DeployLocal is Script {
         unverified = vm.addr(vm.deriveKey(MNEMONIC, 4));
         venue = vm.addr(vm.deriveKey(MNEMONIC, 5));
         orderKey = vm.addr(vm.deriveKey(MNEMONIC, 6));
+        venue2 = vm.addr(vm.deriveKey(MNEMONIC, 7));
+        orderKey2 = vm.addr(vm.deriveKey(MNEMONIC, 8));
     }
 
     function _deployCore() internal {
@@ -88,6 +93,7 @@ contract DeployLocal is Script {
             })
         );
         registry.addVenue(token, venue, orderKey);
+        registry.addVenue(token, venue2, orderKey2);
         registry.setBand(token, 2_500000, 1000, 0);
         registry.mint(token, seller, SELLER_UNITS);
         vm.stopBroadcast();
@@ -121,7 +127,9 @@ contract DeployLocal is Script {
         vm.serializeAddress("actors", "issuer", issuer);
         vm.serializeAddress("actors", "unverified", unverified);
         vm.serializeAddress("actors", "venue", venue);
-        string memory actors = vm.serializeAddress("actors", "orderKey", orderKey);
+        vm.serializeAddress("actors", "orderKey", orderKey);
+        vm.serializeAddress("actors", "venue2", venue2);
+        string memory actors = vm.serializeAddress("actors", "orderKey2", orderKey2);
 
         vm.serializeUint("deployment", "chainId", block.chainid);
         vm.serializeString("deployment", "contracts", contracts);

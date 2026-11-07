@@ -33,6 +33,9 @@ export type OrderView = {
   /** The fill or cancel transaction, once the chain shows one. */
   closeTx?: Hash;
   buyer?: Address;
+  /** Unix seconds, for orders stored since these fields exist. */
+  announcedAt?: number;
+  closedAt?: number;
   /** Registry report for a filled order. */
   report?: ReportState;
 };

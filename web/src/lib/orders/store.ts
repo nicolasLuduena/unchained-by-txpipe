@@ -12,7 +12,8 @@ export type StoredOrder = {
   sellerSig: Hex;
   announceTx: Hash;
   announceBlock: bigint;
-  filled?: { tx: Hash; buyer: Address };
+  announcedAt?: number;
+  filled?: { tx: Hash; buyer: Address; at?: number };
   cancelled?: { tx?: Hash };
   acknowledged?: Acknowledgment;
 };
@@ -74,8 +75,8 @@ function key(name: string): string {
 }
 
 export const store = {
-  async putOrder({ orderHash, order, sellerSig, announceTx, announceBlock }: StoredOrder) {
-    const record: OrderRecord = { orderHash, order, sellerSig, announceTx, announceBlock };
+  async putOrder({ orderHash, order, sellerSig, announceTx, announceBlock, announcedAt }: StoredOrder) {
+    const record: OrderRecord = { orderHash, order, sellerSig, announceTx, announceBlock, announcedAt };
     await venueKv().hset(key(ORDERS), orderHash, encode(record));
   },
 
@@ -152,6 +153,16 @@ export const store = {
   /** Newest first. */
   async listRefusals(): Promise<Refusal[]> {
     return (await venueKv().list(key(REFUSALS))).map((raw) => decode<Refusal>(raw));
+  },
+
+  /** A value every instance shares, gone after `ttlMs` without a rewrite. */
+  async getCached<T>(name: string): Promise<T | null> {
+    const raw = await venueKv().getValue(key(name));
+    return raw ? decode<T>(raw) : null;
+  },
+
+  async putCached(name: string, value: unknown, ttlMs: number) {
+    await venueKv().setValue(key(name), encode(value), ttlMs);
   },
 
   /** True for the one instance that should do the work. The claim is left to expire, which is also the retry. */

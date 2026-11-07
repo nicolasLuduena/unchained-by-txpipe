@@ -29,6 +29,16 @@ const FEED_EVENTS = [...handoffRegistryAbi, ...handoffSettlementAbi].filter(
 const TRANSFER = erc20Abi.find((item) => item.type === "event" && item.name === "Transfer") as AbiEvent;
 const SCANNED_EVENTS = [...FEED_EVENTS, TRANSFER];
 
+/** A scanner's whole progress, so another instance can pick it up instead of starting over. */
+export type ScanSnapshot = {
+  cursor: bigint;
+  sources: string;
+  chunkBlocks: bigint;
+  feedLogs: ScannedLog[];
+  transfers: [Address, ScannedLog[]][];
+  times: [bigint, number][];
+};
+
 /** The cap named in a "block range too large" refusal, or null for any other failure. */
 function rangeCap(error: unknown): bigint | null {
   const match = /maximum of (\d+) blocks/.exec(String((error as Error)?.message));
@@ -45,8 +55,8 @@ function startBlock(): bigint {
  * the contracts and every token: log reads are the scarce thing on the public RPC. No indexer.
  *
  * What it holds is always an unbroken prefix of the chain, up to scannedTo(). A poll that runs out of time or gets
- * throttled just stops there, and the next one carries on. On serverless each instance has its own scanner, so a
- * cold instance starts over from the start block and catches up across polls.
+ * throttled just stops there, and the next one carries on. On serverless, lib/console/shared.ts hands this progress
+ * between instances, so a cold one resumes from the shared cursor.
  */
 export class LogScanner {
   readonly feedLogs: ScannedLog[] = [];
@@ -118,6 +128,20 @@ export class LogScanner {
       const block = await Promise.race([publicClient.getBlock({ blockNumber }), expiry]);
       if (block) this.blockTimes.set(blockNumber, Number(block.timestamp));
     }
+  }
+
+  snapshot(): ScanSnapshot {
+    return { cursor: this.cursor, sources: this.sources, chunkBlocks: this.chunkBlocks, feedLogs: [...this.feedLogs], transfers: [...this.transfers], times: this.times() };
+  }
+
+  restore(snapshot: ScanSnapshot) {
+    this.cursor = snapshot.cursor;
+    this.sources = snapshot.sources;
+    this.chunkBlocks = snapshot.chunkBlocks;
+    this.feedLogs.splice(0, this.feedLogs.length, ...snapshot.feedLogs);
+    this.transfers.clear();
+    snapshot.transfers.forEach(([token, logs]) => this.transfers.set(token, logs));
+    snapshot.times.forEach(([block, time]) => this.blockTimes.set(block, time));
   }
 
   /** The last block the scan has reached, for the progress line. */
