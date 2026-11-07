@@ -56,7 +56,7 @@ Handoff holds no assets, holds no fiat and takes nothing from trades. It is soft
 
 **Terminology:** PSAV, venue, issuer, attester, attestation, wrapper token, order, fill, price band, registry report, sandbox (the CNV regulatory one, not a test environment).
 
-**Language:** Spanish copy on the wallet screen and console, per the spec.
+**Language:** English on every screen, a change from the spec so that judges can follow it. Seed references on Fuji, such as the demo CNV and deposit references, stay in Spanish because they are stored on-chain.
 
 **Chain:** Avalanche Fuji C-Chain for the demo. A permissioned L1 with one validator per PSAV is roadmap, not built.
 
@@ -69,7 +69,7 @@ Handoff holds no assets, holds no fiat and takes nothing from trades. It is soft
 
 ## Brand Commitments
 
-The name is **Handoff**, confirmed over "Cuota". Screens are dark: no white or near-white grounds, confirmed by the owner. Nothing else in the current brand is binding: logo, palette, type, voice rules and the component API may all be replaced. Inside a host wallet the wallet's brand comes first and Handoff stays secondary, because the product is white-label.
+The name is **Handoff**, confirmed over "Cuota". Screens are light: a warm plaster ground with indigo, madder and saffron ribbons, chosen by the owner after the first dark version. Nothing else in the current brand is binding: logo, palette, type, voice rules and the component API may all be replaced. Inside a host wallet the wallet's brand comes first and Handoff stays secondary, because the product is white-label.
 
 ## Evidence on Hand
 

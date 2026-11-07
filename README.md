@@ -8,16 +8,16 @@ A white-label trading layer for Argentina's tokenized securities, built for the 
 
 Handoff is software, built to the structure of Título XXII of the CNV Normas and operated by a PSAV. It holds no assets, holds no fiat and takes nothing from trades. The spec is [issue #1](https://github.com/nicolasLuduena/unchained-by-txpipe/issues/1), written under an earlier working name. The pitch script and Q&A are in [docs/pitch.md](docs/pitch.md), and the design in [docs/architecture.md](docs/architecture.md).
 
-**[Watch the demo, 45 seconds](docs/demo/handoff-demo.mp4).** One real sale and one real on-chain refusal on the hosted site.
+**[Watch the guided demo](docs/demo/handoff-demo.mp4).** One real sale and one real on-chain refusal on Fuji.
 
-![Two wallets sharing one order book, with the compliance feed at the right](docs/demo/demo-sold.png)
+![The guided demo after a sale: the step explains what happened, beside two wallets sharing one order book](docs/demo/demo-sold.png)
 
 **Live demo:** https://handoff-unchained.vercel.app/demo. Any username works. The password is in the submission, because the site holds demo keys.
 
 ## Deliverables checklist
 
 - [x] [Verified contract addresses with Snowtrace links](#deployed-contracts): the three Handoff contracts plus the demo attestation store
-- [x] [End-user interface](#install): two-wallet demo page at `/demo`, wallet screen at `/`, issuer and PSAV console at `/console`
+- [x] [End-user interface](#install): guided demo at `/demo`, wallet at `/`, issuer and PSAV console at `/console`
 - [x] [Why Avalanche](#why-avalanche): five-validator L1 mapping, finality of about one second, ICM
 - [x] [Built today versus libraries used](#built-today-versus-libraries)
 - [x] [Bonus section: 0xGasless components and sponsored user operation links](#bonus-0xgasless)
@@ -69,7 +69,7 @@ Three things to read correctly:
 
 ## Bring your own MetaMask
 
-The wallet has a fourth actor on Fuji, "Mi billetera", at `/?actor=metamask`. **It is a demo verification with no identity check:** anyone who signs gets a tier 2 demo attestation from the team's demo instance of KUMPLY's contract, not from KUMPLY's official store.
+The wallet has a fourth actor on Fuji, "My wallet", at `/?actor=metamask`. **It is a demo verification with no identity check:** anyone who signs gets a tier 2 demo attestation from the team's demo instance of KUMPLY's contract, not from KUMPLY's official store.
 
 1. The page connects to the injected provider and switches to Fuji, adding the network if needed. With no provider it says so.
 2. The MetaMask EOA owns a 0xGasless smart account (the same Fuji contracts, index 0). The page shows it, and the KUMPLY SDK pre-check blocks it.
@@ -168,7 +168,7 @@ git clone --recurse-submodules https://github.com/nicolasLuduena/unchained-by-tx
 cd unchained-by-txpipe/contracts && forge test
 ```
 
-The web app needs Node and pnpm, not Foundry. It serves the two-wallet demo page at `/demo`, the wallet screen at `/` and the issuer console at `/console`, both with Spanish copy.
+The web app needs Node and pnpm, not Foundry. It serves the guided demo at `/demo`, the wallet at `/` and the issuer console at `/console`, all in English.
 
 ```bash
 cd web
@@ -331,8 +331,8 @@ The 0xGasless bundler, paymaster, EntryPoint and smart-account contracts are thi
 **In the demo:**
 
 - **Attestations are demo attestations** in the team's own store, with no identity check, as stated at the top.
-- **The order book is sell-only.** There are no buy orders, so the spec's "best bid" is shown as the lowest ask, under the label "Mejor oferta". There is no matching engine: it is a bulletin board.
-- **The registry acknowledgment is a labelled mock.** It reads "Acuse de demostración, sin llamada real". No call to BYMA or anyone else happens.
+- **The order book is sell-only.** There are no buy orders, so the spec's "best bid" is shown as the lowest ask, under the label "Best offer". There is no matching engine: it is a bulletin board.
+- **The registry acknowledgment is a labelled mock.** It reads "Demo acknowledgment, no real call". No call to BYMA or anyone else happens.
 - **The hosted console signs for anyone with the demo password.** Its route acts as issuer or PSAV, so the password is the only control, and any holder can pause the token or burn units. Re-pointing a venue is switched off on Fuji because one bad key would stop every order.
 - **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. The exception is [Mi billetera](#bring-your-own-metamask), where the visitor's MetaMask signs.
 - **Venue powers are wider than the spec's.** Any listed venue can lift a pause and can change the band's width and age limit, which the spec gives to the issuer. A price-0 sale that way still needs a venue key and a seller signature, and an issuer floor blocks it. Fixing this means redeploying the contracts, so it stayed as it is.
