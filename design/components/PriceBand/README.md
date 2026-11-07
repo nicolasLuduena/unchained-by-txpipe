@@ -1,0 +1,1 @@
+The allowed price range, drawn to scale. The mark sits at its true position between `min` and `max`, and the value always reads below it. Outside the band the mark holds the edge, turns `bad`, and the readout adds "Fuera de banda". Provide numbers, not strings; pass `format` to change how the ends read. Pair it with the price input so a holder sees the range before signing.

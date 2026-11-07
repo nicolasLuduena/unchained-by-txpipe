@@ -1,0 +1,503 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T16:07:30Z",
+  "title": "Design System: Handoff",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Old Navy Serge",
+        "canonical": "#141c2b",
+        "tonalRamp": [
+          "#080b11",
+          "#1f2530",
+          "#3a4252",
+          "#586274",
+          "#788396",
+          "#9ca5b7",
+          "#c1cad8",
+          "#e9eff8"
+        ]
+      },
+      "coupon": {
+        "role": "neutral",
+        "displayName": "Coupon Stock",
+        "canonical": "#1f2a3d",
+        "tonalRamp": [
+          "#070b12",
+          "#1d2533",
+          "#384255",
+          "#556277",
+          "#76839a",
+          "#99a6bb",
+          "#bfcadc",
+          "#e8effa"
+        ]
+      },
+      "stub": {
+        "role": "neutral",
+        "displayName": "Stub Stock",
+        "canonical": "#29364c",
+        "tonalRamp": [
+          "#070b13",
+          "#1c2534",
+          "#364257",
+          "#54627a",
+          "#74839c",
+          "#97a6be",
+          "#becade",
+          "#e7effc"
+        ]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Inset Well",
+        "canonical": "#0f1522",
+        "tonalRamp": [
+          "#090b11",
+          "#20252f",
+          "#3b4250",
+          "#596171",
+          "#7a8293",
+          "#9da5b5",
+          "#c3c9d7",
+          "#eaeff7"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Buff",
+        "canonical": "#e8dfcb",
+        "tonalRamp": [
+          "#0d0b06",
+          "#29251a",
+          "#484133",
+          "#68604f",
+          "#8a8270",
+          "#aca493",
+          "#cfc9bb",
+          "#f2eee5"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Worn Buff",
+        "canonical": "#beb7a6",
+        "tonalRamp": [
+          "#0d0b06",
+          "#29251b",
+          "#474235",
+          "#676152",
+          "#888272",
+          "#aba596",
+          "#cec9bc",
+          "#f1eee6"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Buff Rule",
+        "canonical": "#e8dfcb",
+        "tonalRamp": [
+          "#0d0b06",
+          "#29251a",
+          "#484133",
+          "#68604f",
+          "#8a8270",
+          "#aca493",
+          "#cfc9bb",
+          "#f2eee5"
+        ]
+      },
+      "rule-soft": {
+        "role": "neutral",
+        "displayName": "Soft Hairline",
+        "canonical": "#3f4d66",
+        "tonalRamp": [
+          "#070b14",
+          "#1c2535",
+          "#364258",
+          "#53627b",
+          "#74839e",
+          "#97a6bf",
+          "#becadf",
+          "#e7effd"
+        ]
+      },
+      "amber": {
+        "role": "primary",
+        "displayName": "Honey Amber",
+        "canonical": "#e9a23b",
+        "tonalRamp": [
+          "#140800",
+          "#352001",
+          "#5c3a01",
+          "#855606",
+          "#b07408",
+          "#d6973f",
+          "#f2bf7d",
+          "#ffebd4"
+        ]
+      },
+      "amber-bright": {
+        "role": "primary",
+        "displayName": "Bright Honey",
+        "canonical": "#f4b65c",
+        "tonalRamp": [
+          "#130900",
+          "#352001",
+          "#5b3a00",
+          "#835704",
+          "#ae7505",
+          "#d09a4b",
+          "#edc185",
+          "#ffebd2"
+        ]
+      },
+      "on-amber": {
+        "role": "primary",
+        "displayName": "Navy on Amber",
+        "canonical": "#141c2b",
+        "tonalRamp": [
+          "#080b11",
+          "#1f2530",
+          "#3a4252",
+          "#586274",
+          "#788396",
+          "#9ca5b7",
+          "#c1cad8",
+          "#e9eff8"
+        ]
+      },
+      "good": {
+        "role": "secondary",
+        "displayName": "Sage Stamp",
+        "canonical": "#a8d3ad",
+        "tonalRamp": [
+          "#030f05",
+          "#122c17",
+          "#294b2f",
+          "#456c4b",
+          "#668e6b",
+          "#8bb08f",
+          "#b4d3b7",
+          "#e1f5e3"
+        ]
+      },
+      "bad": {
+        "role": "secondary",
+        "displayName": "Coral Stamp",
+        "canonical": "#f08a78",
+        "tonalRamp": [
+          "#1e0100",
+          "#480b05",
+          "#732317",
+          "#9c4032",
+          "#c26252",
+          "#e48978",
+          "#feb4a6",
+          "#ffe9e5"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus Amber",
+        "canonical": "#e9a23b",
+        "tonalRamp": [
+          "#140800",
+          "#352001",
+          "#5c3a01",
+          "#855606",
+          "#b07408",
+          "#d6973f",
+          "#f2bf7d",
+          "#ffebd4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-xl": {
+        "displayName": "Display XL",
+        "purpose": "Slides and the catalog only. Uppercase."
+      },
+      "display-l": {
+        "displayName": "Display L",
+        "purpose": "Coupon titles and console screen titles. Uppercase."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sheet titles and subheads. Uppercase."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Coupon heads, stub heads and stamps. Uppercase."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Medium button text. Uppercase."
+      },
+      "button-lg": {
+        "displayName": "Button Large",
+        "purpose": "The full-width confirm button. Uppercase."
+      },
+      "button-sm": {
+        "displayName": "Button Small",
+        "purpose": "Small button text. Uppercase."
+      },
+      "tab": {
+        "displayName": "Tab",
+        "purpose": "Navigation. Uppercase."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text."
+      },
+      "body-strong": {
+        "displayName": "Body Strong",
+        "purpose": "Row names."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Helper lines, row meta and the demo caveat."
+      },
+      "field-label": {
+        "displayName": "Field Label",
+        "purpose": "Labels inside ruled fields and above inputs. Uppercase, in Worn Buff."
+      },
+      "figure-l": {
+        "displayName": "Figure L",
+        "purpose": "The one headline figure on a screen."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Figures in ruled fields."
+      },
+      "figure-s": {
+        "displayName": "Figure S",
+        "purpose": "Figures in rows."
+      },
+      "input-figure": {
+        "displayName": "Input Figure",
+        "purpose": "Values typed into an input."
+      },
+      "hash": {
+        "displayName": "Hash",
+        "purpose": "Addresses and hashes only, truncated."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-sheet",
+        "value": "0 -8px 32px rgba(8, 12, 20, 0.5)",
+        "purpose": "The bottom sheet only, cast upward."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-tear",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The tear and the stamp."
+      },
+      {
+        "name": "duration-state",
+        "value": "150ms",
+        "purpose": "Colour changes on button hover and focus."
+      },
+      {
+        "name": "duration-tear",
+        "value": "420ms",
+        "purpose": "The stub tearing on a fill, once. The stamp starts 160ms in."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "coupon-narrow",
+        "value": "320px"
+      },
+      {
+        "name": "feed-narrow",
+        "value": "620px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one amber fill on a screen: the sale, the signature.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Vender 4 tokens</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 var(--space-4);border:1px solid transparent;border-radius:var(--radius);background:transparent;color:var(--text);font:700 16px/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color var(--duration-state) ease,color var(--duration-state) ease,border-color var(--duration-state) ease}.ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-btn-primary{background:var(--amber);color:var(--on-amber)}.ds-btn-primary:hover{background:var(--amber-bright)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A buff outline for the other path.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">Ver orden</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 var(--space-4);border:1px solid transparent;border-radius:var(--radius);background:transparent;color:var(--text);font:700 16px/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color var(--duration-state) ease,color var(--duration-state) ease,border-color var(--duration-state) ease}.ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-btn-secondary{border-color:var(--rule)}.ds-btn-secondary:hover{background:var(--stub)}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Underlined text for low-stakes actions.",
+      "html": "<button class=\"ds-btn ds-btn-ghost\">Historial</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 var(--space-4);border:1px solid transparent;border-radius:var(--radius);background:transparent;color:var(--text);font:700 16px/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color var(--duration-state) ease,color var(--duration-state) ease,border-color var(--duration-state) ease}.ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-btn-ghost{padding-inline:var(--space-2);text-decoration:underline;text-underline-offset:4px}.ds-btn-ghost:hover{background:var(--stub)}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "A coral outline and word, for revoke and cancel only.",
+      "html": "<button class=\"ds-btn ds-btn-danger\">Cancelar orden</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 var(--space-4);border:1px solid transparent;border-radius:var(--radius);background:transparent;color:var(--text);font:700 16px/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color var(--duration-state) ease,color var(--duration-state) ease,border-color var(--duration-state) ease}.ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-btn-danger{border-color:var(--bad);color:var(--bad)}.ds-btn-danger:hover{background:var(--stub)}"
+    },
+    {
+      "name": "Stamp",
+      "kind": "chip",
+      "refersTo": "stamp",
+      "description": "A word in a ruled box. The border style carries the state without colour.",
+      "html": "<div class=\"ds-stamps\"><span class=\"ds-stamp ds-stamp-good\">Vendido</span><span class=\"ds-stamp ds-stamp-pending\">Pendiente</span><span class=\"ds-stamp ds-stamp-bad\">Revertida</span><span class=\"ds-stamp ds-stamp-agent\">Agente</span><span class=\"ds-stamp ds-stamp-unused\">Sin usar</span></div>",
+      "css": ".ds-stamps{display:flex;flex-wrap:wrap;gap:var(--space-3)}.ds-stamp{display:inline-flex;align-items:center;height:26px;padding:0 var(--space-2);font:700 14px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;border:2px solid currentColor;color:var(--text)}.ds-stamp-good{color:var(--good)}.ds-stamp-bad{color:var(--bad);border-style:double;border-width:4px}.ds-stamp-pending{border-style:dashed}.ds-stamp-agent{border-width:1px}.ds-stamp-unused{border-width:1px;border-style:dotted;color:var(--text-muted)}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "A labelled input on the well. Typed figures are amber.",
+      "html": "<label class=\"ds-input-wrap\"><span class=\"ds-input-label\">Precio por token</span><input class=\"ds-input\" value=\"112,00\" inputmode=\"decimal\"><span class=\"ds-input-help\">Banda permitida: 104,00 a 116,00</span></label>",
+      "css": ".ds-input-wrap{display:block;color:var(--text-muted);font:400 13px/18px var(--font-sans)}.ds-input-label{display:block;margin-bottom:var(--space-1);font:500 12px/16px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}.ds-input{display:block;box-sizing:border-box;width:100%;height:48px;padding:0 var(--space-3);background:var(--well);border:1px solid var(--rule);border-radius:var(--radius);color:var(--amber);caret-color:var(--amber);font:600 20px/1 var(--font-figure);font-variant-numeric:tabular-nums}.ds-input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-input[aria-invalid=\"true\"]{border:2px solid var(--bad)}.ds-input:disabled{border-style:dashed;color:var(--text-muted)}.ds-input-help{display:block;margin-top:var(--space-1)}"
+    },
+    {
+      "name": "Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Navigation in condensed capitals. The current item is amber with a 2px underline.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Billetera\"><a href=\"#\">Inicio</a><a href=\"#\" aria-current=\"page\">Mercado</a><a href=\"#\">Órdenes</a><a href=\"#\">Historial</a></nav>",
+      "css": ".ds-tabs{display:flex;justify-content:space-around;gap:var(--space-2)}.ds-tabs a{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--space-2);color:var(--text);font:700 15px/1 var(--font-display);letter-spacing:.08em;text-decoration:none;text-transform:uppercase}.ds-tabs a:hover{color:var(--amber-bright)}.ds-tabs a[aria-current=\"page\"]{color:var(--amber);box-shadow:inset 0 -2px 0 var(--amber)}.ds-tabs a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}"
+    },
+    {
+      "name": "Asset Row",
+      "kind": "custom",
+      "refersTo": "asset-row",
+      "description": "One asset in a list: name, one meta fact, price and an optional stamp.",
+      "html": "<a class=\"ds-row\" href=\"#\"><span class=\"ds-row-main\"><span class=\"ds-row-name\">Edificio Conectia</span><span class=\"ds-row-meta\">Tenés 4 tokens</span></span><span class=\"ds-row-price\"><span class=\"ds-row-cur\">USDC</span>112,00</span></a>",
+      "css": ".ds-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);min-height:64px;padding:var(--space-2) var(--space-4);background:var(--coupon);border-bottom:1px solid var(--rule-soft);color:var(--text);font:400 15px/22px var(--font-sans);text-decoration:none}.ds-row:hover{background:var(--stub)}.ds-row:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-row-main{display:flex;flex-direction:column;min-width:0}.ds-row-name{font-weight:600}.ds-row-meta{color:var(--text-muted);font-size:13px;line-height:18px}.ds-row-price{color:var(--amber);font:600 15px/20px var(--font-figure);font-variant-numeric:tabular-nums;white-space:nowrap}.ds-row-cur{margin-right:.35em}"
+    },
+    {
+      "name": "Price Band",
+      "kind": "custom",
+      "refersTo": "price-band",
+      "description": "The allowed price range, drawn to scale, with the value at its true position.",
+      "html": "<div class=\"ds-band\"><div class=\"ds-band-scale\" aria-hidden=\"true\"><span class=\"ds-band-mark\" style=\"left:66.67%\"></span></div><div class=\"ds-band-labels\"><span>104,00</span><span class=\"ds-band-value\">112,00</span><span>116,00</span></div></div>",
+      "css": ".ds-band{color:var(--text);font:500 13px/18px var(--font-sans)}.ds-band-scale{position:relative;height:2px;margin:14px 0 12px;background:var(--rule)}.ds-band-scale::before,.ds-band-scale::after{content:\"\";position:absolute;top:-5px;width:1px;height:12px;background:var(--rule)}.ds-band-scale::before{left:0}.ds-band-scale::after{right:0}.ds-band-mark{position:absolute;top:-9px;width:3px;height:20px;margin-left:-1px;background:var(--amber)}.ds-band-labels{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-2);font-family:var(--font-figure);font-variant-numeric:tabular-nums}.ds-band-value{color:var(--amber);font-size:15px;font-weight:600}"
+    },
+    {
+      "name": "Coupon",
+      "kind": "card",
+      "refersTo": "coupon-body",
+      "description": "The signature object: an order with a stub, notched at the perforation. It never disappears; it changes state.",
+      "html": "<article class=\"ds-coupon\"><div class=\"ds-coupon-body\"><header class=\"ds-coupon-head\"><span>Orden de venta</span><span>N.º 0417</span></header><h3 class=\"ds-coupon-title\">Edificio Conectia</h3><div class=\"ds-fields\"><div class=\"ds-field\"><span class=\"ds-field-label\">Cantidad</span><span class=\"ds-figure\">4</span></div><div class=\"ds-field\"><span class=\"ds-field-label\">Mejor compra</span><span class=\"ds-figure\">112,00</span></div></div></div><div class=\"ds-coupon-stub\"><div class=\"ds-coupon-stubhead\"><span>Talón de liquidación</span><span class=\"ds-coupon-stamp\">Sin usar</span></div><span class=\"ds-figure\"><span class=\"ds-cur\">USDC</span>448,00</span></div></article>",
+      "css": ".ds-coupon{position:relative;max-width:390px;color:var(--text);font:400 15px/22px var(--font-sans)}.ds-coupon-body{padding:var(--space-4) var(--space-4) var(--space-5);background:var(--coupon);box-shadow:inset 1px 1px 0 var(--rule-soft),inset -1px 0 0 var(--rule-soft);-webkit-mask:radial-gradient(circle 9px at 0 100%,transparent 98%,#000),radial-gradient(circle 9px at 100% 100%,transparent 98%,#000);-webkit-mask-composite:source-in;mask:radial-gradient(circle 9px at 0 100%,transparent 98%,#000),radial-gradient(circle 9px at 100% 100%,transparent 98%,#000);mask-composite:intersect}.ds-coupon-head{display:flex;justify-content:space-between;gap:var(--space-3);padding-bottom:var(--space-2);border-bottom:1px solid var(--rule);font:700 14px/18px var(--font-display);letter-spacing:.1em;text-transform:uppercase}.ds-coupon-title{margin:var(--space-4) 0;font:700 44px/46px var(--font-display);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}.ds-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule)}.ds-field{min-width:0;padding:var(--space-2) var(--space-3);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}.ds-field-label{display:block;margin-bottom:var(--space-1);color:var(--text-muted);font:500 12px/16px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}.ds-figure{color:var(--amber);font:600 26px/32px var(--font-figure);font-variant-numeric:tabular-nums;white-space:nowrap}.ds-cur{margin-right:.35em}.ds-coupon-stub{position:relative;z-index:0;padding:var(--space-3) var(--space-4) var(--space-4)}.ds-coupon-stub::before{content:\"\";position:absolute;inset:0;z-index:-1;background:var(--stub);border-top:2px dashed var(--rule);box-shadow:inset 1px -1px 0 var(--rule-soft),inset -1px 0 0 var(--rule-soft);-webkit-mask:radial-gradient(circle 9px at 0 0,transparent 98%,#000),radial-gradient(circle 9px at 100% 0,transparent 98%,#000);-webkit-mask-composite:source-in;mask:radial-gradient(circle 9px at 0 0,transparent 98%,#000),radial-gradient(circle 9px at 100% 0,transparent 98%,#000);mask-composite:intersect}.ds-coupon-stubhead{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);min-height:26px;margin-bottom:var(--space-2);color:var(--amber);font:700 14px/18px var(--font-display);letter-spacing:.1em;text-transform:uppercase}.ds-coupon-stamp{display:inline-flex;align-items:center;height:26px;padding:0 var(--space-2);font:700 14px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;border:1px dotted currentColor;color:var(--text-muted)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Jet-Age Ticket Wallet",
+    "overview": "Handoff treats an order as a printed coupon kept in an old navy wallet. The coupon is cut stock: square at every corner, ruled with hairlines, headed in condensed capitals, and divided by a dashed perforation. It validates, tears or voids, and it stays on screen through all three. State is printed onto the object as a stamp. It is never a transient message that leaves.\n\nThe system is dense and exact, closer to a ledger than a marketing page. Colour is scarce: four navy grounds, one buff for text and rules, and one honey amber for value and action. Depth comes from stepping between stocks, so a single ambient shadow is enough for the whole system. Motion is scarcer still. One tear happens once, when a fill lands, and the rest of the system only changes colour.\n\nThe world rejects the fintech default of soft rounded cards with coloured pills. Screens are dark, with no white or near-white grounds. Inside a host wallet the wallet's brand comes first, and how far a host may restyle the coupon is still undecided.",
+    "keyCharacteristics": [
+      "Dark only: four navy stocks, buff text, honey amber for figures and the one action.",
+      "Square corners throughout; the only curves are the notches at each end of the perforation.",
+      "Status is a word in a ruled box, and the border style carries it without colour.",
+      "Barlow Condensed capitals for heads, Barlow for text and tabular figures, Spline Sans Mono for hashes and addresses only.",
+      "No icon set: states are words.",
+      "One signature motion, the tear, played once."
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "Amber marks value and action, never decoration. On a product screen its only fill is the one primary action.",
+        "section": "colors"
+      },
+      {
+        "name": "The Word Not Fill Rule",
+        "body": "Sage and Coral never fill a surface. They ink a word, or stroke an outline or mark that sits with a word.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dark Stock Rule",
+        "body": "Every screen sits on Old Navy Serge. No white or near-white ground, anywhere on screen.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figure Rule",
+        "body": "Figures are Barlow with tabular numerals, so columns of prices align. Every price, quantity and balance goes through the Amount component, written `USDC 112,00` with a decimal comma and a dot for thousands: `3.418,00`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hash Only Rule",
+        "body": "Spline Sans Mono sets hashes and addresses and nothing else, because that is where `0` and `O` must differ. It is not a figure face and not a code label.",
+        "section": "typography"
+      },
+      {
+        "name": "The Capitals Rule",
+        "body": "Barlow Condensed is always uppercase.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Shadow Rule",
+        "body": "The sheet is the only surface that casts a shadow. Inset box-shadows on coupon edges and the current tab draw lines, not elevation, and they stay.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Cut Stock Rule",
+        "body": "Corners are square. A notch at the perforation is the only permitted curve.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Single Coupon Rule",
+        "body": "The coupon is the container. There are no generic cards, and coupons never nest.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Nothing Disappears Rule",
+        "body": "An order changes state and stays on screen. Cancelled and reverted orders keep their coupon, their stamp and their reason.",
+        "section": "components"
+      },
+      {
+        "name": "The Grayscale Rule",
+        "body": "A status must read in grayscale, because a projector washes colour out. If the border style and the word do not carry it, it is not finished.",
+        "section": "components"
+      },
+      {
+        "name": "The One Tear Rule",
+        "body": "The tear is the only signature motion, and it plays once, at the moment a fill lands. Everything else only changes colour.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do ground every screen on Old Navy Serge and put coupons, rows, notices and sheets on Coupon Stock.",
+      "Do use the tokens, never a literal colour. Edit `tokens.json` and regenerate `tokens.css`.",
+      "Do send every price, quantity and balance through Amount, and every address and hash through Hash.",
+      "Do write a status as a word in a ruled box, with the border style from the stamp ladder.",
+      "Do keep a cancelled or reverted coupon on screen with its struck total, its stamp across the perforation and a one-line reason.",
+      "Do give every interactive element a solid 2px focus ring at 2px offset.",
+      "Do keep touch targets at 44px or more, and the confirm button at 56px.",
+      "Do show the Fuji demo caveat in Caption on every screen with an attestation.",
+      "Do pass `torn` only at the moment a fill lands, and keep the stub parted under reduced motion."
+    ],
+    "donts": [
+      "Don't use white or near-white grounds.",
+      "Don't use soft rounded cards or coloured pills. Corners are square, and a status is a stamp.",
+      "Don't put two primary buttons on one screen.",
+      "Don't use Sage or Coral as a surface fill.",
+      "Don't set anything in Spline Sans Mono except hashes and addresses, including figures and token labels.",
+      "Don't add an icon set, or use a spinner alone for a pending state.",
+      "Don't nest a coupon inside a coupon.",
+      "Don't lift the coupon head onto page sections as a small label above a heading. It is ruled ticket data and belongs to the coupon.",
+      "Don't add a shadow to anything but the sheet.",
+      "Don't animate anything beyond the tear and colour changes on hover and focus.",
+      "Don't recolor, rotate, outline or add effects to the logo files. Operated By is the one exception, taking the surrounding text colour inside a host wallet."
+    ]
+  }
+}

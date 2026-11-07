@@ -1,0 +1,1 @@
+Handoff's one appearance inside a host wallet: the mark at 24px and "Operado con Handoff" in `text-muted`. It takes the color of the text, so the host's brand stays first. Use it once per screen, in the footer.

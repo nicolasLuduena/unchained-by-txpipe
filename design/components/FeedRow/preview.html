@@ -1,0 +1,14 @@
+<!-- @dsCard group="Console" height=120 width=720 subtitle="one line of the compliance feed" -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<div id="root" style="padding:16px;background:var(--ground);box-sizing:border-box"></div>
+<script src="../../vendor/react.production.min.js"></script>
+<script src="../../vendor/react-dom.production.min.js"></script>
+<script src="../bundle.js"></script>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.FeedRow, { time: '21:14', event: 'Vendido', status: 'sold', asset: 'Edificio Conectia', from: '0x8a1f3e770000000000000000000000000000c42e', to: '0x51d09bb20000000000000000000000000000e713', price: '448,00' })
+  ));
+</script>

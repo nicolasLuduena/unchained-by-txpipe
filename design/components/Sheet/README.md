@@ -1,0 +1,1 @@
+The bottom sheet: the one surface with a shadow. Use it to confirm an action without leaving the screen. Provide `title` and children, and `caveat` when the sheet shows an attestation. A sheet carries at most one `primary` button.

@@ -1,0 +1,1 @@
+Standard navigation in condensed caps. The current item is amber with a 2px rule, and carries `aria-current`. Provide `items` with `label`, `href` and `current`, and an `ariaLabel`. In a host wallet these tabs belong to the host; use them for the screens Handoff owns.
