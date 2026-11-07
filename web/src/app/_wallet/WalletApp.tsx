@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 import type { Address } from "viem";
-import { Notice, OperatedBy, Stamp, Tabs, type StampStatus } from "@/design";
+import { Notice, OperatedBy, Ribbons, Stamp, Tabs, type StampStatus } from "@/design";
 import { chainName, networkLabel } from "@/lib/chain";
 import type { Actor } from "@/lib/sponsor";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
@@ -19,20 +19,28 @@ import { useWallet, type Precheck } from "./useWallet";
 
 const HOST_STAMP: Record<Precheck, StampStatus> = { checking: "pending", passed: "verified", blocked: "blocked", unavailable: "pending" };
 
+/** The stamp is one word. This line, which carries it, says what it means for someone who has never seen a verified account. */
+const HOST_STATE: Record<Precheck, string> = {
+  checking: "Checking whether this account can trade.",
+  passed: "This account can buy and sell.",
+  blocked: "This account cannot buy or sell yet.",
+  unavailable: "We could not check whether this account can trade.",
+};
+
 const DEFAULT_BRAND = "Billetera Sur";
 
-function Frame({ brand, stamp, children }: { brand: string; stamp?: StampStatus; children: ReactNode }) {
+function Frame({ brand, children }: { brand: string; children: ReactNode }) {
   return (
-    <div className="host">
-      <header className="host__bar">
+    <div className="host wallet-host">
+      <Ribbons className="host__ribbons" />
+      <header className="host__bar wallet-head">
         <span className="host__name">{brand}</span>
-        {stamp && <Stamp status={stamp} />}
       </header>
       {children}
       <footer className="host__foot wallet-foot">
         <p className="caveat">
-          Atestaciones de demostración en Fuji, sin verificación de identidad.
-          {chainName === "fuji" && " Las emite una instancia de demostración del contrato de KUMPLY."}
+          Demo attestations on Fuji, no identity verification.
+          {chainName === "fuji" && " They come from a demo instance of the KUMPLY contract, not KUMPLY's official store."}
         </p>
         <OperatedBy />
       </footer>
@@ -43,7 +51,7 @@ function Frame({ brand, stamp, children }: { brand: string; stamp?: StampStatus;
 type Place = { brand: string; actor: Actor; section: Section };
 
 /** The frame and both tab rows, the same with or without an account to show. */
-function Shell({ brand, actor, section, stamp, children }: Place & { stamp?: StampStatus; children: ReactNode }) {
+function Shell({ brand, actor, section, stamp, state, children }: Place & { stamp?: StampStatus; state?: string; children: ReactNode }) {
   const router = useRouter();
   const href = (nextActor: Actor, nextSection: Section) => `/?actor=${nextActor}&tab=${nextSection}`;
 
@@ -57,13 +65,22 @@ function Shell({ brand, actor, section, stamp, children }: Place & { stamp?: Sta
   }
 
   return (
-    <Frame brand={brand} stamp={stamp}>
-      <div onClick={navigate}>
-        <div className="wallet-demo">
-          <span className="t-field-label">Demostración: ver la billetera como</span>
-          <Tabs ariaLabel="Cuenta de demostración" items={ACTORS.map((a) => ({ label: a.label, href: href(a.id, section), current: a.id === actor }))} />
+    <Frame brand={brand}>
+      {state && (
+        <p className="wallet-state">
+          {stamp && <Stamp status={stamp} />}
+          <span>{state}</span>
+        </p>
+      )}
+      <div className="wallet-nav" onClick={navigate}>
+        <div className="wallet-nav__col">
+          <span className="t-field-label">Sections</span>
+          <Tabs ariaLabel="Sections" className="hf-tabs--rail" items={SECTIONS.map((s) => ({ label: s.label, href: href(actor, s.id), current: s.id === section }))} />
         </div>
-        <Tabs ariaLabel="Secciones" className="wallet-tabs" items={SECTIONS.map((s) => ({ label: s.label, href: href(actor, s.id), current: s.id === section }))} />
+        <div className="wallet-nav__col">
+          <span className="t-field-label">View as</span>
+          <Tabs ariaLabel="Demo account" className="hf-tabs--rail" items={ACTORS.map((a) => ({ label: a.label, href: href(a.id, section), current: a.id === actor }))} />
+        </div>
       </div>
       {children}
     </Frame>
@@ -75,9 +92,9 @@ function Wallet({ config, address, metamask, ...place }: Place & { config: Walle
   const wallet = useWallet(config, address);
 
   return (
-    <Shell {...place} stamp={HOST_STAMP[wallet.precheck]}>
+    <Shell {...place} stamp={HOST_STAMP[wallet.precheck]} state={HOST_STATE[wallet.precheck]}>
       <main className="host__main">
-        {wallet.offline && <Notice status="pending">No pudimos leer {networkLabel} o el servicio de órdenes. Reintentando.</Notice>}
+        {wallet.offline && <Notice status="pending">We could not read {networkLabel} or the order service. Retrying.</Notice>}
         {metamask && <MetaMaskPanel metamask={metamask} wallet={wallet} />}
         {section === "mercado" && <MarketSection config={config} actor={actor} wallet={wallet} />}
         {section === "vender" && <SellSection config={config} actor={actor} wallet={wallet} />}
@@ -108,7 +125,7 @@ export function WalletApp({ actor, section, brand = DEFAULT_BRAND }: { actor: Ac
     return (
       <Frame brand={brand}>
         <main className="host__main">
-          <Notice status="pending">El emisor todavía no registró el token en esta red.</Notice>
+          <Notice status="pending">The issuer has not registered the token on this network yet.</Notice>
         </main>
       </Frame>
     );

@@ -2,7 +2,7 @@ import type { Address, Hash } from "viem";
 
 /** What the visitor's MetaMask signs to prove it owns the address. It asks for a demo, so it says there is no identity check. */
 export function onboardMessage(owner: Address, chainId: number): string {
-  return `Handoff: pido una verificación de demostración, sin control de identidad.\nDueño: ${owner}\nRed: ${chainId}`;
+  return `Handoff: I request a demo verification, with no identity check.\nOwner: ${owner}\nNetwork: ${chainId}`;
 }
 
 /** How far one owner's onboarding got. Written after every step, so a retry resumes instead of repeating. */

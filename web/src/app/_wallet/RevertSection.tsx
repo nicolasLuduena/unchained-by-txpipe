@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Hash as HashText, Notice, TextField } from "@/design";
+import { AssetRow, Button, Hash as HashText, Notice, TextField } from "@/design";
 import { chain, explorerUrl, networkLabel } from "@/lib/chain";
 import { venue } from "@/lib/orders/client";
 import { getSponsor, type Actor } from "@/lib/sponsor";
 import type { WalletConfig } from "@/lib/wallet/deployment";
-import { parseTokens, tokensLabel } from "@/lib/wallet/format";
+import { formatUsdc, parseTokens, tokensLabel } from "@/lib/wallet/format";
 import { useAction, type Wallet } from "./useWallet";
 
 type Props = { config: WalletConfig; actor: Actor; wallet: Wallet };
@@ -16,11 +16,11 @@ export function RevertSection({ config, actor, wallet }: Props) {
   const [amountText, setAmountText] = useState("1");
   const requesting = useAction();
 
-  if (!snapshot) return <Notice status="pending">Leyendo tu cuenta en {networkLabel}.</Notice>;
-  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
+  if (!snapshot) return <Notice status="pending">Reading your account on {networkLabel}.</Notice>;
+  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verify your identity in the wallet to trade.</Notice>;
 
   const amount = parseTokens(amountText);
-  const amountError = amount === null || amount === 0n ? "Ingresá una cantidad entera." : amount > snapshot.tokens ? `Tenés ${tokensLabel(snapshot.tokens)}.` : undefined;
+  const amountError = amount === null || amount === 0n ? "Enter a whole number." : amount > snapshot.tokens ? `You have ${tokensLabel(snapshot.tokens)}.` : undefined;
   const pending = reversions.some((r) => r.status === "pending");
 
   function request() {
@@ -41,32 +41,40 @@ export function RevertSection({ config, actor, wallet }: Props) {
   }
 
   return (
-    <section className="wallet-stack">
-      <h2 className="t-title">Pasar a papel</h2>
-      <p className="caveat">Pedís volver a un certificado en papel. El PSAV da de baja tus tokens contra ese certificado.</p>
-      <TextField label="Cantidad" inputMode="numeric" value={amountText} help={`Tenés ${tokensLabel(snapshot.tokens)}.`} error={amountError} onChange={(e) => setAmountText(e.target.value)} />
-      <Button variant="primary" size="lg" busy={requesting.busy} disabled={!!amountError || pending} onClick={request}>
-        Pedir certificado en papel
-      </Button>
-      {requesting.error && (
-        <Notice status="blocked" word="Rechazado">
-          {requesting.error}
-        </Notice>
-      )}
-      {reversions.map((r) =>
-        r.status === "pending" ? (
-          <Notice status="pending" key={r.id}>
-            Pediste pasar {tokensLabel(BigInt(r.amount))} a papel. El pedido está con el PSAV.
+    <div className="wallet-cols">
+      <section className="wallet-stack wallet-primary">
+        <h2 className="t-title">Convert to paper</h2>
+        <p className="caveat">You ask to go back to a paper certificate. The PSAV retires your tokens against that certificate, so you can no longer sell them here.</p>
+        <TextField label="Amount" inputMode="numeric" value={amountText} help={`You have ${tokensLabel(snapshot.tokens)}.`} error={amountError} onChange={(e) => setAmountText(e.target.value)} />
+        <Button variant="primary" size="lg" busy={requesting.busy} disabled={!!amountError || pending} onClick={request}>
+          Request paper certificate
+        </Button>
+        {requesting.error && (
+          <Notice status="blocked" word="Refused">
+            {requesting.error}
           </Notice>
-        ) : (
-          <div className="wallet-stack" key={r.id}>
-            <Notice status="verified" word="En papel">
-              El PSAV pasó {tokensLabel(BigInt(r.amount))} a papel. Certificado {r.certificateRef}.
+        )}
+        {reversions.map((r) =>
+          r.status === "pending" ? (
+            <Notice status="pending" key={r.id}>
+              You asked to move {tokensLabel(BigInt(r.amount))} to paper. The request is with the PSAV.
             </Notice>
-            {r.txHash && <HashText value={r.txHash} href={explorerUrl("tx", r.txHash)} />}
-          </div>
-        ),
-      )}
-    </section>
+          ) : (
+            <div className="wallet-stack" key={r.id}>
+              <Notice status="verified" word="On paper">
+                The PSAV moved {tokensLabel(BigInt(r.amount))} to paper. Certificate {r.certificateRef}.
+              </Notice>
+              {r.txHash && <HashText value={r.txHash} href={explorerUrl("tx", r.txHash)} />}
+            </div>
+          ),
+        )}
+      </section>
+
+      {/* The phone already says this under the field; the wider layouts have a column for it. */}
+      <section className="wallet-stack wallet-side wallet-side--wide">
+        <h2 className="t-title">Your assets</h2>
+        <AssetRow name={snapshot.tokenName} meta={`${tokensLabel(snapshot.tokens)} · Reference price`} price={formatUsdc(snapshot.reference)} />
+      </section>
+    </div>
   );
 }

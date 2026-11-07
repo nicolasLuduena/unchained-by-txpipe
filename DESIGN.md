@@ -238,6 +238,8 @@ components:
     height: "48px"
 ---
 
+> **Superseded in part.** The product moved to a light look: a plaster ground, indigo hairlines, indigo, madder and saffron ribbons, Montserrat and Jost. The current values live in `design/tokens.css`. The dark rules below describe the first version.
+
 # Design System: Handoff
 
 ## Overview

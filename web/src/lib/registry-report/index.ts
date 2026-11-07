@@ -30,7 +30,7 @@ const fakeRegistryReport: RegistryReport = {
     await new Promise((resolve) => setTimeout(resolve, DEMO_LATENCY_MS));
     return {
       id: `DEMO-${fill.txHash.slice(2, 10).toUpperCase()}`,
-      label: "Acuse de demostración, sin llamada real",
+      label: "Demo acknowledgment, no real call",
       at: new Date().toISOString(),
     };
   },

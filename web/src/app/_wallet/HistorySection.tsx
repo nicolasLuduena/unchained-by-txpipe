@@ -7,14 +7,14 @@ import type { Wallet } from "./useWallet";
 
 export function HistorySection({ config, wallet }: { config: WalletConfig; wallet: Wallet }) {
   const { snapshot, history, historyPartial } = wallet;
-  if (!snapshot) return <Notice status="pending">Leyendo {networkLabel}.</Notice>;
+  if (!snapshot) return <Notice status="pending">Reading {networkLabel}.</Notice>;
 
   return (
-    <>
-      <section className="wallet-stack">
-        <h2 className="t-title">Historial</h2>
-        {historyPartial && <p className="caveat">Seguimos leyendo {networkLabel}: puede haber movimientos que todavía no aparecen.</p>}
-        {history.length === 0 && !historyPartial && <p className="caveat">Todavía no hay movimientos en esta cuenta.</p>}
+    <div className="wallet-cols">
+      <section className="wallet-stack wallet-primary">
+        <h2 className="t-title">History</h2>
+        {historyPartial && <p className="caveat">Still reading {networkLabel}: some activity may not show yet.</p>}
+        {history.length === 0 && !historyPartial && <p className="caveat">No activity on this account yet.</p>}
         {history.map((entry) => (
           <div className="wallet-history" key={entry.id}>
             <FeedRow
@@ -32,21 +32,22 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
         ))}
       </section>
 
-      <section className="wallet-stack">
-        <h2 className="t-title">Documento de emisión</h2>
+      <section className="wallet-stack wallet-side">
+        <h2 className="t-title">Issuance document</h2>
+        <p className="caveat">What backs this token and where you can check it.</p>
         <div className="wallet-doc">
-          <span className="t-field-label">Autorización CNV</span>
+          <span className="t-field-label">CNV authorization</span>
           <p>{snapshot.cnvAuthRef}</p>
         </div>
         <div className="wallet-doc">
-          <span className="t-field-label">Depósito</span>
+          <span className="t-field-label">Deposit</span>
           <p>{snapshot.depositRef}</p>
         </div>
         <div className="wallet-doc">
-          <span className="t-field-label">Hash del documento, registrado en {networkLabel}</span>
+          <span className="t-field-label">Document hash, recorded on {networkLabel}</span>
           <HashText value={snapshot.issuanceDocHash} href={explorerUrl("address", config.registry)} />
         </div>
       </section>
-    </>
+    </div>
   );
 }

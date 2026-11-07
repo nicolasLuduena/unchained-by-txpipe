@@ -26,21 +26,21 @@ export function SellSection({ config, actor, wallet }: Props) {
   const posting = useAction();
 
   // The SDK pre-check gates the ticket: nothing below renders until it has passed.
-  if (precheck === "checking") return <Notice status="pending">Comprobando tu verificación.</Notice>;
-  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verificá tu identidad en la billetera para operar.</Notice>;
+  if (precheck === "checking") return <Notice status="pending">Checking your verification.</Notice>;
+  if (precheck === "blocked") return actor === "metamask" ? null : <Notice status="blocked">Verify your identity in the wallet to trade.</Notice>;
   if (precheck === "unavailable" || !snapshot) {
-    return <Notice status="pending">No pudimos comprobar tu verificación. Probá de nuevo en un momento.</Notice>;
+    return <Notice status="pending">We could not check your verification. Try again in a moment.</Notice>;
   }
-  if (snapshot.blocked) return <Notice status="blocked">El PSAV bloqueó esta cuenta. Consultá en la billetera.</Notice>;
-  if (snapshot.paused) return <Notice status="blocked">La negociación de este token está pausada.</Notice>;
+  if (snapshot.blocked) return <Notice status="blocked">The PSAV blocked this account. Contact your wallet.</Notice>;
+  if (snapshot.paused) return <Notice status="blocked">Trading in this token is paused.</Notice>;
 
   const shownPrice = priceText ?? formatUsdc(snapshot.reference);
   const amount = parseTokens(amountText);
   const price = parseUsdc(shownPrice);
 
-  const amountError = amount === null || amount === 0n ? "Ingresá una cantidad entera." : amount > snapshot.tokens ? `Tenés ${tokensLabel(snapshot.tokens)}.` : undefined;
+  const amountError = amount === null || amount === 0n ? "Enter a whole number." : amount > snapshot.tokens ? `You have ${tokensLabel(snapshot.tokens)}.` : undefined;
   const priceError =
-    price === null ? "Ingresá un precio." : price < snapshot.low || price > snapshot.high ? `Fuera del rango permitido: USDC ${formatUsdc(snapshot.low)} a ${formatUsdc(snapshot.high)}.` : undefined;
+    price === null ? "Enter a price." : price < snapshot.low || price > snapshot.high ? `Outside the price band: USDC ${formatUsdc(snapshot.low)} to ${formatUsdc(snapshot.high)}.` : undefined;
   const ready = amount !== null && price !== null && !amountError && !priceError;
 
   function post() {
@@ -64,55 +64,61 @@ export function SellSection({ config, actor, wallet }: Props) {
   }
 
   return (
-    <>
-      <section className="wallet-stack">
-        <h2 className="t-title">Vender {snapshot.tokenName}</h2>
-        <TextField
-          label="Cantidad"
-          inputMode="numeric"
-          value={amountText}
-          help={`Tenés ${tokensLabel(snapshot.tokens)}.`}
-          error={amountError}
-          onChange={(e) => setAmountText(e.target.value)}
+    <div className="wallet-cols">
+      <div className="wallet-group wallet-primary">
+        <section className="wallet-stack">
+          <h2 className="t-title">Sell {snapshot.tokenName}</h2>
+          <TextField
+            label="Amount"
+            inputMode="numeric"
+            value={amountText}
+            help={`You have ${tokensLabel(snapshot.tokens)}.`}
+            error={amountError}
+            onChange={(e) => setAmountText(e.target.value)}
+          />
+          <TextField label="Price per token, in USDC" inputMode="decimal" value={shownPrice} error={priceError} onChange={(e) => setPriceText(e.target.value)} />
+        </section>
+
+        <section className="wallet-stack">
+          <span className="t-field-label">Price band</span>
+          <p className="caveat">The contract refuses any price outside this band, in USDC per token.</p>
+          <PriceBand min={usdcToNumber(snapshot.low)} max={usdcToNumber(snapshot.high)} value={usdcToNumber(price ?? snapshot.reference)} />
+        </section>
+      </div>
+
+      <div className="wallet-group wallet-side">
+        <Coupon
+          label="Sell order"
+          title={snapshot.tokenName}
+          fields={[
+            { label: "Amount", value: amount === null ? "-" : tokensLabel(amount) },
+            { label: "Price", value: price === null ? "-" : `USDC ${formatUsdc(price)}` },
+          ]}
+          note="Your tokens stay in your wallet until someone accepts."
+          stubLabel="Order total"
+          total={formatUsdc((amount ?? 0n) * (price ?? 0n))}
         />
-        <TextField label="Precio por token, en USDC" inputMode="decimal" value={shownPrice} error={priceError} onChange={(e) => setPriceText(e.target.value)} />
-      </section>
 
-      <section className="wallet-stack">
-        <span className="t-field-label">Rango permitido</span>
-        <PriceBand min={usdcToNumber(snapshot.low)} max={usdcToNumber(snapshot.high)} value={usdcToNumber(price ?? snapshot.reference)} />
-      </section>
-
-      <Coupon
-        label="Orden de venta"
-        title={snapshot.tokenName}
-        fields={[
-          { label: "Cantidad", value: amount === null ? "-" : tokensLabel(amount) },
-          { label: "Precio", value: price === null ? "-" : `USDC ${formatUsdc(price)}` },
-        ]}
-        note="Tus tokens quedan en tu billetera hasta que alguien acepte."
-        total={formatUsdc((amount ?? 0n) * (price ?? 0n))}
-      />
-
-      <section className="wallet-stack">
-        <Button variant="primary" size="lg" busy={posting.busy} disabled={!ready} onClick={post}>
-          {ready ? `Vender ${tokensLabel(amount)}` : "Vender"}
-        </Button>
-        <p className="caveat">{SPONSOR_LABEL}</p>
-        {posting.error && (
-          <Notice status="blocked" word="Rechazado">
-            {posting.error}
-          </Notice>
-        )}
-        {posted && (
-          <div className="wallet-stack">
-            <Notice status="verified" word="Publicada">
-              Firmaste tu orden. El PSAV la publicó en el libro.
+        <section className="wallet-stack">
+          <Button variant="primary" size="lg" busy={posting.busy} disabled={!ready} onClick={post}>
+            {ready ? `Sell ${tokensLabel(amount)}` : "Sell"}
+          </Button>
+          <p className="caveat">{SPONSOR_LABEL}</p>
+          {posting.error && (
+            <Notice status="blocked" word="Refused">
+              {posting.error}
             </Notice>
-            <HashText value={posted.announceTx} href={explorerUrl("tx", posted.announceTx)} />
-          </div>
-        )}
-      </section>
-    </>
+          )}
+          {posted && (
+            <div className="wallet-stack">
+              <Notice status="verified" word="Posted">
+                You signed your order. The PSAV, a licensed virtual asset provider, posted it to the order book, where any verified buyer can accept it.
+              </Notice>
+              <HashText value={posted.announceTx} href={explorerUrl("tx", posted.announceTx)} />
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
   );
 }
