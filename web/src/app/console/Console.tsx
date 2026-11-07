@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
-import { AssetRow, Hash, Notice, Stamp, Tabs } from "@/design";
+import { AssetRow, Hash, Notice, Ribbons, Stamp, Tabs } from "@/design";
 import { parseBig } from "@/lib/big-json";
 import { chainName, deployment, explorerUrl, networkLabel } from "@/lib/chain";
 import type { FeedEntry } from "@/lib/console/feed";
@@ -16,7 +16,7 @@ import { TokenSummary } from "./TokenSummary";
 
 const POLL_MS = chainName === "local" ? 3000 : 5000;
 const SYNCED_BLOCKS = 100n;
-const CAVEAT = "Atestaciones de demostración en Fuji, sin verificación de identidad.";
+const CAVEAT = "Demo attestations on Fuji, no identity verification.";
 
 function useRoleFromHash(): Role {
   const [role, setRole] = useState<Role>("emisor");
@@ -72,9 +72,9 @@ function useConsoleState() {
 }
 
 function businessStamp(read: boolean | null | undefined) {
-  if (read === undefined) return <Stamp status="pending">Leyendo</Stamp>;
-  if (read === null) return <Stamp status="pending">Sin respuesta</Stamp>;
-  return read ? <Stamp status="verified">Empresa</Stamp> : <Stamp status="blocked">Sin atestación de empresa</Stamp>;
+  if (read === undefined) return <Stamp status="pending">Reading</Stamp>;
+  if (read === null) return <Stamp status="pending">No response</Stamp>;
+  return read ? <Stamp status="verified">Business</Stamp> : <Stamp status="blocked">No attestation</Stamp>;
 }
 
 /** The sync line only earns its place while the scan is catching up. */
@@ -110,9 +110,9 @@ export function Console() {
   if (!deployment?.contracts?.HandoffRegistry) {
     return (
       <main className="desk">
-        <h1 className="t-display-l">Consola del emisor y PSAV</h1>
-        <Notice status="pending" word="Sin despliegue">
-          No hay deployments/{chainName}.json. Desplegá los contratos y reiniciá la app.
+        <h1 className="t-display-l">Issuer and PSAV console</h1>
+        <Notice status="pending" word="No deployment">
+          There is no deployments/{chainName}.json. Deploy the contracts and restart the app.
         </Notice>
       </main>
     );
@@ -120,49 +120,57 @@ export function Console() {
 
   return (
     <main className="desk">
+      <Ribbons className="desk__ribbons" />
       <header className="desk__head">
-        <img className="desk__logo" src="/design/logos/handoff-lockup-horizontal.svg" alt="Handoff" />
-        <h1 className="t-display-l">Consola del emisor y PSAV</h1>
+        <span className="desk__brand">
+          <img className="desk__logo" src="/design/logos/handoff-mark.svg" alt="" />
+          Handoff
+        </span>
+        <h1 className="t-display-l">Issuer and PSAV console</h1>
+        <p className="desk__lede">Register tokens, set the price band and follow every order, sale and refusal. The PSAV, a licensed virtual asset provider, runs the venue.</p>
       </header>
 
-      <section className="desk__role" aria-label="Rol">
-        <Tabs
-          ariaLabel="Rol que opera"
-          className="desk__tabs"
-          items={ROLES.map((r) => ({ label: ROLE_LABEL[r], href: `#${r}`, current: r === role }))}
-        />
-        <span className="desk__who">
-          <span className="t-field-label">Dirección</span>
-          {address ? <Hash value={address} href={explorerUrl("address", address)} /> : <span className="t-caption">Sin clave configurada</span>}
-        </span>
-        {role !== "psav" && state?.business[role] !== true && (
-          <span className="desk__who">
-            <span className="t-field-label">SDK isBusiness</span>
-            {businessStamp(state?.business[role])}
-          </span>
-        )}
-        {behind(state) && (
-          <span className="desk__sync t-caption">
-            {state ? `Leyendo ${networkLabel}: bloque ${units(state.scannedTo)} de ${units(state.head)}` : `Leyendo ${networkLabel}`}
-          </span>
-        )}
-      </section>
-
-      <p className="caveat">
-        {CAVEAT}
-        {" "}
-        {chainName === "local"
-          ? "Red local: el SDK de KUMPLY lee un stub de prueba."
-          : "El SDK de KUMPLY lee una instancia de demostración del contrato de KUMPLY, sin verificación de identidad. No es el almacén oficial de KUMPLY."}
-      </p>
-
       {failed ? (
-        <Notice status="pending" word="Sin conexión">
-          El RPC no respondió. Reintentamos en cada lectura y lo ya leído se conserva.
+        <Notice className="desk__offline" status="pending" word="Offline">
+          The RPC did not respond. We retry on every read and keep what we already have.
         </Notice>
       ) : null}
 
       <div className="desk__columns">
+        <aside className="desk__rail">
+          <section className="desk__role" aria-label="Role">
+            <span className="t-field-label">Acting as</span>
+            <Tabs
+              ariaLabel="Acting role"
+              className="hf-tabs--rail"
+              items={ROLES.map((r) => ({ label: ROLE_LABEL[r], href: `#${r}`, current: r === role }))}
+            />
+          </section>
+          <div className="desk__who">
+            <span className="t-field-label">This role's address</span>
+            {address ? <Hash value={address} href={explorerUrl("address", address)} /> : <span className="t-caption">No key configured</span>}
+          </div>
+          {role !== "psav" && state?.business[role] !== true && (
+            <div className="desk__who">
+              <span className="t-field-label">Verified business</span>
+              {businessStamp(state?.business[role])}
+              <span className="desk__note">With no business attestation, the SDK check (isBusiness) stops the action before it is sent.</span>
+            </div>
+          )}
+          {behind(state) && (
+            <span className="desk__note">
+              {state ? `Reading ${networkLabel}: block ${units(state.scannedTo)} of ${units(state.head)}` : `Reading ${networkLabel}`}
+            </span>
+          )}
+          <p className="caveat desk__caveat">
+            {CAVEAT}
+            {" "}
+            {chainName === "local"
+              ? "Local network: the KUMPLY SDK reads a test stub."
+              : "The KUMPLY SDK reads a demo instance of the KUMPLY contract, with no identity verification. It is not KUMPLY's official store."}
+          </p>
+        </aside>
+
         <ActionPanel
           key={role}
           role={role}
@@ -178,14 +186,14 @@ export function Console() {
           <section className="desk__section">
             <h2 className="t-title">Tokens</h2>
             {tokens.length === 0 ? (
-              <p className="t-caption">{state ? "Todavía no hay tokens en el registro. Registrá el primero como emisor." : "Leyendo el registro."}</p>
+              <p className="t-caption">{state ? "No tokens in the registry yet. Register the first one as issuer." : "Reading the registry."}</p>
             ) : (
               <div className="desk__tokens">
                 {tokens.map((t) => (
                   <AssetRow
                     key={t.address}
                     name={t.name}
-                    meta={`${t.symbol}, ${units(t.totalSupply)} de ${units(t.authorizedSupply)} unidades${t.paused ? ", pausado" : ""}`}
+                    meta={`${t.symbol}, ${units(t.totalSupply)} of ${units(t.authorizedSupply)} units${t.paused ? ", paused" : ""}`}
                     price={usdc(t.band.price)}
                     className={t.address === token?.address ? "desk__token--current" : undefined}
                     onClick={() => setSelected(t.address)}

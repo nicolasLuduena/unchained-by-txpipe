@@ -4,28 +4,29 @@ import { share, units } from "@/lib/console/format";
 import type { HolderState, TokenView } from "@/lib/console/state";
 
 const STATE_STAMP: Record<HolderState, StampStatus> = {
-  Verificado: "verified",
-  Bloqueado: "blocked",
-  "En papel": "verified",
-  "Sin atestación": "blocked",
-  "Sin unidades": "unused",
+  Verified: "verified",
+  Blocked: "blocked",
+  "On paper": "verified",
+  "No attestation": "blocked",
+  "No units": "unused",
 };
 
 export function HoldersTable({ token }: { token: TokenView }) {
   return (
     <section className="desk__section">
-      <h2 className="t-title">Titulares</h2>
+      <h2 className="t-title">Holders</h2>
+      <p className="t-caption desk__sub">Who holds units of this token, and whether they can trade.</p>
       {token.holders.length === 0 ? (
-        <p className="t-caption">Sin titulares todavía. Emití unidades para ver el primero.</p>
+        <p className="t-caption">No holders yet. Issue units to see the first one.</p>
       ) : (
         <table className="desk__table">
           <thead>
             <tr>
-              <th scope="col">Titular</th>
-              <th scope="col">Categoría de atestación</th>
-              <th scope="col" className="desk__num">Unidades</th>
-              <th scope="col" className="desk__num">Parte de la emisión</th>
-              <th scope="col">Estado</th>
+              <th scope="col">Holder</th>
+              <th scope="col">Attestation category</th>
+              <th scope="col" className="desk__num">Units</th>
+              <th scope="col" className="desk__num">Share of issuance</th>
+              <th scope="col">State</th>
             </tr>
           </thead>
           <tbody>

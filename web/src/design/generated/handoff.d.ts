@@ -4,7 +4,7 @@ import type { ReactNode, MouseEventHandler, ChangeEventHandler } from "react";
 export type StampStatus = "verified" | "blocked" | "pending" | "sponsored" | "agent" | "sold" | "cancelled" | "reverted" | "unused";
 export type CouponState = "open" | "sold" | "cancelled" | "reverted";
 
-/** Primary is amber and appears once per screen. Labels are verbs. */
+/** Primary is the filled indigo button and appears once per screen. Labels are verbs. */
 export interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
@@ -21,7 +21,7 @@ export interface ButtonProps {
 /** A word in a ruled box. The border style carries the state without colour. */
 export interface StampProps { status: StampStatus; className?: string; children?: ReactNode; }
 
-/** Every number goes through this, in Barlow tabular figures. Sizes: s in rows, m in fields, l for the one headline figure. */
+/** Every number goes through this, in Jost tabular figures. Sizes: s in rows, m in fields, l for the one headline figure. */
 export interface AmountProps { value: string; currency?: string; size?: "s" | "m" | "l"; muted?: boolean; className?: string; }
 
 /** Address or transaction hash, truncated. Links to the explorer when href is set. */
@@ -79,7 +79,7 @@ export interface TextFieldProps {
 /** The allowed price range, drawn to scale. */
 export interface PriceBandProps { min: number; max: number; value: number; format?: (n: number) => string; className?: string; }
 
-/** Standard navigation tabs. */
+/** Navigation with a dot per place: filled for the current one. Pass className="hf-tabs--rail" for the vertical rail. */
 export interface TabsProps { items: { label: string; href?: string; current?: boolean }[]; ariaLabel?: string; className?: string; }
 
 /** The bottom sheet: the one surface with a shadow. */
@@ -90,6 +90,9 @@ export interface FeedRowProps { time: string; event: string; status: StampStatus
 
 /** Handoff's one appearance inside a host wallet. */
 export interface OperatedByProps { className?: string; }
+
+/** The three-colour chord across the top of a page. Decoration: aria-hidden, drifts in once on load. Place it in a positioned parent. */
+export interface RibbonsProps { className?: string; }
 
 /** What happened and what to do next. */
 export interface NoticeProps { status?: StampStatus; word?: string; className?: string; children: ReactNode; }
@@ -108,3 +111,4 @@ export declare const Notice: (props: NoticeProps) => JSX.Element;
 export declare const Sheet: (props: SheetProps) => JSX.Element;
 export declare const FeedRow: (props: FeedRowProps) => JSX.Element;
 export declare const OperatedBy: (props: OperatedByProps) => JSX.Element;
+export declare const Ribbons: (props: RibbonsProps) => JSX.Element;

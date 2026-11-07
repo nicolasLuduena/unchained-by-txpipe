@@ -36,13 +36,13 @@ async function send(role: Role, action: ActionDef, values: Values, ctx: ActionCo
 function Result({ result }: { result: SendResult }) {
   if (result.ok) {
     return (
-      <Notice status="sold" word="Listo">
-        Confirmado en el bloque {result.block}. <Hash value={result.hash} href={explorerUrl("tx", result.hash)} />
+      <Notice status="sold" word="Done">
+        Confirmed in block {result.block}. <Hash value={result.hash} href={explorerUrl("tx", result.hash)} />
       </Notice>
     );
   }
   return (
-    <Notice status="blocked" word="Rechazado">
+    <Notice status="blocked" word="Refused">
       {reasonText(result.code)} <code className="desk__code">{result.code}</code>{" "}
       {result.hash ? <Hash value={result.hash} href={explorerUrl("tx", result.hash)} /> : null}
     </Notice>
@@ -68,16 +68,16 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
       id: `consola:${at}:${action.id}:${Math.random()}`,
       at,
       order: at * 1000,
-      event: "Rechazado",
+      event: "Refused",
       status: "blocked",
-      asset: ctx.token?.name ?? "Sin token",
+      asset: ctx.token?.name ?? "No token",
       from: address ?? "-",
-      fromRole: "Cuenta",
+      fromRole: "Account",
       price: "-",
       unit: " ",
       hash,
       code,
-      detail: `${action.title} desde esta consola. Se conserva hasta recargar la página.`,
+      detail: `${action.title} from this console. Kept until you reload the page.`,
     });
   }
 
@@ -107,12 +107,12 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
   return (
     <div className="desk__form">
       {refusedBySdk ? (
-        <Notice status="blocked" word="Rechazado">
-          {reasonText(sdkCode)} <code className="desk__code">isBusiness = {business === null ? "sin dato" : "false"}</code>
+        <Notice status="blocked" word="Refused">
+          {reasonText(sdkCode)} <code className="desk__code">isBusiness = {business === null ? "no data" : "false"}</code>
         </Notice>
       ) : null}
       {action.id === "plataforma" && ctx.token ? (
-        <p className="t-caption">{ctx.token.venues.length} de 5 plataformas. El contrato no admite una sexta.</p>
+        <p className="t-caption">{ctx.token.venues.length} of 5 venues. The contract does not accept a sixth.</p>
       ) : null}
       {fields.map((field) =>
         field.kind === "flag" ? (
@@ -145,7 +145,7 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
         </Button>
         {refusedBySdk ? (
           <Button variant="ghost" busy={busy} onClick={() => submit(true)}>
-            Probar en {networkLabel}
+            Send to {networkLabel} anyway
           </Button>
         ) : null}
       </div>
@@ -161,7 +161,8 @@ export function ActionPanel(props: PanelProps) {
 
   return (
     <section className="desk__section desk__actions">
-      <h2 className="t-title">Acciones</h2>
+      <h2 className="t-title">Actions</h2>
+      <p className="t-caption desk__sub">Each action signs as the chosen role.</p>
       <div className="desk__accordion">
         {actions.map((action) => (
           <details className="desk__action" name="acciones" key={action.id}>
@@ -170,7 +171,7 @@ export function ActionPanel(props: PanelProps) {
               <span className="t-caption">{action.who}</span>
             </summary>
             {action.needsToken && !token ? (
-              <p className="t-caption desk__empty">Elegí o registrá un token primero.</p>
+              <p className="t-caption desk__empty">Choose or register a token first.</p>
             ) : (
               // Keyed by token so its defaults follow the selection; registering must survive the switch it causes.
               <ActionForm key={action.needsToken ? token?.address : action.id} action={action} ctx={ctx} props={props} />

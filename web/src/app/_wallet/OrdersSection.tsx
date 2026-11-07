@@ -17,7 +17,7 @@ export function OrdersSection({ config, actor, wallet }: Props) {
   const { address, snapshot, orders } = wallet;
   const cancelling = useAction();
 
-  if (!snapshot) return <Notice status="pending">Leyendo tus órdenes.</Notice>;
+  if (!snapshot) return <Notice status="pending">Reading your orders.</Notice>;
 
   const isSeller = (o: OrderView) => isAddressEqual(o.order.seller, address);
   const mine = orders.filter((o) => isSeller(o) || (o.buyer && isAddressEqual(o.buyer, address)));
@@ -34,20 +34,20 @@ export function OrdersSection({ config, actor, wallet }: Props) {
 
   return (
     <section className="wallet-stack">
-      <h2 className="t-title">Tus órdenes</h2>
-      {mine.length === 0 && <p className="caveat">Todavía no tenés órdenes.</p>}
+      <h2 className="t-title">Your orders</h2>
+      {mine.length === 0 && <p className="caveat">You have no orders yet.</p>}
       {cancelling.error && (
-        <Notice status="blocked" word="Rechazado">
+        <Notice status="blocked" word="Refused">
           {cancelling.error}
         </Notice>
       )}
       {mine.map((view) => (
         <Fragment key={view.orderHash}>
-          <OrderCoupon view={view} label={isSeller(view) ? "Orden de venta" : "Compra"} tokenName={snapshot.tokenName} />
+          <OrderCoupon view={view} label={isSeller(view) ? "Sell order" : "Purchase"} tokenName={snapshot.tokenName} />
           {view.status === "filled" && <FillProof view={view} />}
           {view.status === "open" && isSeller(view) && (
             <Button variant="danger" busy={cancelling.busy} onClick={() => cancel(view)}>
-              Cancelar sin gas
+              Cancel with no gas
             </Button>
           )}
         </Fragment>

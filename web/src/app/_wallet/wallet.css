@@ -1,21 +1,31 @@
 /* Layout for the wallet screen. Everything visual comes from the design system's tokens and components. */
 
-/* minmax(0, 1fr) so a long unbroken revert reason wraps instead of widening the page. */
+/* minmax(0, 1fr) so a long unbroken refusal reason wraps instead of widening the page. */
 .host .host__main { grid-template-columns: minmax(0, 1fr); }
 .wallet-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
 
 .host__main .hf-notice p { max-width: 100%; overflow-wrap: anywhere; }
 
-.wallet-demo {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px dashed var(--rule-soft);
-}
+/* The chord fills the header and stops on the hairline above the rails, so no navigation sits on a crossing. */
+.host > .host__ribbons { position: absolute; inset: 0 0 auto 30%; height: 136px; }
+.wallet-head { min-height: 96px; align-items: flex-start; padding-top: var(--space-4); border-bottom: 0; }
+.wallet-head .hf-stamp { background: var(--ground); }
+.wallet-head .hf-stamp--pending { background: var(--saffron); }
+.wallet-head .hf-stamp--sold { background: var(--amber); }
 
-/* Five tabs have to fit at phone width. */
-.wallet-tabs { justify-content: space-between; gap: 0; padding-inline: var(--space-3); }
-.wallet-tabs a { padding-inline: var(--space-1); }
+/* Held to the left of the ribbons: a longer state wraps instead of running onto a crossing. */
+.wallet-state { max-width: 64%; min-height: 40px; padding: var(--space-2) 0 var(--space-3) var(--space-4); color: var(--text); font: 400 14px/20px var(--font-sans); }
+
+/* Two vertical rails share one hairline grid: where you are, and whose account you are looking at. */
+.wallet-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  border-block: 1px solid var(--rule);
+}
+.wallet-nav__col { display: grid; align-content: start; gap: var(--space-1); min-width: 0; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); }
+.wallet-nav__col + .wallet-nav__col { border-left: 1px solid var(--rule-soft); }
+.wallet-nav__col .t-field-label { color: var(--text-muted); }
+.wallet-nav__col .hf-tabs a { letter-spacing: .16em; }
 
 .wallet-demo-control {
   display: grid;
@@ -30,11 +40,12 @@
 
 .wallet-doc { display: grid; gap: var(--space-1); }
 .wallet-doc p { overflow-wrap: anywhere; }
+.wallet-report { justify-self: start; }
 
-.wallet-link { color: var(--text); }
+.wallet-link { justify-self: start; }
 
 /* The verification button has to say there is no identity check, so its label wraps instead of clipping. */
-.wallet-long-button { height: auto; min-height: 44px; padding-block: var(--space-2); line-height: 1.25; white-space: normal; }
+.wallet-long-button { height: auto; min-height: 44px; padding-block: var(--space-2); line-height: 1.35; white-space: normal; }
 
 .wallet-foot { display: grid; gap: var(--space-2); }
 
