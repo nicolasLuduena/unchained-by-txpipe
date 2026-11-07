@@ -6,7 +6,7 @@ import { roleAddresses } from "./send-as";
 import { readConsole, type ConsoleState } from "./state";
 
 /** A reading is reused for this long, so screens polling together cost the public RPC one read. */
-const MIN_INTERVAL_MS = chainName === "local" ? 1000 : 4000;
+const MIN_INTERVAL_MS = chainName === "local" ? 1000 : 7000;
 
 type Shared = { scanner: LogScanner; state: ConsoleState | null; readAt: number; running: Promise<ConsoleState> | null };
 

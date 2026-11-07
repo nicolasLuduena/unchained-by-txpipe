@@ -1,15 +1,17 @@
 import "server-only";
 import { erc20Abi, getAddress, type AbiEvent, type Address, type Hash } from "viem";
 import { handoffRegistryAbi, handoffSettlementAbi } from "@/lib/abi";
-import { deployment, publicClient } from "@/lib/chain";
+import { chainName, deployment, logSlotWaitMs, publicClient } from "@/lib/chain";
+import { MAX_LOG_SPAN } from "@/lib/wallet/logs";
 
-/** Starting chunk. An RPC that allows less says so, and the scanner drops to its cap: Fuji's public RPC allows 100. */
-const CHUNK_BLOCKS = 2048n;
+/** Starting chunk. An RPC that allows less says so, and the scanner drops to its cap. Fuji's cap is known, and a refused read still costs quota. */
+const CHUNK_BLOCKS = chainName === "local" ? 2048n : MAX_LOG_SPAN;
 /**
  * Bounds one poll in time, so a backfill shows progress and fits a serverless function. Time and not a chunk count:
  * a 429 carries a Retry-After of up to 60 seconds, and viem would sit out all of it inside a single read.
+ * Longer than the gap between log reads, so every poll gets at least one.
  */
-const SCAN_BUDGET_MS = 6000;
+const SCAN_BUDGET_MS = 8000;
 
 export type ScannedLog = {
   eventName: string;
@@ -73,25 +75,25 @@ export class LogScanner {
       this.transfers.clear();
     }
 
-    const timer = { expired: false, id: undefined as NodeJS.Timeout | undefined };
+    const deadline = Date.now() + SCAN_BUDGET_MS;
+    let timer: NodeJS.Timeout | undefined;
     const expiry = new Promise<null>((resolve) => {
-      timer.id = setTimeout(() => {
-        timer.expired = true;
-        resolve(null);
-      }, SCAN_BUDGET_MS);
+      timer = setTimeout(resolve, SCAN_BUDGET_MS, null);
     });
     try {
-      await this.readLogs(address, head, expiry, timer);
-      await this.readTimes(expiry, timer);
+      await this.readLogs(address, head, expiry, deadline);
+      await this.readTimes(expiry, deadline);
     } catch (error) {
       console.error("scan stopped early", error instanceof Error ? error.message.slice(0, 200) : error);
     } finally {
-      clearTimeout(timer.id);
+      clearTimeout(timer);
     }
   }
 
-  private async readLogs(address: Address[], head: bigint, expiry: Promise<null>, timer: { expired: boolean }) {
-    while (this.cursor <= head && !timer.expired) {
+  private async readLogs(address: Address[], head: bigint, expiry: Promise<null>, deadline: number) {
+    // Stops rather than queues when no slot fits the budget: a read it abandoned would still spend quota, and the
+    // order service's lookups, which a screen is waiting on, get the slot instead.
+    while (this.cursor <= head && Date.now() + logSlotWaitMs() < deadline) {
       const end = this.cursor + this.chunkBlocks - 1n;
       const toBlock = end < head ? end : head;
       let logs;
@@ -109,10 +111,10 @@ export class LogScanner {
     }
   }
 
-  private async readTimes(expiry: Promise<null>, timer: { expired: boolean }) {
+  private async readTimes(expiry: Promise<null>, deadline: number) {
     const missing = [...new Set(this.feedLogs.map((log) => log.blockNumber))].filter((n) => !this.blockTimes.has(n));
     for (const blockNumber of missing) {
-      if (timer.expired) return;
+      if (Date.now() >= deadline) return;
       const block = await Promise.race([publicClient.getBlock({ blockNumber }), expiry]);
       if (block) this.blockTimes.set(blockNumber, Number(block.timestamp));
     }

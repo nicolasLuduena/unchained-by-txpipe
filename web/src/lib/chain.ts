@@ -24,11 +24,19 @@ export const chain: Chain = CHAINS[chainName];
 /** Null until deployments/<chain>.json exists. Inlined by next.config.ts; restart dev after a redeploy. */
 export const deployment: Deployment | null = JSON.parse(process.env.NEXT_PUBLIC_DEPLOYMENT ?? "null");
 
-/** Measured on Fuji's public RPC: one eth_getLogs a second holds; two in a second trip the penalty below. */
-const LOG_READ_GAP_MS = 1250;
+/**
+ * Measured on Fuji's public RPC: about 12 eth_getLogs in any minute trips the penalty below, however they are spaced
+ * (9 reads at a 1.25s gap, 10 at 2.5s, 12 at 4s). This gap stays under it with room for a second reader.
+ */
+const LOG_READ_GAP_MS = chainName === "local" ? 0 : 7000;
 
 // On globalThis so every route shares one budget: Next can load this module more than once on the server.
 const logReads = globalThis as typeof globalThis & { __handoffNextLogRead?: number };
+
+/** How long a log read asked for now would wait. A caller that can walk away checks this first, and spends no quota. */
+export function logSlotWaitMs(): number {
+  return Math.max(0, (logReads.__handoffNextLogRead ?? 0) - Date.now());
+}
 
 async function waitForLogSlot() {
   const now = Date.now();
@@ -39,7 +47,8 @@ async function waitForLogSlot() {
 
 /**
  * Spaces eth_getLogs out. Going over the limit earns a 60 second 429 on every method from this IP, sends
- * included, so one burst of log reads would stop the whole demo. Nothing else needs pacing: eth_call holds at 8 a second.
+ * included, so a backfill could stop the whole demo. Nothing else needs pacing: eth_call holds at 8 a second.
+ * On serverless this budget is per instance, and instances that share an IP share the RPC's quota.
  */
 function pacedLogs(inner: Transport): Transport {
   return (args) => {
