@@ -1,0 +1,29 @@
+KUMPLY Protocol
+Copyright 2026 KUMPLY Protocol
+
+This product includes software developed by the KUMPLY Protocol contributors.
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file for terms.
+
+---
+
+Third-party components:
+
+  - OpenZeppelin Contracts (MIT License)
+    Copyright (c) OpenZeppelin
+    https://github.com/OpenZeppelin/openzeppelin-contracts
+
+  - viem (MIT License)
+    https://github.com/wevm/viem
+
+---
+
+Trademark notice:
+
+AVALANCHE(R) and AVAX(R) are trademarks of Ava Labs, Inc. KUMPLY is an
+independent project and is not endorsed by, sponsored by, or affiliated with
+Ava Labs, Inc. or the Avalanche Foundation.
+
+This License does not grant permission to use the trade names, trademarks,
+service marks, or product names of KUMPLY Protocol, except as required for
+reasonable and customary use in describing the origin of the work.

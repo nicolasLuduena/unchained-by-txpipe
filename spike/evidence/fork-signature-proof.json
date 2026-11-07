@@ -1,0 +1,82 @@
+{
+  "probe": "0x4be5efc7163054ce324101af2a99ca88cad1731c",
+  "owner (throwaway)": "0x53b7607a5925237af049D292b2a5f51dA082b217",
+  "counterfactual": "0x5353D7194727FbA15B5b0156C7d6Cd973935053C",
+  "code before deploy": "none",
+  "digest (viem hashTypedData)": "0x6956a3fcef218f7e0b8b04c3eaeb04c6e98d569e5a94d26b60807bc4b01345c3",
+  "digest == on-chain hashOrder": true,
+  "undeployed: SDK output is ERC-6492": true,
+  "undeployed: SignatureChecker": {
+    "direct": false,
+    "wrapped": false
+  },
+  "undeployed: stripped sig pre-deploy": {
+    "direct": false,
+    "wrapped": false
+  },
+  "factory deploy status": "success",
+  "code size after deploy": 90,
+  "deployed implementation": "0x8aF33bE7af021A6075aeB19b076fC75Bfbd2c5c3",
+  "ECDSA module enabled": true,
+  "module owner == throwaway owner": true,
+  "stale client: still ERC-6492 after deploy": true,
+  "stale client: SignatureChecker": {
+    "direct": false,
+    "wrapped": false
+  },
+  "stale client: stripped": {
+    "direct": true,
+    "wrapped": true
+  },
+  "pre-deploy sig, stripped, after deploy": {
+    "direct": true,
+    "wrapped": true
+  },
+  "fresh client: sig bytes": 192,
+  "fresh client: inner sig bytes": 65,
+  "fresh client: wrapped module": "0xcfb0BA514aa398085D63eC70cfEa6EC7f1094E8F",
+  "fresh client: SignatureChecker": {
+    "direct": true,
+    "wrapped": true
+  },
+  "recovers owner: raw digest": false,
+  "recovers owner: EIP-191 over 32 bytes": true,
+  "recovers owner: EIP-191 over hex string": false,
+  "Uint8Array input == hex input": true,
+  "no-0x input: EIP-191 over the 64-char text": true,
+  "no-0x input: SignatureChecker": {
+    "direct": false,
+    "wrapped": false
+  },
+  "viem WalletClient signer == local": true,
+  "ethers 5 Wallet signer == local": true,
+  "owner signTypedData + manual wrap": {
+    "direct": true,
+    "wrapped": false
+  },
+  "neg: stranger key": {
+    "direct": false,
+    "wrapped": false
+  },
+  "neg: unwrapped 65-byte sig": {
+    "direct": false,
+    "wrapped": false
+  },
+  "neg: wrapped with unknown module": {
+    "direct": false,
+    "wrapped": false
+  },
+  "neg: different digest": {
+    "direct": false,
+    "wrapped": false
+  },
+  "neg: client missing module override": "0xfe5Bf45836edAC6f2a19738b0FbfDDd8860ee222",
+  "executeBatch selector": "0x00004680",
+  "handleOps status": "success",
+  "handleOps deployed account": true,
+  "batch: fill saw allowance from approve": true,
+  "handleOps account: SignatureChecker": {
+    "direct": true,
+    "wrapped": true
+  }
+}

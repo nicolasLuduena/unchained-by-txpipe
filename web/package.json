@@ -1,0 +1,33 @@
+{
+  "name": "handoff-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/sync-design.mjs && node scripts/sync-deployments.mjs",
+    "gen:abi": "node scripts/gen-abi.mjs",
+    "predev": "pnpm run sync",
+    "dev": "next dev",
+    "prebuild": "pnpm run sync",
+    "build": "next build",
+    "start": "next start",
+    "pretypecheck": "pnpm run sync",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@0xgasless/smart-account": "0.0.13",
+    "@kumply/sdk": "^1.3.0",
+    "@upstash/redis": "^1.41.0",
+    "merkletreejs": "^0.3.11",
+    "next": "^16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tslib": "^2.9.1",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}

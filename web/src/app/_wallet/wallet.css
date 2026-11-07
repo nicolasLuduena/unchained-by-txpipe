@@ -1,0 +1,42 @@
+/* Layout for the wallet screen. Everything visual comes from the design system's tokens and components. */
+
+/* minmax(0, 1fr) so a long unbroken revert reason wraps instead of widening the page. */
+.host .host__main { grid-template-columns: minmax(0, 1fr); }
+.wallet-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+
+.host__main .hf-notice p { max-width: 100%; overflow-wrap: anywhere; }
+
+.wallet-demo {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--rule-soft);
+}
+
+/* Five tabs have to fit at phone width. */
+.wallet-tabs { justify-content: space-between; gap: 0; padding-inline: var(--space-3); }
+.wallet-tabs a { padding-inline: var(--space-1); }
+
+.wallet-demo-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--rule);
+}
+
+/* FeedRow switches to its narrow layout through this container. */
+.wallet-history { display: grid; gap: var(--space-1); container: feed / inline-size; }
+
+.wallet-doc { display: grid; gap: var(--space-1); }
+.wallet-doc p { overflow-wrap: anywhere; }
+
+.wallet-link { color: var(--text); }
+
+/* The verification button has to say there is no identity check, so its label wraps instead of clipping. */
+.wallet-long-button { height: auto; min-height: 44px; padding-block: var(--space-2); line-height: 1.25; white-space: normal; }
+
+.wallet-foot { display: grid; gap: var(--space-2); }
+
+/* An open order already says it is unused. The stamp appears when there is news: sold. */
+.hf-coupon--open .hf-coupon__stubhead .hf-stamp { display: none; }
