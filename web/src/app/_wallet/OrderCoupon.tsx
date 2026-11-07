@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Coupon, Notice, Stamp, type CouponState } from "@/design";
+import type { Hash } from "viem";
+import { Coupon, Hash as HashText, Notice, Stamp, type CouponState } from "@/design";
 import { explorerUrl } from "@/lib/chain";
 import { fromWireOrder, type OrderStatus, type OrderView } from "@/lib/orders/types";
 import { formatUsdc, tokensLabel } from "@/lib/wallet/format";
@@ -52,7 +53,7 @@ export function OrderCoupon({ view, label, tokenName, reference, note, torn, chi
 }
 
 /** What a fill leaves behind: the explorer link and the registry report, which is a labelled mock. */
-export function FillProof({ view }: { view: OrderView }) {
+export function FillProof({ view, userOpHash }: { view: OrderView; userOpHash?: Hash }) {
   const href = view.closeTx && explorerUrl("tx", view.closeTx);
   return (
     <div className="wallet-stack">
@@ -62,6 +63,12 @@ export function FillProof({ view }: { view: OrderView }) {
         </a>
       ) : (
         <p className="caveat">Red local: esta transacción no tiene explorador.</p>
+      )}
+      {userOpHash && (
+        <div className="wallet-doc">
+          <span className="t-field-label">Operación patrocinada</span>
+          <HashText value={userOpHash} />
+        </div>
       )}
       {view.report?.status === "acknowledged" ? (
         <Notice status="unused" word="Acuse">

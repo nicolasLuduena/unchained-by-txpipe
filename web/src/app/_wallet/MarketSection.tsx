@@ -28,7 +28,7 @@ type Props = { config: WalletConfig; actor: Actor; wallet: Wallet };
 
 export function MarketSection({ config, actor, wallet }: Props) {
   const { address, snapshot, orders, precheck } = wallet;
-  const [lastFill, setLastFill] = useState<Hash | null>(null);
+  const [lastFill, setLastFill] = useState<{ orderHash: Hash; userOpHash?: Hash } | null>(null);
   const [attempt, setAttempt] = useState<DirectResult | null>(null);
   const buying = useAction();
   const direct = useAction();
@@ -38,18 +38,18 @@ export function MarketSection({ config, actor, wallet }: Props) {
   const ask = lowestAsk(orders);
   const ownAsk = ask && isAddressEqual(ask.order.seller, address);
   const total = ask ? BigInt(ask.order.amount) * BigInt(ask.order.price) : 0n;
-  const filled = orders.find((o) => o.orderHash === lastFill && o.status === "filled");
+  const filled = orders.find((o) => o.orderHash === lastFill?.orderHash && o.status === "filled");
 
   function buy(view: OrderView) {
     return buying.run(async () => {
       const venueSig = await venue.coSign(view.orderHash, address);
       const sponsor = await getSponsor();
       const amount = BigInt(view.order.amount) * BigInt(view.order.price);
-      await sponsor.sendCalls(actor, [
+      const { userOpHash } = await sponsor.sendCalls(actor, [
         { to: config.usdc, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [config.settlement, amount] }) },
         { to: config.settlement, data: fillData(view, venueSig) },
       ]);
-      setLastFill(view.orderHash);
+      setLastFill({ orderHash: view.orderHash, userOpHash });
       wallet.refresh();
     });
   }
@@ -80,7 +80,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
       {filled && (
         <section className="wallet-stack">
           <OrderCoupon view={filled} label="Compra" tokenName={snapshot.tokenName} torn />
-          <FillProof view={filled} />
+          <FillProof view={filled} userOpHash={lastFill?.userOpHash} />
         </section>
       )}
 
