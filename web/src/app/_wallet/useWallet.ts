@@ -22,6 +22,7 @@ export type WalletData = {
   orders: OrderView[];
   reversions: ReversionView[];
   history: HistoryEntry[];
+  historyPartial: boolean;
   precheck: Precheck;
   offline: boolean;
 };
@@ -32,6 +33,7 @@ const empty = (address: Address): WalletData => ({
   orders: [],
   reversions: [],
   history: [],
+  historyPartial: true,
   precheck: "checking",
   offline: false,
 });
@@ -47,8 +49,8 @@ export function useWallet(config: WalletConfig, address: Address) {
     async function load() {
       // Apart from the rest: history is a record, and a slow log read must not hold the ticket shut.
       readHistory(config, address)
-        .then((history) => {
-          if (live) setData((d) => (d.address === address ? { ...d, history } : d));
+        .then(({ entries, partial }) => {
+          if (live) setData((d) => (d.address === address ? { ...d, history: entries, historyPartial: partial } : d));
         })
         .catch((error: unknown) => console.error("history refresh failed", error));
 

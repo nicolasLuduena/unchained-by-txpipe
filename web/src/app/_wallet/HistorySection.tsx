@@ -6,14 +6,15 @@ import type { WalletConfig } from "@/lib/wallet/deployment";
 import type { Wallet } from "./useWallet";
 
 export function HistorySection({ config, wallet }: { config: WalletConfig; wallet: Wallet }) {
-  const { snapshot, history } = wallet;
+  const { snapshot, history, historyPartial } = wallet;
   if (!snapshot) return <Notice status="pending">Leyendo la cadena.</Notice>;
 
   return (
     <>
       <section className="wallet-stack">
         <h2 className="t-title">Historial</h2>
-        {history.length === 0 && <p className="caveat">Todavía no hay movimientos en esta cuenta.</p>}
+        {historyPartial && <p className="caveat">Seguimos leyendo la cadena: puede haber movimientos que todavía no aparecen.</p>}
+        {history.length === 0 && !historyPartial && <p className="caveat">Todavía no hay movimientos en esta cuenta.</p>}
         {history.map((entry) => (
           <div className="wallet-history" key={entry.id}>
             <FeedRow

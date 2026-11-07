@@ -15,8 +15,9 @@ const holder = globalThis as typeof globalThis & { __handoffConsole?: Shared };
 const shared: Shared = (holder.__handoffConsole ??= { scanner: new LogScanner(), state: null, readAt: 0, running: null });
 
 /**
- * The one chain poll behind the console and the wallet's history. However many screens are open, the RPC
- * sees a single scan, and a failed poll keeps its cursors, so the next one carries on from there.
+ * The one chain poll behind the console and the wallet's history. However many screens are open, an instance
+ * sends the RPC a single scan. A poll that fails falls back to the last good reading, if there is one, because a
+ * stale screen that says how far it has read beats an error; the next poll carries on from the scanner's cursor.
  */
 export async function sharedConsole(): Promise<ConsoleState> {
   if (shared.state && Date.now() - shared.readAt < MIN_INTERVAL_MS) return shared.state;
@@ -25,6 +26,11 @@ export async function sharedConsole(): Promise<ConsoleState> {
       shared.state = state;
       shared.readAt = Date.now();
       return state;
+    })
+    .catch((error: unknown) => {
+      if (!shared.state) throw error;
+      console.error("chain read failed, serving the last reading", error instanceof Error ? error.message.slice(0, 200) : error);
+      return shared.state;
     })
     .finally(() => {
       shared.running = null;

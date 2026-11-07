@@ -25,16 +25,16 @@ type ReversionArgs = { token: Address; holder: Address; amount: bigint };
 async function readEvents() {
   const response = await fetch("/api/chain/logs", { cache: "no-store" });
   if (!response.ok) throw new Error(`chain logs: ${response.status}`);
-  return parseBig<{ logs: ScannedLog[]; times: [bigint, number][] }>(await response.text());
+  return parseBig<{ head: bigint; scannedTo: bigint; logs: ScannedLog[]; times: [bigint, number][] }>(await response.text());
 }
 
 function clock(seconds: number) {
   return new Date(seconds * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 }
 
-/** Everything this account did on the token, from chain events. */
-export async function readHistory(config: WalletConfig, account: Address): Promise<HistoryEntry[]> {
-  const { logs, times } = await readEvents();
+/** Everything this account did on the token, from chain events. `partial` while the scan is still catching up. */
+export async function readHistory(config: WalletConfig, account: Address): Promise<{ entries: HistoryEntry[]; partial: boolean }> {
+  const { head, scannedTo, logs, times } = await readEvents();
   const timeOf = new Map(times);
   const mine = (address: Address) => isAddressEqual(address, account);
   const ofToken = (token: Address) => isAddressEqual(token, config.token);
@@ -42,7 +42,8 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
   const entries: HistoryEntry[] = [];
 
   for (const e of logs) {
-    const located = { id: `${e.transactionHash}-${e.logIndex}`, hash: e.transactionHash, time: clock(timeOf.get(e.blockNumber) ?? 0) };
+    const seconds = timeOf.get(e.blockNumber);
+    const located = { id: `${e.transactionHash}-${e.logIndex}`, hash: e.transactionHash, time: seconds ? clock(seconds) : "-" };
     const order = e.args as OrderArgs;
 
     if (e.eventName === "OrderAnnounced" && ofToken(order.token) && mine(order.seller)) {
@@ -65,5 +66,5 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
   }
 
   // The scan is oldest first; the screen is newest first.
-  return entries.reverse();
+  return { entries: entries.reverse(), partial: scannedTo < head };
 }
