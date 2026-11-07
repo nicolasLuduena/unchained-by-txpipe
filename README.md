@@ -8,14 +8,16 @@ A white-label trading layer for Argentina's tokenized securities, built for the 
 
 Handoff is software, built to the structure of Título XXII of the CNV Normas and operated by a PSAV. It holds no assets, holds no fiat and takes nothing from trades. The spec is [issue #1](https://github.com/nicolasLuduena/unchained-by-txpipe/issues/1), written under an earlier working name. The pitch script and Q&A are in [docs/pitch.md](docs/pitch.md), and the design in [docs/architecture.md](docs/architecture.md).
 
-**TODO: demo video link.** Not recorded yet.
+**[Watch the demo, 45 seconds](docs/demo/handoff-demo.mp4).** One real sale and one real on-chain refusal on the hosted site.
 
-**TODO: wallet screen screenshot.** Not captured yet.
+![Two wallets sharing one order book, with the compliance feed at the right](docs/demo/demo-sold.png)
+
+**Live demo:** https://handoff-unchained.vercel.app/demo. Any username works. The password is in the submission, because the site holds demo keys.
 
 ## Deliverables checklist
 
 - [x] [Verified contract addresses with Snowtrace links](#deployed-contracts): the three Handoff contracts plus the demo attestation store
-- [x] [End-user interface](#install): wallet screen at `/`, issuer and PSAV console at `/console`
+- [x] [End-user interface](#install): two-wallet demo page at `/demo`, wallet screen at `/`, issuer and PSAV console at `/console`
 - [x] [Why Avalanche](#why-avalanche): five-validator L1 mapping, finality of about one second, ICM
 - [x] [Built today versus libraries used](#built-today-versus-libraries)
 - [x] [Bonus section: 0xGasless components and sponsored user operation links](#bonus-0xgasless)
@@ -55,7 +57,9 @@ Each row is a real transaction, read from [`spike/evidence/`](spike/evidence). *
 | Attested holder transfers directly to an attested holder, outside the venue path | Reverted, `NotRoutedThroughVenue` | [`0x4554...5f3b`](https://testnet.snowtrace.io/tx/0x4554b2f23dc30c2db6bffd89c64a19d4ece8c93d2350d4d919f5aeeaf0ef5f3b) |
 | Reversion to paper: the PSAV burns 1 unit against `DEMO-CERT-0001` | Success | [`0x2c8e...3460`](https://testnet.snowtrace.io/tx/0x2c8e4a20b1d894e22526273c646cc53ad3d69f0e0bec8518fa0452b007163460) |
 
-After the fill the seller held 98 units and USDC 5, the buyer 22 units and USDC 15, and the settlement contract zero of both. The reversion then took the buyer to 21.
+The [demo clip](docs/demo/handoff-demo.mp4) is a separate run through the hosted `/demo` page in a real browser: HOSTED_RUN
+
+After the scripted fill the seller held 98 units and USDC 5, the buyer 22 units and USDC 15, and the settlement contract zero of both. The reversion then took the buyer to 21.
 
 Three things to read correctly:
 
@@ -117,7 +121,7 @@ Create a Vercel project with root directory `web` and the Next.js preset, and at
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Injected by the Upstash integration. |
 | `NEXT_PUBLIC_RPC_URL` | Optional but advised: the public Fuji RPC throttles. Read at build time. |
 
-None of these but the two `NEXT_PUBLIC_` ones reach the browser. Without the KV variables the venue falls back to process memory, which serverless instances do not share, so orders would come and go between requests.
+None of these but the two `NEXT_PUBLIC_` ones reach the browser, with one exception: `GET /api/onboard` returns the `AA_*` addresses and `BUNDLER_URL` for the MetaMask path, so a bundler URL with a key in it must not go there. Without the KV variables the venue falls back to process memory, which serverless instances do not share, so orders would come and go between requests.
 
 Redis keys are `handoff:<chainId>:<settlement>:...`, so a contract redeploy starts with an empty book and old keys are simply left behind.
 
@@ -162,7 +166,7 @@ git clone --recurse-submodules https://github.com/nicolasLuduena/unchained-by-tx
 cd unchained-by-txpipe/contracts && forge test
 ```
 
-The web app needs Node and pnpm, not Foundry. It serves the wallet screen at `/` and the issuer console at `/console`, both with Spanish copy.
+The web app needs Node and pnpm, not Foundry. It serves the two-wallet demo page at `/demo`, the wallet screen at `/` and the issuer console at `/console`, both with Spanish copy.
 
 ```bash
 cd web
@@ -185,7 +189,7 @@ To run the app against the existing Fuji deployment, set `NEXT_PUBLIC_CHAIN=fuji
 
 ## Deploy to Fuji
 
-Keys come from one mnemonic. Indexes: 0 deployer, 1 issuer, 2 unverified, 3 seller owner, 4 buyer owner, 5 venue PSAV, 6 venue order key. Secrets stay in files outside the repo and are read by path, or, where there are no files, by value (see [Deploy the web app to Vercel](#deploy-the-web-app-to-vercel)).
+Keys come from one mnemonic. Indexes: 0 deployer, 1 issuer, 2 unverified, 3 seller owner, 4 buyer owner, 5 venue PSAV, 6 venue order key, 7 second venue, 8 second venue order key. Secrets stay in files outside the repo and are read by path, or, where there are no files, by value (see [Deploy the web app to Vercel](#deploy-the-web-app-to-vercel)).
 
 **1. Prepare.** From `spike/`: `npm install`, `forge build`, copy `.env.example` to `.env`, and run `npm run addresses` to print every role, including the smart-account addresses before they exist. Send faucet AVAX to the deployer, issuer, unverified EOA, venue and order key.
 
@@ -240,7 +244,7 @@ Each writes to `spike/evidence/`, replacing the previous run.
 
 **How it is sponsored.** Through the team's own paymaster on 0xGasless: the team's project and key, with a gas tank funded with test AVAX, sponsoring human accounts. On-chain, the paymaster in each `UserOperationEvent` is the 0xGasless verifying paymaster contract on Fuji, [`0xC68dAd686fcAe526dB286d84E1Fc8aDdc7b2FE98`](https://testnet.snowtrace.io/address/0xC68dAd686fcAe526dB286d84E1Fc8aDdc7b2FE98), through EntryPoint v0.6.
 
-**The paymaster does not check attestations.** Attestation is enforced in the token hook, where a failed check reverts. The app's sponsor route separately limits itself to the two demo accounts and the wallet's own calls, which protects the credit and is not an identity check. The rule sheet's example of a paymaster that only sponsors attested accounts is not what this does: that lane covers KYA tier 5 only, and these humans are tier 2.
+**The paymaster does not check attestations.** Attestation is enforced in the token hook, where a failed check reverts. The app's `/api/venue/sponsor` route limits itself to the two demo accounts and the wallet's own calls, which protects the credit and is not an identity check. The MetaMask path goes through `/api/paymaster`, which does check the attestation before sponsoring, then forwards any call from that account under a rate limit. The rule sheet's example of a paymaster that only sponsors attested accounts is not what this does: that lane covers KYA tier 5 only, and these humans are tier 2.
 
 | Sponsored operation | userOpHash | Transaction |
 |---|---|---|
@@ -327,11 +331,13 @@ The 0xGasless bundler, paymaster, EntryPoint and smart-account contracts are thi
 - **Attestations are demo attestations** in the team's own store, with no identity check, as stated at the top.
 - **The order book is sell-only.** There are no buy orders, so the spec's "best bid" is shown as the lowest ask, under the label "Mejor oferta". There is no matching engine: it is a bulletin board.
 - **The registry acknowledgment is a labelled mock.** It reads "Acuse de demostración, sin llamada real". No call to BYMA or anyone else happens.
-- **The console has no auth and is run locally.** Its route signs as issuer or PSAV for whoever can reach it, so it must not be exposed.
+- **The hosted console signs for anyone with the demo password.** Its route acts as issuer or PSAV, so the password is the only control, and any holder can pause the token or burn units. Re-pointing a venue is switched off on Fuji because one bad key would stop every order.
 - **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. The exception is [Mi billetera](#bring-your-own-metamask), where the visitor's MetaMask signs.
-- **The linked transactions came from scripts,** see [What ran on Fuji](#what-ran-on-fuji).
+- **Venue powers are wider than the spec's.** Any listed venue can lift a pause and can change the band's width and age limit, which the spec gives to the issuer. A price-0 sale that way still needs a venue key and a seller signature, and an issuer floor blocks it. Fixing this means redeploying the contracts, so it stayed as it is.
+- **Some duties sit only in the PSAV's service, not the contracts.** A blocked holder can still receive tokens on-chain, and only the co-signature refuses them. `revertToPaper` accepts an empty certificate reference, and only the console form requires one. `announceOrder` accepts a spent nonce, and only the order service refuses it.
+- **The linked transactions in the table came from scripts,** see [What ran on Fuji](#what-ran-on-fuji). The hosted run is listed below that table.
 - **The direct-transfer refusals used the issuer EOA,** and the refused fill used a deliberately issued co-signature.
-- **The order book is one in-memory instance,** labelled as the PSAV's. Restarting it loses open orders. One venue is listed on Fuji, so synchronization between PSAVs is not exercised; the five-venue cap lives in the contract and its tests.
+- **The order book is one shared Redis store on the hosted site,** labelled as the PSAV's, and process memory when run locally without one. Two venues are listed on Fuji, but every order from the UI names venue 1, so venue 1 co-signs even for the buyer on venue 2. An order naming venue 2 ran only on a local chain, so synchronization between PSAVs is not exercised on Fuji; the five-venue cap lives in the contract and its tests.
 - **Sponsorship policy.** The spec asks for a contract allowlist and a per-user rate limit on the paymaster key. Neither is confirmed in place; only the app route limits what it sends.
 - **One asset.** The second asset, a tokenized CEDEAR, was not built. The demo trust, its CNV and deposit references and "Billetera Sur" are fictional.
 

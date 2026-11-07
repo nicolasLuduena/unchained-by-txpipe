@@ -6,6 +6,7 @@ import { chain, chainName, publicClient } from "@/lib/chain";
 import { registryReport } from "@/lib/registry-report";
 import { bandLimits } from "@/lib/wallet/band";
 import { coreContracts } from "@/lib/wallet/deployment";
+import { withinRate } from "@/lib/onboard/limits";
 import { firstInSpans } from "@/lib/wallet/logs";
 import { revertAbi, revertReason } from "@/lib/wallet/revert-reason";
 import { store, type StoredOrder, type StoredReversion } from "./store";
@@ -16,6 +17,7 @@ import { venueIndex } from "./venues";
 const RECEIPT_POLL_MS = chainName === "local" ? 200 : 1000;
 const REVERSION_MAX_AGE_S = 600n;
 const REPORT_CLAIM_MS = 30_000;
+const ORDERS_PER_MINUTE = 20;
 /** One instance at a time looks an event up by logs, and no more often than this: eth_getLogs quota is per IP, not per instance. */
 const LOG_LOOKUP_GAP_MS = chainName === "local" ? 1000 : 20_000;
 
@@ -169,6 +171,7 @@ export function hashOrder(order: Order): Promise<Hash> {
 export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: unknown }): Promise<OrderView> {
   const order = parseOrder(body.order);
   const sellerSig = parseSignature(body.sellerSig);
+  if (!(await withinRate("orders", ORDERS_PER_MINUTE, 60_000))) throw new Refused("rate_limited", "Demasiadas órdenes. Probá en un minuto.", 429);
   await assertPostable(order);
 
   const orderHash = await hashOrder(order);
@@ -234,7 +237,8 @@ async function syncWithChain(stored: StoredOrder): Promise<StoredOrder> {
   ]);
   if (!filled && !cancelled) return stored;
   // A sponsored fill is recorded from its own receipt moments from now, so a lookup here is only the fallback.
-  if (!(await store.claim(`lookup:${stored.orderHash}`, LOG_LOOKUP_GAP_MS))) return stored;
+  // Losing the claim only means another request is finding the event. The flag already settles a cancel.
+  if (!(await store.claim(`lookup:${stored.orderHash}`, LOG_LOOKUP_GAP_MS))) return cancelled && !filled ? { ...stored, cancelled: {} } : stored;
 
   // The flag proves the event exists, so this scan runs once per order and always ends.
   const latest = await publicClient.getBlockNumber({ cacheTime: 0 });

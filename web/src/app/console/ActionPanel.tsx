@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Address } from "viem";
 import { Button, Hash, Notice, TextField } from "@/design";
-import { explorerUrl, networkLabel } from "@/lib/chain";
+import { explorerUrl, networkLabel, chainName } from "@/lib/chain";
 import { ACTIONS, fieldError, type ActionContext, type ActionDef, type Values } from "@/lib/console/actions";
 import type { FeedEntry } from "@/lib/console/feed";
 import { reasonText } from "@/lib/console/reasons";
@@ -157,7 +157,7 @@ function ActionForm({ action, ctx, props }: { action: ActionDef; ctx: ActionCont
 export function ActionPanel(props: PanelProps) {
   const { role, token, store } = props;
   const ctx: ActionContext = { token, store };
-  const actions = ACTIONS.filter((action) => action.roles.includes(role));
+  const actions = ACTIONS.filter((action) => action.roles.includes(role) && (action.fn !== "repointVenue" || chainName !== "fuji"));
 
   return (
     <section className="desk__section desk__actions">

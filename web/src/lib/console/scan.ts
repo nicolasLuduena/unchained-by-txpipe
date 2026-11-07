@@ -77,13 +77,13 @@ export class LogScanner {
 
   async poll(head: bigint, contracts: Address[], tokens: readonly Address[]) {
     const address = [...contracts, ...tokens];
-    // A token registered later has logs behind the cursor, so a new source starts the scan over.
-    if (address.join() !== this.sources) {
-      this.sources = address.join();
+    // Tokens append, and a new one has no logs behind the cursor. Anything else starts the scan over.
+    if (!address.join().startsWith(this.sources)) {
       this.cursor = startBlock();
       this.feedLogs.length = 0;
       this.transfers.clear();
     }
+    this.sources = address.join();
 
     const deadline = Date.now() + SCAN_BUDGET_MS;
     let timer: NodeJS.Timeout | undefined;

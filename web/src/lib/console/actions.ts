@@ -169,7 +169,7 @@ export const ACTIONS: ActionDef[] = [
     fn: "revertToPaper",
     fields: () => [
       { name: "holder", label: "Titular", kind: "address", initial: actor("seller") },
-      { name: "amount", label: "Unidades", kind: "whole", initial: "5" },
+      { name: "amount", label: "Unidades", kind: "whole", initial: "1" },
       // The contract accepts an empty reference, so this form is what requires it.
       { name: "certificate", label: "Referencia del certificado", kind: "required", help: "La emite el depositario. Handoff no emite certificados." },
       { name: "docHash", label: "Hash del documento", kind: "hash", help: "Hash de ejemplo. Pegá el del documento real.", initial: EXAMPLE_DOC_HASH },

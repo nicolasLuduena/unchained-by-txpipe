@@ -9,10 +9,10 @@ How Handoff is put together, what each party can do, and where the trust sits. T
 | Registry, wrapper token, settlement | `contracts/src/` | The DLT entity named in the issuance document, or the PSAV | The team, on Fuji |
 | Attestation store | `contracts/src/vendor/kumply/` | Each PSAV attests its own users in this format | The team's own instance of KUMPLY's contract. Demo attestations, no identity check |
 | Wallet screen | `web/src/app/_wallet/` | Embedded by the PSAV under its brand | Fictional host wallet "Billetera Sur" |
-| Order book and co-signature | `web/src/lib/orders/` | The participating PSAVs | One in-memory instance, labelled as the PSAV's |
+| Order book and co-signature | `web/src/lib/orders/` | The participating PSAVs | One shared Redis store on the hosted site, process memory locally, labelled as the PSAV's |
 | Sponsorship | `web/src/lib/sponsor/` | The PSAV's own 0xGasless key | The team's key and gas tank |
 | Registry report | `web/src/lib/registry-report/` | Optional client for BYMA or a PSAV ledger | Labelled mock, no live call |
-| Issuer and PSAV console | `web/src/app/console/` | Authenticated desk tool | Run locally, no auth |
+| Issuer and PSAV console | `web/src/app/console/` | Authenticated desk tool | Hosted behind the demo password, which is its only control |
 
 ## A fill
 
@@ -70,9 +70,9 @@ Swapping to KUMPLY's official store means redeploying the registry, and then the
 | Venue | `revertToPaper`, `setBlocked`, band, pause | EOA, on the console's server side |
 | Order key | `announceOrder`, co-sign fills; an order uses its own venue's key | Server env `VENUE_ORDER_KEY`, `VENUE_ORDER_KEY_2` |
 | Seller and buyer owners | Sign for their smart accounts | App server on Fuji, behind the sponsor route. A demo shortcut: in production these belong to the user's wallet |
-| Paymaster key | Spend sponsorship | Server file, read by path, never `NEXT_PUBLIC` |
+| Paymaster key | Spend sponsorship | Server file read by path locally, a server environment value on Vercel, never `NEXT_PUBLIC` |
 
-The paymaster does not read attestations; the hook does. [`fuji-server.ts`](../web/src/lib/sponsor/fuji-server.ts) refuses anything but the two demo accounts and the wallet's own calls, to protect the credit.
+The paymaster does not read attestations; the hook does. [`fuji-server.ts`](../web/src/lib/sponsor/fuji-server.ts) refuses anything but the two demo accounts and the wallet's own calls, to protect the credit. The MetaMask path uses `/api/paymaster` instead, which sponsors any attested account under a rate limit.
 
 ## What the signature work found
 

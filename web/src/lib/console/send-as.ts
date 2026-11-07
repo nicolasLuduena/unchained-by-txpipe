@@ -56,6 +56,8 @@ function refusal(error: unknown): SendResult {
 /** Simulates first, so a refused call comes back with its reason and spends no gas. */
 export async function sendAs(role: Role, call: RegistryCall): Promise<SendResult> {
   if (!REGISTRY_WRITES.includes(call.fn)) return { ok: false, code: "CallNotAllowed", detail: String(call.fn) };
+  // One bad key here stops every order for everyone, so the hosted demo does not offer it.
+  if (call.fn === "repointVenue" && chainName === "fuji") return { ok: false, code: "CallNotAllowed", detail: String(call.fn) };
   const registry = deployment?.contracts?.HandoffRegistry;
   if (!registry) return { ok: false, code: "NoDeployment" };
   const account = accountFor(role);

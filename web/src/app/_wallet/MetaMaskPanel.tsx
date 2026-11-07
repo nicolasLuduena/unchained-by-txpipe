@@ -55,7 +55,7 @@ export function MetaMaskPanel({ metamask, wallet }: { metamask: MetaMask; wallet
         <HashText value={smartAccount} href={explorerUrl("address", smartAccount)} />
       </div>
 
-      {wallet.precheck === "blocked" && (
+      {(wallet.precheck === "blocked" || (record && !record.done)) && (
         <>
           <Notice status="blocked">Primero verificá esta cuenta. La comprobación del SDK de KUMPLY la bloquea hasta que tenga una atestación.</Notice>
           <Button className="wallet-long-button" variant="primary" busy={verifying.busy} onClick={() => verify(wallet.refresh)}>

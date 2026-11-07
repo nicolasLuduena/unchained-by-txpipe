@@ -199,7 +199,7 @@ export function feedFromVenue(payload: unknown, assetName: (token: Address) => s
         fromRole: "Cuenta",
         price: price ?? "-",
         unit: price ? undefined : " ",
-        hash: pick(r, ["hash", "txHash", "orderHash"]),
+        hash: pick(r, ["hash", "txHash"]),
         code: pick(r, ["code", "reasonCode", "reason"]) ?? (isRevertRequest ? "RevertRequest" : "Refused"),
         detail: pick(r, ["message", "detail", "certificateRef"]),
       },

@@ -10,6 +10,7 @@ import { readSecret } from "@/lib/secrets";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { sendFrom } from "./direct";
 import type { Call, DemoActor } from "./index";
+import { withinRate } from "@/lib/onboard/limits";
 
 /** Mnemonic address index per demo actor, the same table as spike/scripts/lib.ts. */
 const OWNER_INDEX: Record<DemoActor, number> = { unverified: 2, seller: 3, buyer: 4 };
@@ -202,6 +203,14 @@ type SponsorRequest = {
   requestedAt?: unknown;
 };
 
+const MAX_CALLS = 3;
+const SPONSORED_PER_MINUTE = 20;
+const DIRECT_PER_MINUTE = 10;
+
+async function assertWithinRate(name: string, limit: number) {
+  if (!(await withinRate(name, limit, 60_000))) throw new Refused("rate_limited", "Demasiadas operaciones. Probá en un minuto.", 429);
+}
+
 /** The server half of the Fuji Sponsor: signing needs the mnemonic and the paymaster key, which stay here. */
 export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
   if (chainName === "local") throw new Refused("not_on_local", "En la red local el patrocinio es simulado.", 404);
@@ -209,6 +218,8 @@ export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
   if (body.action === "sendCalls") {
     const actor = sponsoredActor(body.actor);
     if (!Array.isArray(body.calls) || body.calls.length === 0) throw new Refused("malformed", "Faltan las llamadas.", 400);
+    if (body.calls.length > MAX_CALLS) throw new Refused("malformed", "Demasiadas llamadas en una operación.", 400);
+    await assertWithinRate(`sponsor:${actor}`, SPONSORED_PER_MINUTE);
     const calls = body.calls.map(parseCall);
     calls.forEach((call) => assertWalletCall(call, ["approve", "fill", "cancel"]));
     return withPaymaster((paymasterUrl) => sendSponsored(actor, calls, paymasterUrl));
@@ -223,6 +234,7 @@ export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
   if (body.action === "direct") {
     // The refusal demo: the unverified EOA pays its own gas, so no paymaster is involved.
     if (body.actor !== "unverified") throw new Refused("sponsor_actor", "Solo la cuenta sin verificar usa esta vía.", 403);
+    await assertWithinRate("direct", DIRECT_PER_MINUTE);
     const call = parseCall(body.call);
     assertWalletCall(call, ["fill"]);
     const wallet = ownerWallet("unverified");

@@ -5,11 +5,11 @@
  */
 export const MAX_LOG_SPAN = 100n;
 
-/** Walks [from, to] in spans the RPC accepts and stops at the first span that finds something. */
+/** Walks [from, to] newest first in spans the RPC accepts, and stops at the first span that finds something. What we look for is usually recent. */
 export async function firstInSpans<T>(from: bigint, to: bigint, read: (fromBlock: bigint, toBlock: bigint) => Promise<T[]>): Promise<T[]> {
-  for (let start = from; start <= to; start += MAX_LOG_SPAN) {
-    const end = start + MAX_LOG_SPAN - 1n;
-    const found = await read(start, end < to ? end : to);
+  for (let end = to; end >= from; end -= MAX_LOG_SPAN) {
+    const start = end - MAX_LOG_SPAN + 1n;
+    const found = await read(start > from ? start : from, end);
     if (found.length > 0) return found;
   }
   return [];

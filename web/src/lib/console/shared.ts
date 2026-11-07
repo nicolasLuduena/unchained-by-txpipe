@@ -13,7 +13,7 @@ import { readConsole, type ConsoleState } from "./state";
  */
 const MIN_INTERVAL_MS = chainName === "local" ? 1000 : 15_000;
 /** How long an idle deployment keeps its cursor. Any scan renews it; past this, the next scan starts from the start block. */
-const CURSOR_TTL_MS = 3_600_000;
+const CURSOR_TTL_MS = 86_400_000;
 const SHARED_READING = "console:reading";
 
 type Reading = { readAt: number; state: ConsoleState; scan: ScanSnapshot };

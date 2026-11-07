@@ -8,6 +8,7 @@ import { passesPrecheck } from "@/lib/wallet/precheck";
 
 const SPONSOR_METHOD = "pm_sponsorUserOperation";
 const SENDER_CALLS_PER_MINUTE = 10;
+const ALL_CALLS_PER_MINUTE = 60;
 const MINUTE_MS = 60_000;
 
 type RpcRequest = { id?: unknown; method?: unknown; params?: unknown };
@@ -39,6 +40,7 @@ export async function forwardToPaymaster(body: RpcRequest | null): Promise<Respo
   const sender = senderOf(body.params);
   if (!sender) return refuse(id, 400, "La operación no indica una cuenta.");
   if (!(await passesPrecheck(config.attestationStore, sender))) return refuse(id, 403, "Esta cuenta no está verificada, así que no tiene patrocinio.");
+  if (!(await withinRate("paymaster:all", ALL_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Demasiadas operaciones. Probá en un minuto.");
   if (!(await withinRate(`paymaster:${sender}`, SENDER_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Demasiadas operaciones seguidas. Esperá un minuto.");
 
   try {

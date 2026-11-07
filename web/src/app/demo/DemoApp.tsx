@@ -284,15 +284,19 @@ function refusalRow(result: DirectResult, from: Address, asset: string): FeedEnt
   };
 }
 
+const OPENING_LINE = "La vendedora firma una orden de venta. Es gratis y sus tokens no se mueven.";
+
 /** One plain sentence for what just happened, so the page reads without narration. */
-function storyLine(book: Book, refused: boolean) {
+function storyLine(book: Book, refused: boolean, untouched: boolean) {
   if (!book.loaded) return "Leyendo el libro de órdenes.";
+  if (untouched) return OPENING_LINE;
   if (refused) return "El contrato rechazó la compra de la cuenta sin verificar. No se movieron tokens ni USDC.";
-  const latest = book.orders[0];
+  const moment = (view: OrderView) => view.closedAt ?? view.announcedAt ?? 0;
+  const latest = book.orders.reduce<OrderView | undefined>((best, view) => (!best || moment(view) > moment(best) ? view : best), undefined);
   if (latest?.status === "open") return "Orden publicada. Los tokens siguen en la billetera de la vendedora. Ahora Banco Norte puede comprar.";
   if (latest?.status === "filled") return "Venta liquidada en una sola transacción: tokens al comprador, USDC a la vendedora. Ninguno pagó gas.";
   if (latest?.status === "cancelled") return "La vendedora canceló la orden. No se movió nada.";
-  return "La vendedora firma una orden de venta. Es gratis y sus tokens no se mueven.";
+  return OPENING_LINE;
 }
 
 function Stage({ config }: { config: WalletConfig }) {
@@ -325,6 +329,10 @@ function Stage({ config }: { config: WalletConfig }) {
     return mergeFeed(scanned?.feed ?? [], live);
   }, [book.orders, refusals, scanned, asset]);
 
+  // What was already in the book when the page opened is not news.
+  const openedOn = useRef<string | null>(null);
+  if (book.loaded && openedOn.current === null) openedOn.current = signature;
+
   const open = firstOpen(book.orders);
   const shared = { orders: book.orders, refresh: refreshAll };
 
@@ -332,7 +340,7 @@ function Stage({ config }: { config: WalletConfig }) {
     <main className="demo" lang="es">
       <header className="demo__head">
         <img className="demo__logo" src="/design/logos/handoff-lockup-horizontal.svg" alt="Handoff" />
-        <h1 className="t-title">Dos billeteras, dos PSAV, un libro de órdenes</h1>
+        <h1 className="t-title">Dos billeteras, un libro de órdenes compartido</h1>
         <div className="demo__caveat">
           <p className="caveat">{CAVEAT}</p>
           <p className="caveat">{STORE_NOTE}</p>
@@ -340,7 +348,7 @@ function Stage({ config }: { config: WalletConfig }) {
       </header>
 
       <p className="demo__story" role="status">
-        {storyLine(book, refusedAt === signature)}
+        {storyLine(book, refusedAt === signature, openedOn.current === signature && refusedAt !== signature)}
       </p>
 
       <div className="demo__stage">
