@@ -1,17 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { encodeFunctionData, isAddressEqual, type Address } from "viem";
+import { isAddressEqual, type Address } from "viem";
 import { Button, Hash, Notice, OperatedBy, Stamp, Tabs, type StampStatus } from "@/design";
-import { handoffSettlementAbi } from "@/lib/abi";
 import { parseBig } from "@/lib/big-json";
 import { chainName, explorerUrl, networkLabel } from "@/lib/chain";
 import { feedFromOrders, mergeFeed, type FeedEntry } from "@/lib/console/feed";
 import type { ConsoleState } from "@/lib/console/state";
-import { venue, VenueRefusal } from "@/lib/orders/client";
-import { fromWireOrder, type OrderStatus, type OrderView } from "@/lib/orders/types";
+import type { OrderStatus, OrderView } from "@/lib/orders/types";
 import { venueLabel, VENUES } from "@/lib/orders/venues";
-import { sendDirect, type DirectResult } from "@/lib/sponsor/direct";
+import type { DirectResult } from "@/lib/sponsor/direct";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { formatUsdc, tokensLabel } from "@/lib/wallet/format";
 import { MarketSection } from "../_wallet/MarketSection";
@@ -19,24 +17,26 @@ import { FillProof, OrderCoupon } from "../_wallet/OrderCoupon";
 import { SellSection } from "../_wallet/SellSection";
 import { useAction, useWallet, type Precheck, type Wallet } from "../_wallet/useWallet";
 import { ComplianceFeed } from "../console/ComplianceFeed";
+import { attemptUnverified } from "./actions";
+import { Guide } from "./Guide";
 import { useBook, type Book } from "./useBook";
 
 const FEED_POLL_MS = chainName === "local" ? 3000 : 15_000;
-const CAVEAT = "Atestaciones de demostración en Fuji, sin verificación de identidad.";
+const CAVEAT = "Demo attestations on Fuji, no identity verification.";
 const STORE_NOTE =
   chainName === "local"
-    ? "Red local: el SDK de KUMPLY lee un stub de prueba."
-    : "Instancia de demostración del contrato de KUMPLY. No es el almacén oficial de KUMPLY.";
+    ? "Local network: the KUMPLY SDK reads a test stub."
+    : "Demo instance of KUMPLY's contract. Not KUMPLY's official store.";
 
 const HOST_STAMP: Record<Precheck, StampStatus> = { checking: "pending", passed: "verified", blocked: "blocked", unavailable: "pending" };
 const BOOK_STAMP: Record<OrderStatus, { status: StampStatus; word: string }> = {
-  open: { status: "unused", word: "Abierta" },
-  filled: { status: "sold", word: "Vendido" },
-  cancelled: { status: "cancelled", word: "Cancelada" },
-  expired: { status: "cancelled", word: "Vencida" },
+  open: { status: "unused", word: "Open" },
+  filled: { status: "sold", word: "Sold" },
+  cancelled: { status: "cancelled", word: "Cancelled" },
+  expired: { status: "cancelled", word: "Expired" },
 };
 
-const couponNumber = (view: OrderView) => `N.º ${(BigInt(view.order.nonce) % 10_000n).toString().padStart(4, "0")}`;
+const couponNumber = (view: OrderView) => `No. ${(BigInt(view.order.nonce) % 10_000n).toString().padStart(4, "0")}`;
 
 /** Oldest first, the order the market takes them in. */
 function firstOpen(orders: OrderView[]) {
@@ -46,11 +46,11 @@ function firstOpen(orders: OrderView[]) {
 /** The shared set, the same rows on both phones. */
 function BookStrip({ book }: { book: Book }) {
   return (
-    <section className="demo-book" aria-label="Libro de órdenes compartido">
-      <h3 className="t-field-label">Libro compartido entre las dos billeteras</h3>
-      <p className="caveat">Cada orden la co-firma su propia plataforma, no la de quien compra.</p>
+    <section className="demo-book" aria-label="Shared order book">
+      <h3 className="t-field-label">Order book shared by both wallets</h3>
+      <p className="caveat">Each order is co-signed by its own venue, not the buyer's.</p>
       {book.orders.length === 0 ? (
-        <p className="caveat">{book.loaded ? "Todavía no hay órdenes." : "Leyendo el libro."}</p>
+        <p className="caveat">{book.loaded ? "No orders yet." : "Reading the book."}</p>
       ) : (
         <ol className="demo-book__rows">
           {book.orders.map((view) => {
@@ -81,12 +81,12 @@ function Phone(props: { brand: string; role: string; venueName: string; wallet: 
       </header>
       <div className="demo-phone__who">
         <span className="t-field-label">{role}</span>
-        <span className="t-field-label">Opera por {venueName}</span>
+        <span className="t-field-label">Operated by {venueName}</span>
         <Hash value={wallet.address} href={explorerUrl("address", wallet.address)} />
       </div>
       {nav}
       <main className="host__main demo-phone__body" key={view}>
-        {wallet.offline && <Notice status="pending">No pudimos leer {networkLabel}. Reintentando.</Notice>}
+        {wallet.offline && <Notice status="pending">Could not read {networkLabel}. Retrying.</Notice>}
         {children}
       </main>
       <BookStrip book={book} />
@@ -97,17 +97,17 @@ function Phone(props: { brand: string; role: string; venueName: string; wallet: 
   );
 }
 
-type SellerTab = "vender" | "ordenes";
+type SellerTab = "sell" | "orders";
 
 function SellerPhone({ config, wallet, book }: { config: WalletConfig; wallet: Wallet; book: Book }) {
-  const [tab, setTab] = useState<SellerTab>("vender");
+  const [tab, setTab] = useState<SellerTab>("sell");
   const mine = useMemo(() => book.orders.filter((o) => isAddressEqual(o.order.seller, wallet.address)), [book.orders, wallet.address]);
   const known = useRef<number | null>(null);
 
   // A posted order takes the seller to its coupon, so the tear happens on screen.
   useEffect(() => {
     if (!book.loaded) return;
-    if (known.current !== null && mine.length > known.current) setTab("ordenes");
+    if (known.current !== null && mine.length > known.current) setTab("orders");
     known.current = mine.length;
   }, [book.loaded, mine.length]);
 
@@ -121,31 +121,31 @@ function SellerPhone({ config, wallet, book }: { config: WalletConfig; wallet: W
   const nav = (
     <div onClick={navigate}>
       <Tabs
-        ariaLabel="Secciones de Billetera Sur"
+        ariaLabel="Billetera Sur sections"
         items={[
-          { label: "Vender", href: "#vender", current: tab === "vender" },
-          { label: "Tus órdenes", href: "#ordenes", current: tab === "ordenes" },
+          { label: "Sell", href: "#sell", current: tab === "sell" },
+          { label: "Your orders", href: "#orders", current: tab === "orders" },
         ]}
       />
     </div>
   );
 
   return (
-    <Phone brand="Billetera Sur" role="Vendedora" venueName={VENUES[0]?.label ?? "PSAV 1"} wallet={wallet} book={book} nav={nav} view={tab}>
-      {tab === "vender" ? (
+    <Phone brand="Billetera Sur" role="Seller" venueName={VENUES[0]?.label ?? "PSAV 1"} wallet={wallet} book={book} nav={nav} view={tab}>
+      {tab === "sell" ? (
         <SellSection config={config} actor="seller" wallet={wallet} />
       ) : (
         <section className="wallet-stack">
-          <h2 className="t-title">Tus órdenes</h2>
-          {mine.length === 0 && <p className="caveat">Todavía no tenés órdenes.</p>}
+          <h2 className="t-title">Your orders</h2>
+          {mine.length === 0 && <p className="caveat">You have no orders yet.</p>}
           {mine.map((view) => (
             <div className="wallet-stack" key={view.orderHash}>
               <OrderCoupon
                 view={view}
-                label="Orden de venta"
+                label="Sell order"
                 tokenName={wallet.snapshot?.tokenName ?? "Token"}
                 torn={book.torn.has(view.orderHash)}
-                note={view.status === "open" ? `Publicada por ${venueLabel(view.order.venue)}. Tus tokens siguen en tu billetera.` : undefined}
+                note={view.status === "open" ? `Published by ${venueLabel(view.order.venue)}. Your tokens stay in your wallet.` : undefined}
               />
               {view.status === "filled" && <FillProof view={view} />}
             </div>
@@ -158,7 +158,7 @@ function SellerPhone({ config, wallet, book }: { config: WalletConfig; wallet: W
 
 function BuyerPhone({ config, wallet, book }: { config: WalletConfig; wallet: Wallet; book: Book }) {
   return (
-    <Phone brand="Banco Norte" role="Comprador" venueName={VENUES[1]?.label ?? "PSAV 2"} wallet={wallet} book={book}>
+    <Phone brand="Banco Norte" role="Buyer" venueName={VENUES[1]?.label ?? "PSAV 2"} wallet={wallet} book={book}>
       <MarketSection config={config} actor="buyer" wallet={wallet} />
     </Phone>
   );
@@ -171,38 +171,32 @@ function UnverifiedControl({ config, order, onResult }: { config: WalletConfig; 
 
   function run(view: OrderView) {
     return action.run(async () => {
-      // A venue that refuses outright still leaves a named revert: the fill goes out with no co-signature.
-      const venueSig = await venue.coSign(view.orderHash, config.unverified, true).catch((error: unknown) => {
-        if (error instanceof VenueRefusal) return "0x" as const;
-        throw error;
-      });
-      const data = encodeFunctionData({ abi: handoffSettlementAbi, functionName: "fill", args: [fromWireOrder(view.order), view.sellerSig, venueSig] });
-      const result = await sendDirect("unverified", { to: config.settlement, data });
+      const result = await attemptUnverified(config, view);
       setAttempt(result);
       onResult(result);
     });
   }
 
   return (
-    <section className="demo-panel" aria-label="Cuenta sin verificar">
+    <section className="demo-panel" aria-label="Unverified account">
       <div className="demo-panel__head">
-        <span className="t-field-label">Cuenta sin verificar</span>
+        <span className="t-field-label">Unverified account</span>
         <Hash value={config.unverified} href={explorerUrl("address", config.unverified)} />
       </div>
-      <p className="caveat">Saltea la billetera y llama al contrato, pagando su propio gas.</p>
+      <p className="caveat">Skips the wallet and calls the contract, paying its own gas.</p>
       <Button variant="secondary" size="sm" busy={action.busy} disabled={!order} onClick={() => order && run(order)}>
-        Intentar compra directa
+        Try a direct purchase
       </Button>
-      {!order && <p className="caveat">Hace falta una orden abierta.</p>}
+      {!order && <p className="caveat">This needs an open order.</p>}
       {action.error && (
-        <Notice status="blocked" word="Sin enviar">
+        <Notice status="blocked" word="Not sent">
           {action.error}
         </Notice>
       )}
       {attempt && (
         <div className="demo-panel__result">
-          <Stamp status={attempt.reverted ? "reverted" : "sold"}>{attempt.reverted ? "Rechazada" : "Sin revertir"}</Stamp>
-          {attempt.reverted && <p className="caveat">El contrato rechazó la compra: {attempt.reason}</p>}
+          <Stamp status={attempt.reverted ? "reverted" : "sold"}>{attempt.reverted ? "Refused" : "Not reverted"}</Stamp>
+          {attempt.reverted && <p className="caveat">The contract refused the purchase: {attempt.reason}</p>}
           <Hash value={attempt.hash} href={explorerUrl("tx", attempt.hash)} />
         </div>
       )}
@@ -214,27 +208,27 @@ function LastSale({ orders }: { orders: OrderView[] }) {
   const sale = orders.find((o) => o.status === "filled" && o.closeTx);
   const href = sale?.closeTx && explorerUrl("tx", sale.closeTx);
   return (
-    <section className="demo-panel" aria-label="Última venta">
+    <section className="demo-panel" aria-label="Last sale">
       <div className="demo-panel__head">
-        <span className="t-field-label">Última venta</span>
+        <span className="t-field-label">Last sale</span>
         {sale && <Stamp status="sold" />}
       </div>
       {sale?.closeTx ? (
         <>
           <p className="caveat">
-            {tokensLabel(BigInt(sale.order.amount))} a USDC {formatUsdc(BigInt(sale.order.price))}. Co-firma {venueLabel(sale.order.venue)}, la plataforma de la orden.
+            {tokensLabel(BigInt(sale.order.amount))} at USDC {formatUsdc(BigInt(sale.order.price))}. Co-signed by {venueLabel(sale.order.venue)}, the order's venue.
           </p>
           <Hash value={sale.closeTx} href={href} />
           {href ? (
             <a className="wallet-link" href={href} target="_blank" rel="noreferrer">
-              Ver en Snowtrace
+              See it on Snowtrace
             </a>
           ) : (
-            <p className="caveat">Red local: esta transacción no tiene explorador.</p>
+            <p className="caveat">Local network: this transaction has no explorer.</p>
           )}
         </>
       ) : (
-        <p className="caveat">Todavía no hay ventas.</p>
+        <p className="caveat">No sales yet.</p>
       )}
     </section>
   );
@@ -271,35 +265,48 @@ function refusalRow(result: DirectResult, from: Address, asset: string): FeedEnt
     id: `directa:${result.hash}`,
     at,
     order: at * 1000,
-    event: "Rechazado",
+    event: "Refused",
     status: "blocked",
     asset,
     from,
-    fromRole: "Cuenta",
+    fromRole: "Account",
     price: "-",
     unit: " ",
     hash: result.hash,
     code: /^\w+/.exec(result.reason ?? "")?.[0] ?? "TransactionReverted",
-    detail: "Compra directa de una cuenta sin verificar.",
+    detail: "Direct purchase from an unverified account.",
   };
 }
 
-const OPENING_LINE = "La vendedora firma una orden de venta. Es gratis y sus tokens no se mueven.";
+const OPENING_LINE = "The seller signs a sell order. It is free and her tokens do not move.";
 
 /** One plain sentence for what just happened, so the page reads without narration. */
 function storyLine(book: Book, refused: boolean, untouched: boolean) {
-  if (!book.loaded) return "Leyendo el libro de órdenes.";
+  if (!book.loaded) return "Reading the order book.";
   if (untouched) return OPENING_LINE;
-  if (refused) return "El contrato rechazó la compra de la cuenta sin verificar. No se movieron tokens ni USDC.";
+  if (refused) return "The contract refused the unverified account's purchase. No tokens or USDC moved.";
   const moment = (view: OrderView) => view.closedAt ?? view.announcedAt ?? 0;
   const latest = book.orders.reduce<OrderView | undefined>((best, view) => (!best || moment(view) > moment(best) ? view : best), undefined);
-  if (latest?.status === "open") return "Orden publicada. Los tokens siguen en la billetera de la vendedora. Ahora Banco Norte puede comprar.";
-  if (latest?.status === "filled") return "Venta liquidada en una sola transacción: tokens al comprador, USDC a la vendedora. Ninguno pagó gas.";
-  if (latest?.status === "cancelled") return "La vendedora canceló la orden. No se movió nada.";
+  if (latest?.status === "open") return "Order posted. The tokens are still in the seller's wallet. Banco Norte can buy now.";
+  if (latest?.status === "filled") return "Sale settled in one transaction: tokens to the buyer, USDC to the seller. Neither paid gas.";
+  if (latest?.status === "cancelled") return "The seller cancelled the order. Nothing moved.";
   return OPENING_LINE;
 }
 
+/** The guided walkthrough is the default. `#all` opens everything at once. */
+function useFreeView() {
+  const [free, setFree] = useState(false);
+  useEffect(() => {
+    const read = () => setFree(window.location.hash === "#all");
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, []);
+  return free;
+}
+
 function Stage({ config }: { config: WalletConfig }) {
+  const freeView = useFreeView();
   const book = useBook();
   const seller = useWallet(config, config.seller);
   const buyer = useWallet(config, config.buyer);
@@ -335,12 +342,40 @@ function Stage({ config }: { config: WalletConfig }) {
 
   const open = firstOpen(book.orders);
   const shared = { orders: book.orders, refresh: refreshAll };
+  const onRefusal = (result: DirectResult) => {
+    if (!result.reverted) return;
+    setRefusedAt(signature);
+    setRefusals((list) => [...list, refusalRow(result, config.unverified, asset)]);
+  };
+
+  // The guide stays mounted behind the free view, so a step running there keeps its result.
+  const guide = (
+    <div hidden={freeView}>
+      <Guide config={config} book={book} seller={{ ...seller, ...shared }} buyer={{ ...buyer, ...shared }} feed={feed} onRefusal={onRefusal} caveat={CAVEAT} storeNote={STORE_NOTE} />
+    </div>
+  );
+  if (!freeView) return guide;
 
   return (
-    <main className="demo" lang="es">
+    <>
+      {guide}
+      <FreeView config={config} book={book} seller={{ ...seller, ...shared }} buyer={{ ...buyer, ...shared }} feed={feed} open={open} story={storyLine(book, refusedAt === signature, openedOn.current === signature && refusedAt !== signature)} onRefusal={onRefusal} />
+    </>
+  );
+}
+
+type FreeViewProps = { config: WalletConfig; book: Book; seller: Wallet; buyer: Wallet; feed: FeedEntry[]; open: OrderView | undefined; story: string; onRefusal: (result: DirectResult) => void };
+
+/** Everything at once, for whoever already knows the story. */
+function FreeView({ config, book, seller, buyer, feed, open, story, onRefusal }: FreeViewProps) {
+  return (
+    <main className="demo" lang="en">
       <header className="demo__head">
         <img className="demo__logo" src="/design/logos/handoff-lockup-horizontal.svg" alt="Handoff" />
-        <h1 className="t-title">Dos billeteras, un libro de órdenes compartido</h1>
+        <h1 className="t-title">Two wallets, one shared order book</h1>
+        <a className="wallet-link" href="#guided">
+          Back to the guided demo
+        </a>
         <div className="demo__caveat">
           <p className="caveat">{CAVEAT}</p>
           <p className="caveat">{STORE_NOTE}</p>
@@ -348,19 +383,19 @@ function Stage({ config }: { config: WalletConfig }) {
       </header>
 
       <p className="demo__story" role="status">
-        {storyLine(book, refusedAt === signature, openedOn.current === signature && refusedAt !== signature)}
+        {story}
       </p>
 
       <div className="demo__stage">
-        <SellerPhone config={config} wallet={{ ...seller, ...shared }} book={book} />
-        <BuyerPhone config={config} wallet={{ ...buyer, ...shared }} book={book} />
+        <SellerPhone config={config} wallet={seller} book={book} />
+        <BuyerPhone config={config} wallet={buyer} book={book} />
         <div className="demo__side">
           <div className="demo__feed">
             <ComplianceFeed entries={feed} />
           </div>
           <div className="demo__controls">
             <LastSale orders={book.orders} />
-            <UnverifiedControl config={config} order={open} onResult={(result) => { if (result.reverted) setRefusedAt(signature); setRefusals((list) => (result.reverted ? [...list, refusalRow(result, config.unverified, asset)] : list)); }} />
+            <UnverifiedControl config={config} order={open} onResult={onRefusal} />
           </div>
         </div>
       </div>
@@ -372,8 +407,8 @@ export function DemoApp() {
   const config = walletConfig();
   if (!config) {
     return (
-      <main className="demo" lang="es">
-        <Notice status="pending">El emisor todavía no registró el token en esta red.</Notice>
+      <main className="demo" lang="en">
+        <Notice status="pending">The issuer has not registered the token on this network yet.</Notice>
       </main>
     );
   }

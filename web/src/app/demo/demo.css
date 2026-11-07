@@ -84,3 +84,194 @@
   .demo__feed { height: 520px; }
   .demo__controls { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* The guided walkthrough. Colour only through tokens, so it holds on any palette the design system gives it. */
+.guide {
+  --guide-lead: clamp(18px, 2.3vh, 25px);
+  --guide-text: clamp(15px, 1.8vh, 19px);
+  --guide-accent: var(--madder, var(--amber));
+  --guide-ink: var(--indigo, var(--text));
+  --guide-quiet: 0.4;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  height: 100dvh;
+  padding: var(--space-4) var(--space-6);
+  overflow: hidden;
+}
+
+.guide__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); }
+.guide__foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-5); padding-top: var(--space-2); border-top: 1px solid var(--rule-soft); }
+.guide__foot .caveat { margin: 0; }
+
+.guide__body {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 40fr) minmax(0, 60fr);
+  gap: var(--space-7);
+  min-height: 0;
+}
+
+/* The rail: filled for where you are and where you have been, hollow for what is still ahead. */
+.guide-rail ol { display: grid; gap: 0; margin: 0; padding: var(--space-2) 0 0; list-style: none; }
+.guide-rail li { position: relative; padding-bottom: clamp(var(--space-5), 5vh, var(--space-7)); }
+.guide-rail li:last-child { padding-bottom: 0; }
+.guide-rail li:not(:last-child)::before,
+.guide-rail li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: -4px;
+  left: 6px;
+  width: 1px;
+  background: var(--rule-soft);
+}
+.guide-rail li:not(:last-child)::after {
+  background: var(--guide-ink);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--duration-tear) var(--ease-tear);
+}
+.guide-rail li[data-state="done"]:not(:last-child)::after { transform: none; }
+
+.guide-rail button {
+  display: grid;
+  grid-template-columns: 13px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  text-align: left;
+  font: 500 clamp(13px, 1.5vh, 16px) / 1.3 var(--font-sans);
+  cursor: pointer;
+}
+.guide-rail button:disabled { cursor: default; }
+.guide-rail button:not(:disabled):hover .guide-rail__label { color: var(--text); }
+.guide-rail__dot {
+  display: block;
+  width: 13px;
+  height: 13px;
+  margin-top: 2px;
+  border: 1px solid var(--guide-ink);
+  border-radius: 50%;
+  background: transparent;
+  outline: 1px solid transparent;
+  outline-offset: 3px;
+  transition: background-color var(--duration-tear) var(--ease-tear), outline-color var(--duration-tear) var(--ease-tear);
+}
+.guide-rail li[data-state="done"] .guide-rail__dot,
+.guide-rail li[data-state="current"] .guide-rail__dot { background: var(--guide-ink); }
+.guide-rail li[data-state="current"] .guide-rail__dot { outline-color: var(--guide-ink); }
+.guide-rail li[data-state="current"] button { color: var(--text); font-weight: 600; }
+
+/* The step. Text scrolls if it has to; the one button never leaves the screen. */
+.guide-panel { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--space-4); min-width: 0; min-height: 0; }
+.guide-panel__scroll { display: grid; align-content: start; gap: clamp(var(--space-3), 2.2vh, var(--space-5)); min-height: 0; padding-right: var(--space-2); overflow-y: auto; }
+.guide-panel__title.t-display-l { margin: 0; font-size: clamp(30px, 4.4vh, 48px); line-height: 1.05; text-wrap: balance; outline: none; }
+.guide-panel__action { display: grid; justify-items: start; gap: var(--space-2); }
+
+/* One movement: the step arrives along the rail's own axis while the rail's line draws to the same place. */
+.guide-panel { animation: guide-arrive var(--duration-tear) var(--ease-tear); }
+.guide-panel[data-direction="back"] { --guide-from: calc(var(--space-5) * -1); }
+@keyframes guide-arrive {
+  from { opacity: 0; transform: translateY(var(--guide-from, var(--space-5))); }
+}
+
+.guide-lead { margin: 0; color: var(--text); font: 400 var(--guide-lead) / 1.35 var(--font-sans); max-width: 34em; }
+.guide-text { margin: 0; color: var(--text-muted); font: 400 var(--guide-text) / 1.4 var(--font-sans); max-width: 40em; }
+.guide-block { display: grid; gap: var(--space-2); }
+.guide-block h2 { margin: 0; color: var(--text-muted); }
+
+.guide-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.guide-code { color: var(--text); font: 500 var(--guide-text) / 1.2 var(--font-mono); overflow-wrap: anywhere; }
+.guide-proof { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-4); margin: 0; }
+.guide-detail { margin: 0; overflow-wrap: anywhere; }
+.guide-panel .wallet-stack > .hf-stamp { justify-self: start; }
+
+.guide-wait { display: grid; justify-items: start; gap: var(--space-2); }
+.guide-wait p { margin: 0; }
+.guide-wait [role="status"] { color: var(--text); font: 500 var(--guide-text) / 1.4 var(--font-sans); }
+.guide-wait .hf-notice { width: 100%; }
+
+.guide-ledger { width: 100%; max-width: 30em; border-collapse: collapse; font: 400 var(--guide-text) / 1.3 var(--font-sans); font-variant-numeric: tabular-nums; }
+.guide-ledger th, .guide-ledger td { padding: var(--space-1) var(--space-3) var(--space-1) 0; border-bottom: 1px solid var(--rule-soft); text-align: right; font-weight: 400; }
+.guide-ledger th[scope="row"] { color: var(--text-muted); text-align: left; }
+.guide-ledger thead th { color: var(--text-muted); font: 500 12px/16px var(--font-sans); letter-spacing: 0.06em; text-transform: uppercase; }
+.guide-ledger tr[data-moved] td { color: var(--text); font-weight: 600; }
+
+.guide-list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; color: var(--text); font: 400 var(--guide-text) / 1.4 var(--font-sans); }
+.guide-list li { padding-bottom: var(--space-2); border-bottom: 1px solid var(--rule-soft); }
+.guide-truth { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
+.guide-links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin: 0; font: 400 var(--guide-text) / 1.4 var(--font-sans); }
+
+/* The stage: context, not controls. What the step talks about stays lit; the rest steps back. */
+.guide-stage {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 11fr) minmax(0, 7fr);
+  gap: var(--space-5);
+  min-width: 0;
+  min-height: 0;
+  transition: grid-template-rows var(--duration-tear) var(--ease-tear);
+}
+/* On the record step the feed is the subject, so it takes the width its rows need to stay on one line. */
+.guide-stage[data-step="record"] { grid-template-rows: minmax(0, 7fr) minmax(0, 11fr); }
+.guide-stage[data-step="record"] .guide-account { display: none; }
+.guide-stage[data-step="record"] .guide-feed { grid-column: 1 / -1; }
+.guide-part {
+  grid-column: span 6;
+  min-width: 0;
+  min-height: 0;
+  opacity: var(--guide-quiet);
+  outline: 1px solid transparent;
+  outline-offset: var(--space-1);
+  transition: opacity var(--duration-tear) var(--ease-tear), outline-color var(--duration-tear) var(--ease-tear);
+}
+.guide-part[data-lit] { opacity: 1; outline-color: var(--guide-accent); }
+
+.guide-phone__balance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--rule-soft); }
+.guide-phone__balance div { display: grid; gap: 2px; }
+.guide-phone__balance dd { margin: 0; font: 600 clamp(18px, 2.4vh, 26px) / 1.2 var(--font-figure); font-variant-numeric: tabular-nums; }
+.guide-phone .demo-phone__who { grid-template-columns: auto minmax(0, 1fr); }
+.guide-phone .demo-phone__who .hf-hash { grid-column: 1 / -1; }
+.guide-phone .demo-phone__foot { padding-block: var(--space-1); }
+
+.guide-account { grid-column: span 3; display: grid; align-content: start; gap: var(--space-2); padding: var(--space-3); border: 1px dashed var(--rule); }
+.guide-account > .hf-stamp { justify-self: start; }
+.guide-account .demo-panel__head { flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
+.guide-feed { grid-column: span 9; }
+.guide-feed .desk__section { gap: var(--space-1); }
+
+@media (max-height: 820px) {
+  .guide { gap: var(--space-3); padding: var(--space-3) var(--space-5); }
+  .guide__body { grid-template-columns: 172px minmax(0, 42fr) minmax(0, 58fr); gap: var(--space-5); }
+  /* The stub is what step 4 shows, so on a short screen the phones give up everything else first. */
+  .guide-stage { grid-template-rows: minmax(0, 13fr) minmax(0, 6fr); gap: var(--space-3); }
+  .guide-phone .demo-phone__foot, .guide-phone .demo-phone__who .hf-hash { display: none; }
+  .guide-phone .host__bar { padding-block: var(--space-2); }
+  .host .guide-phone .demo-phone__body, .host.guide-phone .demo-phone__body { padding-block: var(--space-2); }
+  .guide-phone .hf-coupon__title { margin-block: var(--space-1); font-size: 20px; line-height: 24px; }
+  .guide-phone .hf-coupon__body { padding-block: var(--space-2); }
+}
+
+/* Under a laptop's width the columns stack and the page scrolls. */
+@media (max-width: 1180px) {
+  .guide { height: auto; overflow: visible; padding-inline: var(--space-4); }
+  .guide__body { grid-template-columns: minmax(0, 1fr); }
+  .guide-rail ol { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .guide-rail li { padding-bottom: 0; }
+  .guide-rail li:not(:last-child)::before, .guide-rail li:not(:last-child)::after { display: none; }
+  .guide-rail button { grid-template-columns: minmax(0, 1fr); }
+  .guide-stage { grid-template-rows: auto; }
+  .guide-part { grid-column: 1 / -1; }
+  .guide-phone { height: 460px; }
+  .guide-feed { height: 420px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-panel, .guide-panel[data-direction="back"] { --guide-from: 0; }
+  .guide-rail li:not(:last-child)::after { transition: none; }
+  .guide-stage { transition: none; }
+}
