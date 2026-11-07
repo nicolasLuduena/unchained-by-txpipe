@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "addresses": "tsx scripts/addresses.ts",
     "fork:sig": "tsx scripts/fork-signature-proof.ts",
+    "fork:seed": "tsx scripts/fork-seed.ts",
+    "batch-shape": "tsx scripts/sponsored-batch-shape.ts",
+    "diag-paymaster": "tsx scripts/diag-paymaster.ts",
     "deploy-accounts": "tsx scripts/deploy-accounts.ts",
     "verify-1271": "tsx scripts/verify-1271.ts",
     "check-attestations": "tsx scripts/check-attestations.ts"

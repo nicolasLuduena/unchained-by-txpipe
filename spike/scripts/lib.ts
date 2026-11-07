@@ -23,10 +23,17 @@ export const FUJI = {
   usdc: "0x5425890298aed601595a70AB815c96711a31Bc65",
 } as const;
 
-export const paymasterUrl = (key: string) => `https://paymaster.0xgasless.com/v1/43113/rpc/${key}`;
+/** Mnemonic address index per demo role. Smart accounts are SDK index 0 of owners 3 and 4. */
+export const ROLE = { deployer: 0, issuer: 1, unverified: 2, sellerOwner: 3, buyerOwner: 4, venuePsav: 5, venueOrderKey: 6 } as const;
+
+/** Reads the team key from ZEROXGASLESS_KEY_PATH at runtime. Never log the returned URL: it embeds the key. */
+export function teamPaymasterUrl() {
+  const key = readFileSync(requireEnv("ZEROXGASLESS_KEY_PATH"), "utf8").trim();
+  return { url: `https://paymaster.0xgasless.com/v1/43113/rpc/${key}`, redact: (text: string) => text.replaceAll(key, "<key>") };
+}
 
 /** The Fuji overrides. Omitting defaultValidationModule silently wraps signatures with the mainnet module. */
-export async function fujiSmartAccount(signer: any, opts: { rpcUrl?: string; paymasterUrl?: string; index?: number } = {}) {
+export async function fujiSmartAccount(signer: any, opts: { rpcUrl?: string; paymasterUrl?: string; bundlerUrl?: string; index?: number } = {}) {
   const rpcUrl = opts.rpcUrl ?? FUJI.rpcUrl;
   const moduleSigner = signer?.type === "local" ? await asWalletClient(signer, rpcUrl) : signer;
   const ecdsa = await createECDSAOwnershipValidationModule({ signer: moduleSigner, moduleAddress: FUJI.ecdsaModule });
@@ -34,7 +41,7 @@ export async function fujiSmartAccount(signer: any, opts: { rpcUrl?: string; pay
     signer: moduleSigner,
     chainId: FUJI.chainId,
     rpcUrl,
-    bundlerUrl: FUJI.bundlerUrl,
+    bundlerUrl: opts.bundlerUrl ?? FUJI.bundlerUrl,
     paymasterUrl: opts.paymasterUrl,
     index: opts.index ?? 0,
     factoryAddress: FUJI.factory,
