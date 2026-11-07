@@ -1,11 +1,11 @@
 import "server-only";
-import { readFileSync } from "node:fs";
 import { createECDSAOwnershipValidationModule, createSmartAccountClient, PaymasterMode } from "@0xgasless/smart-account";
 import { createWalletClient, decodeFunctionData, erc20Abi, http, isAddress, isAddressEqual, type Address, type Hash, type Hex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
 import { handoffSettlementAbi } from "@/lib/abi";
 import { chain, chainName, publicClient } from "@/lib/chain";
 import { Refused } from "@/lib/orders/service";
+import { readSecret } from "@/lib/secrets";
 import { walletConfig, type WalletConfig } from "@/lib/wallet/deployment";
 import { sendFrom } from "./direct";
 import type { Actor, Call } from "./index";
@@ -19,15 +19,10 @@ function notConfigured(what: string) {
   return new Refused("sponsor_not_configured", `Falta configurar el patrocinio: ${what}.`, 503);
 }
 
-/** Reads a secret from the file its env variable names. The contents never reach a log or an error. */
-function readSecretFile(variable: "MNEMONIC_PATH" | "ZEROXGASLESS_KEY_PATH") {
-  const path = process.env[variable];
-  if (!path) throw notConfigured(variable);
-  try {
-    return readFileSync(path, "utf8").trim();
-  } catch {
-    throw notConfigured(variable);
-  }
+function requireSecret(name: "MNEMONIC" | "ZEROXGASLESS_KEY") {
+  const secret = readSecret(name);
+  if (!secret) throw notConfigured(name);
+  return secret;
 }
 
 function requireConfig(): WalletConfig {
@@ -37,7 +32,7 @@ function requireConfig(): WalletConfig {
 }
 
 function owner(actor: Actor) {
-  return mnemonicToAccount(readSecretFile("MNEMONIC_PATH"), { addressIndex: OWNER_INDEX[actor] });
+  return mnemonicToAccount(requireSecret("MNEMONIC"), { addressIndex: OWNER_INDEX[actor] });
 }
 
 function ownerWallet(actor: Actor) {
@@ -81,7 +76,7 @@ async function freshClient(actor: "seller" | "buyer", paymasterUrl: string) {
 
 /** Runs SDK work with the keyed URL in scope. SDK errors can quote that URL and refusals are readable, so all are redacted. */
 async function withPaymaster<T>(run: (paymasterUrl: string) => Promise<T>): Promise<T> {
-  const key = readSecretFile("ZEROXGASLESS_KEY_PATH");
+  const key = requireSecret("ZEROXGASLESS_KEY");
   try {
     return await run(`https://paymaster.0xgasless.com/v1/${chain.id}/rpc/${key}`);
   } catch (error) {
