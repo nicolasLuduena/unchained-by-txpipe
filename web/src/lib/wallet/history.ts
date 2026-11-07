@@ -29,7 +29,7 @@ async function readEvents() {
 }
 
 function clock(seconds: number) {
-  return new Date(seconds * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  return new Date(seconds * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 }
 
 /** Everything this account did on the token, from chain events. `partial` while the scan is still catching up. */
@@ -49,19 +49,19 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
     if (e.eventName === "OrderAnnounced" && ofToken(order.token) && mine(order.seller)) {
       const { seller, amount, price, nonce } = order;
       announced.set(nonce, { amount, price });
-      entries.push({ ...located, event: "Publicada", status: "unused", detail: tokensLabel(amount), from: seller, price: formatUsdc(price) });
+      entries.push({ ...located, event: "Order", status: "unused", detail: tokensLabel(amount), from: seller, price: formatUsdc(price) });
     } else if (e.eventName === "OrderCancelled" && mine(order.seller)) {
       const known = announced.get(order.nonce);
       if (!known) continue; // Cancelled on another token.
-      entries.push({ ...located, event: "Cancelada", status: "cancelled", detail: tokensLabel(known.amount), from: account, price: formatUsdc(known.price) });
+      entries.push({ ...located, event: "Cancelled", status: "cancelled", detail: tokensLabel(known.amount), from: account, price: formatUsdc(known.price) });
     } else if (e.eventName === "OrderFilled" && ofToken(order.token) && (mine(order.seller) || mine(order.buyer))) {
       const { seller, buyer, amount, price } = order;
-      entries.push({ ...located, event: mine(seller) ? "Vendido" : "Comprado", status: "sold", detail: tokensLabel(amount), from: seller, to: buyer, price: formatUsdc(price) });
+      entries.push({ ...located, event: mine(seller) ? "Sold" : "Bought", status: "sold", detail: tokensLabel(amount), from: seller, to: buyer, price: formatUsdc(price) });
     } else if (e.eventName === "Reversion") {
       const { token, holder, amount } = e.args as ReversionArgs;
       if (!ofToken(token) || !mine(holder)) continue;
       // Amount prints the currency first, so a blank one keeps this reading "1 token" rather than "tokens 1".
-      entries.push({ ...located, event: "En papel", status: "verified", detail: "A certificado en papel", from: holder, price: tokensLabel(amount), currency: " " });
+      entries.push({ ...located, event: "On paper", status: "verified", detail: "To paper certificate", from: holder, price: tokensLabel(amount), currency: " " });
     }
   }
 

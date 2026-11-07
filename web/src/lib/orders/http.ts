@@ -16,12 +16,12 @@ export async function venueRoute(route: string, run: () => Promise<object>): Pro
       return respond({ error: { code: error.code, reason: error.message } }, error.status);
     }
     console.error(`venue route ${route} failed`, error);
-    return respond({ error: { code: "unavailable", reason: "El servicio de órdenes no pudo responder." } }, 502);
+    return respond({ error: { code: "unavailable", reason: "The order service could not respond." } }, 502);
   }
 }
 
 export async function readJson<T extends object>(request: Request): Promise<T> {
   const body: unknown = await request.json().catch(() => null);
-  if (typeof body !== "object" || body === null) throw new Refused("malformed", "El cuerpo del pedido no es JSON.", 400);
+  if (typeof body !== "object" || body === null) throw new Refused("malformed", "The request body is not JSON.", 400);
   return body as T;
 }

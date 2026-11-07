@@ -37,7 +37,7 @@ function saveRecord(record: OnboardRecord) {
 }
 
 function assertOnFuji() {
-  if (chainName === "local") throw new Refused("not_on_local", "Mi billetera funciona solo en Fuji.", 404);
+  if (chainName === "local") throw new Refused("not_on_local", "My wallet works only on Fuji.", 404);
 }
 
 /** The address, the contracts and how far this owner got. Reads only. */
@@ -55,7 +55,7 @@ async function serialized<T>(work: () => Promise<T>): Promise<T> {
   const token = crypto.randomUUID();
   const deadline = Date.now() + LOCK_WAIT_MS;
   while (!(await kv.acquire(lock, token, LOCK_TTL_MS))) {
-    if (Date.now() > deadline) throw new Refused("onboard_busy", "Hay otras verificaciones en curso. Probá de nuevo en un momento.", 503);
+    if (Date.now() > deadline) throw new Refused("onboard_busy", "Other verifications are in progress. Try again in a moment.", 503);
     await new Promise((resolve) => setTimeout(resolve, LOCK_POLL_MS));
   }
   try {
@@ -67,7 +67,7 @@ async function serialized<T>(work: () => Promise<T>): Promise<T> {
 
 async function confirmed(hash: Hash): Promise<Hash> {
   const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: RECEIPT_POLL_MS });
-  if (receipt.status !== "success") throw new Error(`Transacción revertida: ${hash}`);
+  if (receipt.status !== "success") throw new Error(`Transaction reverted: ${hash}`);
   return hash;
 }
 
@@ -133,13 +133,13 @@ export async function onboard(body: { owner?: unknown; signature?: unknown }): P
   const signed =
     typeof signature === "string" &&
     (await verifyMessage({ address: owner, message: onboardMessage(owner, chain.id), signature: signature as Hex }).catch(() => false));
-  if (!signed) throw new Refused("invalid_owner_signature", "La firma no corresponde a esta cuenta.", 403, context);
+  if (!signed) throw new Refused("invalid_owner_signature", "The signature does not match this account.", 403, context);
 
   return serialized(async () => {
     const existing = await readRecord(owner);
     if (existing?.done) return { record: existing };
     if (!existing && Object.keys(await venueKv().hgetall(recordsKey())).length >= MAX_ONBOARDINGS) {
-      throw new Refused("onboard_cap", "Se agotaron los cupos de esta demostración.", 429, context);
+      throw new Refused("onboard_cap", "This demo has no places left.", 429, context);
     }
 
     try {
@@ -149,7 +149,7 @@ export async function onboard(body: { owner?: unknown; signature?: unknown }): P
       return { record: await run(record, initCode) };
     } catch (error) {
       if (error instanceof Refused) throw error;
-      throw new Refused("onboard_failed", `No pudimos terminar la verificación de demostración: ${revertReason(error)}. Probá de nuevo.`, 502, context);
+      throw new Refused("onboard_failed", `We could not finish the demo verification: ${revertReason(error)}. Try again.`, 502, context);
     }
   });
 }

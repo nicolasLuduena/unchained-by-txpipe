@@ -49,7 +49,7 @@ export function listRefusals(): Promise<Refusal[]> {
 
 function core() {
   const contracts = coreContracts();
-  if (!contracts) throw new Refused("not_deployed", "Los contratos todavía no están desplegados.", 503);
+  if (!contracts) throw new Refused("not_deployed", "The contracts are not deployed yet.", 503);
   return contracts;
 }
 
@@ -69,19 +69,19 @@ export function parseAddress(value: unknown, field: string): Address {
   try {
     return getAddress(String(value));
   } catch {
-    throw new Refused("malformed", `La dirección de ${field} no es válida.`, 400);
+    throw new Refused("malformed", `The ${field} address is not valid.`, 400);
   }
 }
 
 export function parseUint(value: unknown, field: string): bigint {
   if (typeof value !== "string" || !/^\d+$/.test(value)) {
-    throw new Refused("malformed", `El campo ${field} no es un entero positivo.`, 400);
+    throw new Refused("malformed", `The ${field} field is not a positive whole number.`, 400);
   }
   return BigInt(value);
 }
 
 export function parseOrder(raw: Partial<WireOrder> | undefined): Order {
-  if (!raw) throw new Refused("malformed", "Falta la orden.", 400);
+  if (!raw) throw new Refused("malformed", "The order is missing.", 400);
   return {
     chainId: parseUint(raw.chainId, "chainId"),
     token: parseAddress(raw.token, "token"),
@@ -96,30 +96,30 @@ export function parseOrder(raw: Partial<WireOrder> | undefined): Order {
 
 function parseSignature(value: unknown): Hex {
   if (typeof value !== "string" || !/^0x[0-9a-fA-F]+$/.test(value)) {
-    throw new Refused("malformed", "La firma no es válida.", 400);
+    throw new Refused("malformed", "The signature is not valid.", 400);
   }
   return value as Hex;
 }
 
 async function assertTradable(token: Address) {
   const registered = await publicClient.readContract({ ...registry(), functionName: "isRegistered", args: [token] });
-  if (!registered) throw new Refused("unknown_token", "Este token no está registrado.");
+  if (!registered) throw new Refused("unknown_token", "This token is not registered.");
   const info = await publicClient.readContract({ ...registry(), functionName: "tokenInfo", args: [token] });
-  if (info.paused) throw new Refused("paused", "La negociación de este token está pausada.");
-  if (!info.tradingEnabled) throw new Refused("trading_disabled", "Este token no admite negociación.");
+  if (info.paused) throw new Refused("paused", "Trading in this token is paused.");
+  if (!info.tradingEnabled) throw new Refused("trading_disabled", "This token does not allow trading.");
   return info;
 }
 
 async function assertInBand(token: Address, price: bigint, floor: bigint, seller: Address) {
   const context = { address: seller };
   const band = await publicClient.readContract({ ...registry(), functionName: "band", args: [token] });
-  if (band.price === 0n) throw new Refused("band_not_set", "Este token todavía no tiene precio de referencia.", 422, context);
+  if (band.price === 0n) throw new Refused("band_not_set", "This token has no reference price yet.", 422, context);
   if (band.maxAge !== 0n && nowSeconds() > band.timestamp + band.maxAge) {
-    throw new Refused("price_stale", "El precio de referencia está vencido.", 422, context);
+    throw new Refused("price_stale", "The reference price has expired.", 422, context);
   }
   const { low, high } = bandLimits(band, floor);
   if (price < low || price > high) {
-    throw new Refused("out_of_band", `El precio ${price} está fuera del rango permitido, de ${low} a ${high}.`, 422, context);
+    throw new Refused("out_of_band", `The price ${price} is outside the allowed range, from ${low} to ${high}.`, 422, context);
   }
 }
 
@@ -128,7 +128,7 @@ async function assertHolderSigned(address: Address, digest: Hash, signature: Hex
   // verifyHash covers EOAs and ERC-1271 smart accounts, so this survives the move to Fuji.
   const verify = (hash: Hash) => publicClient.verifyHash({ address, hash, signature }).catch(() => false);
   if ((await verify(digest)) || (await verify(hashMessage({ raw: digest })))) return;
-  throw new Refused("invalid_holder_signature", "La firma no corresponde a esta cuenta.", 422, { address });
+  throw new Refused("invalid_holder_signature", "The signature does not match this account.", 422, { address });
 }
 
 /** Everything an order must be before the PSAV takes it. The sponsor checks the same before it signs one. */
@@ -136,10 +136,10 @@ export async function assertPostable(order: Order) {
   const { seller } = order;
   const context = { address: seller };
 
-  if (order.chainId !== BigInt(chain.id)) throw new Refused("wrong_chain", "La orden es de otra red.", 422, context);
-  if (venueIndex(order.venue) < 0) throw new Refused("unknown_venue", "La orden es de otra plataforma.", 422, context);
-  if (order.amount === 0n) throw new Refused("zero_amount", "La cantidad tiene que ser mayor a cero.", 422, context);
-  if (order.expiry <= nowSeconds()) throw new Refused("expired", "La orden ya venció.", 422, context);
+  if (order.chainId !== BigInt(chain.id)) throw new Refused("wrong_chain", "This order is for another network.", 422, context);
+  if (venueIndex(order.venue) < 0) throw new Refused("unknown_venue", "This order belongs to another venue.", 422, context);
+  if (order.amount === 0n) throw new Refused("zero_amount", "The amount must be greater than zero.", 422, context);
+  if (order.expiry <= nowSeconds()) throw new Refused("expired", "This order has expired.", 422, context);
 
   const info = await assertTradable(order.token);
   await assertInBand(order.token, order.price, info.floor, seller);
@@ -152,10 +152,10 @@ export async function assertPostable(order: Order) {
     publicClient.readContract({ ...settlement(), functionName: "cancelled", args: [seller, order.nonce] }),
   ]);
   // The contract announces a spent nonce without complaint, and that order could never fill.
-  if (filled || cancelled) throw new Refused("nonce_used", "Esta orden ya se usó. Firmá una nueva.", 409, context);
-  if (!attested) throw new Refused("seller_not_attested", "La cuenta vendedora no está verificada.", 403, context);
-  if (blocked) throw new Refused("seller_blocked", "La cuenta vendedora está bloqueada por el PSAV.", 403, context);
-  if (balance < order.amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
+  if (filled || cancelled) throw new Refused("nonce_used", "This order was already used. Sign a new one.", 409, context);
+  if (!attested) throw new Refused("seller_not_attested", "The seller's account is not verified.", 403, context);
+  if (blocked) throw new Refused("seller_blocked", "The PSAV blocked the seller's account.", 403, context);
+  if (balance < order.amount) throw new Refused("insufficient_balance", "You do not have that many tokens.", 422, context);
 }
 
 /** The digest a seller signs, as the settlement contract computes it. */
@@ -171,7 +171,7 @@ export function hashOrder(order: Order): Promise<Hash> {
 export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: unknown }): Promise<OrderView> {
   const order = parseOrder(body.order);
   const sellerSig = parseSignature(body.sellerSig);
-  if (!(await withinRate("orders", ORDERS_PER_MINUTE, 60_000))) throw new Refused("rate_limited", "Demasiadas órdenes. Probá en un minuto.", 429);
+  if (!(await withinRate("orders", ORDERS_PER_MINUTE, 60_000))) throw new Refused("rate_limited", "Too many orders. Try again in a minute.", 429);
   await assertPostable(order);
 
   const orderHash = await hashOrder(order);
@@ -183,16 +183,16 @@ export async function postOrder(body: { order?: Partial<WireOrder>; sellerSig?: 
 
 async function announce(order: Order, sellerSig: Hex, hashed: { address: Address; orderHash: Hash }): Promise<OrderView> {
   const { orderHash } = hashed;
-  if (await store.getOrder(orderHash)) throw new Refused("duplicate", "Esta orden ya está publicada.", 409, hashed);
+  if (await store.getOrder(orderHash)) throw new Refused("duplicate", "This order is already posted.", 409, hashed);
 
   const simulated = await publicClient
     .simulateContract({ ...settlement(), abi: revertAbi, functionName: "announceOrder", args: [order, sellerSig], account: orderKeyAccount(order.venue) })
     .catch((error: unknown) => {
       const reason = revertReason(error);
       if (reason.startsWith("InvalidSellerSignature")) {
-        throw new Refused("invalid_seller_signature", "La firma no corresponde a la cuenta vendedora.", 422, hashed);
+        throw new Refused("invalid_seller_signature", "The signature does not match the seller's account.", 422, hashed);
       }
-      throw new Refused("announce_reverted", `El contrato rechazó la orden: ${reason}`, 422, hashed);
+      throw new Refused("announce_reverted", `The contract refused the order: ${reason}`, 422, hashed);
     });
   const announceTx = await orderKeyClient(order.venue).writeContract(simulated.request);
   const receipt = await publicClient.waitForTransactionReceipt({ hash: announceTx, pollingInterval: RECEIPT_POLL_MS });
@@ -302,7 +302,7 @@ export async function listOrders(): Promise<OrderView[]> {
 
 async function findOrder(orderHash: string): Promise<StoredOrder> {
   const stored = await store.getOrder(orderHash as Hash);
-  if (!stored) throw new Refused("unknown_order", "Esa orden no está en el libro.", 404);
+  if (!stored) throw new Refused("unknown_order", "That order is not in the book.", 404);
   return stored;
 }
 
@@ -310,7 +310,7 @@ async function findOrder(orderHash: string): Promise<StoredOrder> {
 export async function markCancelled(orderHash: string): Promise<OrderView> {
   const stored = await syncWithChain(await findOrder(orderHash));
   if (!stored.cancelled) {
-    throw new Refused("not_cancelled_on_chain", "La orden sigue vigente en el contrato.", 409, { address: stored.order.seller, orderHash: stored.orderHash });
+    throw new Refused("not_cancelled_on_chain", "The order is still open in the contract.", 409, { address: stored.order.seller, orderHash: stored.orderHash });
   }
   return view(stored);
 }
@@ -326,17 +326,17 @@ export async function coSign(orderHash: string, body: { buyer?: unknown; demoDir
   const context = { address: buyer, orderHash: found.orderHash };
 
   const stored = await syncWithChain(found);
-  if (view(stored).status !== "open") throw new Refused("order_closed", "Esta orden ya no está vigente.", 409, context);
-  if (buyer === stored.order.seller) throw new Refused("self_trade", "No podés comprar tu propia orden.", 422, context);
+  if (view(stored).status !== "open") throw new Refused("order_closed", "This order is no longer open.", 409, context);
+  if (buyer === stored.order.seller) throw new Refused("self_trade", "You cannot buy your own order.", 422, context);
   await assertTradable(stored.order.token);
 
   const [attested, blocked] = await Promise.all([
     publicClient.readContract({ ...registry(), functionName: "isAttested", args: [stored.order.token, buyer] }),
     publicClient.readContract({ ...registry(), functionName: "isBlocked", args: [stored.order.token, buyer] }),
   ]);
-  if (blocked) throw new Refused("buyer_blocked", "La cuenta compradora está bloqueada por el PSAV.", 403, context);
+  if (blocked) throw new Refused("buyer_blocked", "The PSAV blocked the buyer's account.", 403, context);
   if (!attested) {
-    const refused = new Refused("buyer_not_attested", "La cuenta compradora no está verificada.", 403, context);
+    const refused = new Refused("buyer_not_attested", "The buyer's account is not verified.", 403, context);
     const demoAllowed = chainName === "local" || process.env.VENUE_DEMO_COSIGN === "1";
     if (body.demoDirectAttempt !== true || !demoAllowed) throw refused;
     await logRefusal("co-sign (demo: firma entregada para mostrar el rechazo en el contrato)", refused);
@@ -364,11 +364,11 @@ function reversionView(r: StoredReversion): ReversionView {
 export async function assertRequestable(request: { token: Address; holder: Address; amount: bigint; requestedAt: bigint }) {
   const { token, holder, amount, requestedAt } = request;
   const context = { address: holder };
-  if (amount === 0n) throw new Refused("zero_amount", "La cantidad tiene que ser mayor a cero.", 422, context);
+  if (amount === 0n) throw new Refused("zero_amount", "The amount must be greater than zero.", 422, context);
   const age = nowSeconds() - requestedAt;
-  if (age > REVERSION_MAX_AGE_S || age < -REVERSION_MAX_AGE_S) throw new Refused("stale_request", "El pedido venció. Volvé a firmarlo.", 422, context);
+  if (age > REVERSION_MAX_AGE_S || age < -REVERSION_MAX_AGE_S) throw new Refused("stale_request", "The request has expired. Sign it again.", 422, context);
   const balance = await publicClient.readContract({ address: token, abi: handoffTokenAbi, functionName: "balanceOf", args: [holder] });
-  if (balance < amount) throw new Refused("insufficient_balance", "No tenés esa cantidad de tokens.", 422, context);
+  if (balance < amount) throw new Refused("insufficient_balance", "You do not have that many tokens.", 422, context);
 }
 
 /** Stores a holder's request for the console's PSAV to act on. Only the holder's signature can open one. */
@@ -394,7 +394,7 @@ export async function requestReversion(body: {
   // Exclusive so two requests with different timestamps, hence different ids, cannot both pass the pending check.
   return store.exclusive(`reversion:${token}:${holder}`, async () => {
     const open = (await store.listReversions()).some((r) => r.token === token && r.holder === holder && r.status === "pending");
-    if (open) throw new Refused("already_pending", "Ya tenés un pedido de reversión pendiente.", 409, context);
+    if (open) throw new Refused("already_pending", "You already have a pending request to go back to paper.", 409, context);
 
     const stored: StoredReversion = {
       id,

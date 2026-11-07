@@ -18,7 +18,7 @@ const SPONSORED = { paymasterServiceData: { mode: PaymasterMode.SPONSORED } };
 const ERC6492_SUFFIX = "6492".repeat(16);
 
 function notConfigured(what: string) {
-  return new Refused("sponsor_not_configured", `Falta configurar el patrocinio: ${what}.`, 503);
+  return new Refused("sponsor_not_configured", `Sponsorship is not configured: ${what}.`, 503);
 }
 
 function requireSecret(name: "MNEMONIC" | "ZEROXGASLESS_KEY") {
@@ -57,7 +57,7 @@ async function freshClient(actor: "seller" | "buyer", paymasterUrl: string) {
   const client = await buildClient(ownerWallet(actor), paymasterUrl);
   const computed = (await client.getAccountAddress()) as Address;
   if (!isAddressEqual(computed, requireConfig()[actor])) {
-    throw new Refused("wrong_owner", "La clave del dueño no corresponde a esta cuenta.", 503);
+    throw new Refused("wrong_owner", "The owner key does not match this account.", 503);
   }
   return client;
 }
@@ -106,7 +106,7 @@ export async function withPaymaster<T>(run: (paymasterUrl: string) => Promise<T>
   } catch (error) {
     if (error instanceof Refused) throw error;
     const message = error instanceof Error ? error.message : String(error);
-    throw new Refused("sponsor_failed", `El patrocinio rechazó la operación: ${message.replaceAll(key, "<key>").slice(0, 300)}`, 502);
+    throw new Refused("sponsor_failed", `Sponsorship refused the operation: ${message.replaceAll(key, "<key>").slice(0, 300)}`, 502);
   }
 }
 
@@ -119,7 +119,7 @@ export async function sendSponsored(actor: "seller" | "buyer", calls: Call[], pa
 
   const { receipt, success } = await response.wait();
   // success is the string "true" or "false", so a plain truthiness check would pass a failed operation.
-  if (String(success) !== "true") throw new Error(`Transacción revertida: ${receipt.transactionHash}`);
+  if (String(success) !== "true") throw new Error(`Transaction reverted: ${receipt.transactionHash}`);
   return { hash: receipt.transactionHash as Hash, userOpHash: response.userOpHash as Hash };
 }
 
@@ -131,19 +131,19 @@ async function signDigest(actor: "seller" | "buyer", digest: Hash, paymasterUrl:
   const client = await freshClient(actor, paymasterUrl);
   // The 0x prefix matters: without it the SDK signs the text and verification fails.
   const signature = (await client.signMessage(digest)) as Hex;
-  if (signature.endsWith(ERC6492_SUFFIX)) throw new Error("La cuenta todavía no está desplegada.");
+  if (signature.endsWith(ERC6492_SUFFIX)) throw new Error("The account is not deployed yet.");
   return signature;
 }
 
 function sponsoredActor(value: unknown): "seller" | "buyer" {
   if (value === "seller" || value === "buyer") return value;
-  throw new Refused("sponsor_actor", "Esta cuenta no tiene patrocinio.", 403);
+  throw new Refused("sponsor_actor", "This account has no sponsorship.", 403);
 }
 
 function parseCall(raw: unknown): Call {
   const { to, data } = (raw ?? {}) as { to?: unknown; data?: unknown };
   if (typeof to !== "string" || !isAddress(to) || typeof data !== "string" || !data.startsWith("0x")) {
-    throw new Refused("malformed", "La llamada está mal formada.", 400);
+    throw new Refused("malformed", "The call is malformed.", 400);
   }
   return { to, data: data as Hex };
 }
@@ -151,7 +151,7 @@ function parseCall(raw: unknown): Call {
 /** This route signs and spends sponsorship, so it runs only the calls the wallet makes, and nothing else. */
 function assertWalletCall(call: Call, allowed: readonly string[]) {
   const { settlement, usdc } = requireConfig();
-  const refused = new Refused("call_not_allowed", "El patrocinio no cubre esta operación.", 403);
+  const refused = new Refused("call_not_allowed", "Sponsorship does not cover this operation.", 403);
   try {
     if (isAddressEqual(call.to, usdc)) {
       const { functionName, args } = decodeFunctionData({ abi: erc20Abi, data: call.data });
@@ -170,9 +170,9 @@ async function orderDigest(actor: "seller" | "buyer", raw: Partial<WireOrder> | 
   const config = requireConfig();
   const order = parseOrder(raw);
   const context = { address: order.seller };
-  if (!isAddressEqual(order.seller, config[actor])) throw new Refused("not_your_order", "Esta orden no es de esta cuenta.", 403, context);
-  if (!isAddressEqual(order.token, config.token)) throw new Refused("unknown_token", "Este token no está registrado.", 422, context);
-  if (!isAddressEqual(order.venue, config.venue)) throw new Refused("unknown_venue", "La orden es de otra plataforma.", 422, context);
+  if (!isAddressEqual(order.seller, config[actor])) throw new Refused("not_your_order", "This order does not belong to this account.", 403, context);
+  if (!isAddressEqual(order.token, config.token)) throw new Refused("unknown_token", "This token is not registered.", 422, context);
+  if (!isAddressEqual(order.venue, config.venue)) throw new Refused("unknown_venue", "This order belongs to another venue.", 422, context);
   await assertPostable(order);
   return hashOrder(order);
 }
@@ -187,7 +187,7 @@ async function reversionRequestDigest(actor: "seller" | "buyer", body: SponsorRe
     amount: parseUint(body.amount, "amount"),
     requestedAt: parseUint(body.requestedAt, "requestedAt"),
   };
-  if (!isAddressEqual(request.token, config.token)) throw new Refused("unknown_token", "Este token no está registrado.", 422, { address: request.holder });
+  if (!isAddressEqual(request.token, config.token)) throw new Refused("unknown_token", "This token is not registered.", 422, { address: request.holder });
   await assertRequestable(request);
   return reversionDigest(request);
 }
@@ -208,17 +208,17 @@ const SPONSORED_PER_MINUTE = 20;
 const DIRECT_PER_MINUTE = 10;
 
 async function assertWithinRate(name: string, limit: number) {
-  if (!(await withinRate(name, limit, 60_000))) throw new Refused("rate_limited", "Demasiadas operaciones. Probá en un minuto.", 429);
+  if (!(await withinRate(name, limit, 60_000))) throw new Refused("rate_limited", "Too many operations. Try again in a minute.", 429);
 }
 
 /** The server half of the Fuji Sponsor: signing needs the mnemonic and the paymaster key, which stay here. */
 export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
-  if (chainName === "local") throw new Refused("not_on_local", "En la red local el patrocinio es simulado.", 404);
+  if (chainName === "local") throw new Refused("not_on_local", "On the local network, sponsorship is simulated.", 404);
 
   if (body.action === "sendCalls") {
     const actor = sponsoredActor(body.actor);
-    if (!Array.isArray(body.calls) || body.calls.length === 0) throw new Refused("malformed", "Faltan las llamadas.", 400);
-    if (body.calls.length > MAX_CALLS) throw new Refused("malformed", "Demasiadas llamadas en una operación.", 400);
+    if (!Array.isArray(body.calls) || body.calls.length === 0) throw new Refused("malformed", "The calls are missing.", 400);
+    if (body.calls.length > MAX_CALLS) throw new Refused("malformed", "Too many calls in one operation.", 400);
     await assertWithinRate(`sponsor:${actor}`, SPONSORED_PER_MINUTE);
     const calls = body.calls.map(parseCall);
     calls.forEach((call) => assertWalletCall(call, ["approve", "fill", "cancel"]));
@@ -233,16 +233,16 @@ export async function runSponsorRequest(body: SponsorRequest): Promise<object> {
 
   if (body.action === "direct") {
     // The refusal demo: the unverified EOA pays its own gas, so no paymaster is involved.
-    if (body.actor !== "unverified") throw new Refused("sponsor_actor", "Solo la cuenta sin verificar usa esta vía.", 403);
+    if (body.actor !== "unverified") throw new Refused("sponsor_actor", "Only the unverified account uses this path.", 403);
     await assertWithinRate("direct", DIRECT_PER_MINUTE);
     const call = parseCall(body.call);
     assertWalletCall(call, ["fill"]);
     const wallet = ownerWallet("unverified");
     if (!isAddressEqual(wallet.account.address, requireConfig().unverified)) {
-      throw new Refused("wrong_owner", "La clave del dueño no corresponde a esta cuenta.", 503);
+      throw new Refused("wrong_owner", "The owner key does not match this account.", 503);
     }
     return sendFrom(wallet, call);
   }
 
-  throw new Refused("malformed", "Acción desconocida.", 400);
+  throw new Refused("malformed", "Unknown action.", 400);
 }
