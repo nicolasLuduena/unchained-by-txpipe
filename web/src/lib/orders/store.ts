@@ -19,7 +19,8 @@ export type StoredReversion = {
   holder: Address;
   amount: bigint;
   requestedAt: bigint;
-  requestBlock: bigint;
+  /** The next block to look at for the PSAV's Reversion event. */
+  scanFrom: bigint;
   status: ReversionStatus;
   certificateRef?: string;
   txHash?: Hash;

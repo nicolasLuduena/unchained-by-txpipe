@@ -43,24 +43,29 @@ export function useWallet(config: WalletConfig, address: Address) {
   useEffect(() => {
     let live = true;
     async function load() {
+      // Apart from the rest: history is a record, and a slow log read must not hold the ticket shut.
+      readHistory(config, address)
+        .then((history) => {
+          if (live) setData((d) => (d.address === address ? { ...d, history } : d));
+        })
+        .catch((error: unknown) => console.error("history refresh failed", error));
+
       try {
-        const [snapshot, orders, reversions, history, passed] = await Promise.all([
+        const [snapshot, orders, reversions, passed] = await Promise.all([
           readSnapshot(config, address),
           venue.listOrders(),
           venue.listReversions(),
-          readHistory(config, address),
           passesPrecheck(config.attestationStore, address),
         ]);
         if (live) {
-          setData({
-            address,
+          setData((d) => ({
+            ...(d.address === address ? d : empty(address)),
             snapshot,
             orders,
             reversions: reversions.filter((r) => isAddressEqual(r.holder, address)),
-            history,
             precheck: passed ? "passed" : "blocked",
             offline: false,
-          });
+          }));
         }
       } catch (error) {
         console.error("wallet refresh failed", error);

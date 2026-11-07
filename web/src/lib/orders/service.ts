@@ -5,6 +5,7 @@ import { chain, chainName, publicClient } from "@/lib/chain";
 import { registryReport } from "@/lib/registry-report";
 import { bandLimits } from "@/lib/wallet/band";
 import { coreContracts } from "@/lib/wallet/deployment";
+import { firstInSpans } from "@/lib/wallet/logs";
 import { revertAbi, revertReason } from "@/lib/wallet/revert-reason";
 import { store, type StoredOrder, type StoredReversion } from "./store";
 import { reversionDigest, toWireOrder, type Order, type OrderView, type Refusal, type ReversionView, type WireOrder } from "./types";
@@ -13,7 +14,6 @@ import { orderKeyAccount, orderKeyClient } from "./venue";
 const RECEIPT_POLL_MS = 200;
 const REVERSION_MAX_AGE_S = 600n;
 const MAX_REFUSALS = 200;
-const LOG_WINDOW_BLOCKS = 2000n;
 
 /** A request the PSAV declines. Logged to the refusal list the console reads. */
 export class Refused extends Error {
@@ -59,12 +59,6 @@ function registry() {
 
 function nowSeconds() {
   return BigInt(Math.floor(Date.now() / 1000));
-}
-
-/** Fuji's public RPC refuses wide getLogs ranges, so a read never reaches further back than the window. */
-async function logsFrom(block: bigint) {
-  const oldest = (await publicClient.getBlockNumber()) - LOG_WINDOW_BLOCKS;
-  return block > oldest ? block : oldest > 0n ? oldest : 0n;
 }
 
 function parseAddress(value: unknown, field: string): Address {
@@ -203,22 +197,20 @@ async function syncWithChain(stored: StoredOrder) {
     publicClient.readContract({ ...settlement(), functionName: "filled", args: [seller, nonce] }),
     publicClient.readContract({ ...settlement(), functionName: "cancelled", args: [seller, nonce] }),
   ]);
+  if (!filled && !cancelled) return;
+
+  // The flag proves the event exists, so this scan runs once per order and always ends.
+  const latest = await publicClient.getBlockNumber();
   if (filled) {
-    const [event] = await publicClient.getContractEvents({
-      ...settlement(),
-      eventName: "OrderFilled",
-      args: { orderHash: stored.orderHash },
-      fromBlock: await logsFrom(stored.announceBlock),
-    });
+    const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
+      publicClient.getContractEvents({ ...settlement(), eventName: "OrderFilled", args: { orderHash: stored.orderHash }, fromBlock, toBlock }),
+    );
     if (event?.args.buyer) stored.filled = { tx: event.transactionHash, buyer: event.args.buyer };
     reportFill(stored);
-  } else if (cancelled) {
-    const [event] = await publicClient.getContractEvents({
-      ...settlement(),
-      eventName: "OrderCancelled",
-      args: { seller, nonce },
-      fromBlock: await logsFrom(stored.announceBlock),
-    });
+  } else {
+    const [event] = await firstInSpans(stored.announceBlock, latest, (fromBlock, toBlock) =>
+      publicClient.getContractEvents({ ...settlement(), eventName: "OrderCancelled", args: { seller, nonce }, fromBlock, toBlock }),
+    );
     stored.cancelled = { tx: event?.transactionHash };
   }
 }
@@ -334,7 +326,7 @@ export async function requestReversion(body: {
     holder,
     amount,
     requestedAt,
-    requestBlock: await publicClient.getBlockNumber(),
+    scanFrom: await publicClient.getBlockNumber(),
     status: "pending",
   };
   store.reversions.set(id, stored);
@@ -344,14 +336,15 @@ export async function requestReversion(body: {
 /** A request is done when the PSAV's revertToPaper shows up as a Reversion event; the console writes nothing here. */
 async function syncReversion(r: StoredReversion) {
   if (r.status === "done") return;
-  const events = await publicClient.getContractEvents({
-    ...registry(),
-    eventName: "Reversion",
-    args: { token: r.token, holder: r.holder },
-    fromBlock: await logsFrom(r.requestBlock),
+  const latest = await publicClient.getBlockNumber();
+  const [event] = await firstInSpans(r.scanFrom, latest, async (fromBlock, toBlock) => {
+    const events = await publicClient.getContractEvents({ ...registry(), eventName: "Reversion", args: { token: r.token, holder: r.holder }, fromBlock, toBlock });
+    return events.filter((e) => e.args.amount === r.amount);
   });
-  const event = events.find((e) => e.args.amount === r.amount);
-  if (!event) return;
+  if (!event) {
+    r.scanFrom = latest + 1n; // A pending request costs one read per poll, however long the PSAV takes.
+    return;
+  }
   r.status = "done";
   r.certificateRef = event.args.certificateRef;
   r.txHash = event.transactionHash;
