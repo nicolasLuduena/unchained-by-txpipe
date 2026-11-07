@@ -94,6 +94,8 @@ Onboarding is idempotent per owner, serialized by a Redis lock and capped at 20 
 
 The regime describes a closed group of at most five operators who must keep one real-time record. That is the shape of a permissioned Avalanche L1. Fuji C-Chain is what runs today; the L1 is the roadmap.
 
+**Why not another network.** These contracts would run on any EVM chain, and other ecosystems offer app-chains too. We chose Avalanche because an L1 gives the closed validator set the regime describes, while ICM keeps it connected to USDC on the C-Chain. A public chain can't restrict who validates, and a private chain built from scratch loses that connection.
+
 | Título XXII | Requirement | Avalanche fit |
 |---|---|---|
 | Art. 5 e | At most five PSAVs per issuance, with "sincronización en tiempo real" between them | **Five-validator L1**, one validator per PSAV. Shared state is the synchronization, so venues have nothing to reconcile. `MAX_VENUES = 5` is already enforced in the registry |
