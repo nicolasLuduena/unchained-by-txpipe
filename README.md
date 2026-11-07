@@ -25,7 +25,7 @@ Handoff is software, built to the structure of Título XXII of the CNV Normas an
 - [ ] Wallet screen screenshot (TODO, see above)
 - [x] [Known gaps](#known-gaps)
 - [x] [Business model: problem, customer, revenue, competitive advantage](#business-model)
-- [x] [Installation](#install), [deployment](#deploy-to-fuji) and [architecture](#architecture)
+- [x] [Installation](#install), [deployment](#deploy-to-fuji), [hosting](#deploy-the-web-app-to-vercel) and [architecture](#architecture)
 
 ## Deployed contracts
 
@@ -76,6 +76,26 @@ The regime describes a closed group of at most five operators who must keep one 
 | Liquidity and payment | The L1 is closed, while USDC and the wider market live on the C-Chain | **ICM** between the C-Chain and the L1 is how a closed venue stays connected |
 
 Not shown in this demo: the L1, a validator set or an ICM message. The one-second figure is Avalanche's finality, not a benchmark we ran. ICM was stretch ticket [#23](https://github.com/nicolasLuduena/unchained-by-txpipe/issues/23) and was not built.
+
+## Deploy the web app to Vercel
+
+Create a Vercel project with root directory `web` and the Next.js preset, and attach Upstash Redis. The build needs neither Foundry nor any file outside `web/`: it refreshes its copies of `design/` and `deployments/` when those are there, and otherwise uses the committed ones. So after a contract redeploy, run `pnpm build` and commit `web/deployments/`.
+
+| Variable | Value |
+| --- | --- |
+| `NEXT_PUBLIC_CHAIN` | `fuji`. Read at build time, so it must apply to the build. |
+| `MNEMONIC` | The deployment seed, as a value. **Testnet only:** it sits in the hosting provider's settings, so it must never hold real funds. |
+| `ZEROXGASLESS_KEY` | The 0xGasless paymaster key, as a value. |
+| `VENUE_ORDER_KEY` | The venue order key: mnemonic index 6, as a hex private key. |
+| `VENUE_DEMO_COSIGN` | `1`, so the unverified demo reaches the token hook. |
+| `AA_FACTORY`, `AA_IMPLEMENTATION`, `AA_FALLBACK_HANDLER`, `AA_ECDSA_MODULE` | The smart-account contracts, in [`web/.env.example`](web/.env.example). |
+| `DEMO_PASSWORD` | Puts the whole app behind HTTP Basic auth: any username, this password. Unset, the app is open. |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Injected by the Upstash integration. |
+| `NEXT_PUBLIC_RPC_URL` | Optional but advised: the public Fuji RPC throttles. Read at build time. |
+
+None of these but the two `NEXT_PUBLIC_` ones reach the browser. Without the KV variables the venue falls back to process memory, which serverless instances do not share, so orders would come and go between requests.
+
+Redis keys are `handoff:<chainId>:<settlement>:...`, so a contract redeploy starts with an empty book and old keys are simply left behind.
 
 ## Architecture
 
@@ -128,7 +148,7 @@ pnpm dev                     # http://localhost:3000
 pnpm build
 ```
 
-`pnpm dev` and `pnpm build` copy the design system into the app first. The app reads `deployments/<chain>.json` at startup, so restart `pnpm dev` after a redeploy; without the file it still runs, with no deployment loaded. After changing a contract interface, run `pnpm gen:abi` and commit `web/src/lib/abi/`.
+`pnpm dev` and `pnpm build` first copy the design system and `deployments/*.json` into `web/`, and the app reads only those copies. Both are committed, so commit them after changing `design/` or redeploying. The app reads the deployment at startup, so restart `pnpm dev` after a redeploy; without the file it still runs, with no deployment loaded. After changing a contract interface, run `pnpm gen:abi` and commit `web/src/lib/abi/`.
 
 To run on a local chain, with a stub store, stub USDC and fake sponsorship:
 
@@ -137,11 +157,11 @@ anvil
 cd contracts && forge script script/DeployLocal.s.sol --rpc-url local --broadcast --slow
 ```
 
-To run the app against the existing Fuji deployment, set `NEXT_PUBLIC_CHAIN=fuji` and the server-only variables in [`web/.env.example`](web/.env.example): `MNEMONIC_PATH`, `ZEROXGASLESS_KEY_PATH`, `VENUE_ORDER_KEY`, `VENUE_DEMO_COSIGN=1` and the four `AA_*` addresses. The public RPC throttles, so a private `NEXT_PUBLIC_RPC_URL` helps.
+To run the app against the existing Fuji deployment, set `NEXT_PUBLIC_CHAIN=fuji` and the server-only variables in [`web/.env.example`](web/.env.example): `MNEMONIC` and `ZEROXGASLESS_KEY` (or `MNEMONIC_PATH` and `ZEROXGASLESS_KEY_PATH`), `VENUE_ORDER_KEY`, `VENUE_DEMO_COSIGN=1` and the four `AA_*` addresses. The public RPC throttles, so a private `NEXT_PUBLIC_RPC_URL` helps.
 
 ## Deploy to Fuji
 
-Keys come from one mnemonic. Indexes: 0 deployer, 1 issuer, 2 unverified, 3 seller owner, 4 buyer owner, 5 venue PSAV, 6 venue order key. Secrets stay in files outside the repo and are read by path.
+Keys come from one mnemonic. Indexes: 0 deployer, 1 issuer, 2 unverified, 3 seller owner, 4 buyer owner, 5 venue PSAV, 6 venue order key. Secrets stay in files outside the repo and are read by path, or, where there are no files, by value (see [Deploy the web app to Vercel](#deploy-the-web-app-to-vercel)).
 
 **1. Prepare.** From `spike/`: `npm install`, `forge build`, copy `.env.example` to `.env`, and run `npm run addresses` to print every role, including the smart-account addresses before they exist. Send faucet AVAX to the deployer, issuer, unverified EOA, venue and order key.
 
