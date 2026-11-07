@@ -21,7 +21,7 @@ export interface Sponsor {
 }
 
 /** Says what the sponsorship is: a mock must say it is a mock. */
-export const SPONSOR_LABEL = chainName === "local" ? "Sin gas: patrocinio simulado en la red local." : "Sin gas: el patrocinio cubre la operación.";
+export const SPONSOR_LABEL = chainName === "local" ? "No gas: sponsorship is simulated on the local network." : "No gas: sponsorship covers this operation.";
 
 /** Loaded on demand so a Fuji page never fetches the local fake or its dev keys. */
 export async function getSponsor(actor?: Actor): Promise<Sponsor> {

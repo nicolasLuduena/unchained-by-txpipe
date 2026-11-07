@@ -19,7 +19,7 @@ async function call<T>(path: string, body?: object): Promise<T> {
     cache: "no-store",
   });
   const json = await response.json();
-  if (!response.ok) throw new VenueRefusal(json.error?.code ?? "unavailable", json.error?.reason ?? "El servicio de órdenes no pudo responder.");
+  if (!response.ok) throw new VenueRefusal(json.error?.code ?? "unavailable", json.error?.reason ?? "The order service could not respond.");
   return json as T;
 }
 

@@ -1,5 +1,6 @@
 import { isAddress, isHex, keccak256, stringToHex, type Address } from "viem";
 import { deployment } from "@/lib/chain";
+import { normalizeUsdc } from "@/lib/wallet/format";
 import { parseUsdc } from "./format";
 import type { JsonArg, RegistryWrite, Role } from "./roles";
 import type { TokenView } from "./state";
@@ -46,24 +47,24 @@ const tokenOf = (ctx: ActionContext) => ctx.token?.address as string;
 export const ACTIONS: ActionDef[] = [
   {
     id: "registrar",
-    title: "Registrar token",
-    who: "Emisor",
+    title: "Register token",
+    who: "Issuer",
     roles: EMISOR,
     needsToken: false,
     gated: true,
     fn: "registerToken",
     fields: (ctx) => [
-      { name: "name", label: "Nombre", kind: "required", initial: "Fideicomiso Ejemplo" },
-      { name: "symbol", label: "Símbolo", kind: "required", initial: "FEJ" },
-      { name: "depositRef", label: "Referencia de depósito", kind: "required", initial: "DEMO-DEPOSITO-0002 (ficticio)" },
-      { name: "cnvAuthRef", label: "Referencia de autorización CNV", kind: "required", initial: "DEMO-CNV-RESFC-0001 (ficticia)" },
-      { name: "docHash", label: "Hash del documento de emisión", kind: "hash", help: "Hash de ejemplo. Pegá el del documento real.", initial: EXAMPLE_DOC_HASH },
-      { name: "supply", label: "Unidades autorizadas", kind: "whole", initial: "1000" },
-      { name: "attesters", label: "Atestadores", kind: "addresses", help: "Direcciones separadas por coma.", initial: ctx.store ?? "" },
-      { name: "qualified", label: "Solo inversores calificados", kind: "flag", help: "Se guarda en el registro. Todavía no se aplica." },
-      { name: "capped", label: "Tope de financiamiento colectivo", kind: "flag", help: "Se guarda en el registro. Todavía no se aplica." },
+      { name: "name", label: "Name", kind: "required", initial: "Example Trust" },
+      { name: "symbol", label: "Symbol", kind: "required", initial: "EXT" },
+      { name: "depositRef", label: "Deposit reference", kind: "required", initial: "DEMO-DEPOSIT-0002 (fictional)" },
+      { name: "cnvAuthRef", label: "CNV authorization reference", kind: "required", initial: "DEMO-CNV-RESFC-0001 (fictional)" },
+      { name: "docHash", label: "Issuance document hash", kind: "hash", help: "Example hash. Paste the hash of the real document.", initial: EXAMPLE_DOC_HASH },
+      { name: "supply", label: "Authorized units", kind: "whole", initial: "1000" },
+      { name: "attesters", label: "Attesters", kind: "addresses", help: "Addresses separated by commas.", initial: ctx.store ?? "" },
+      { name: "qualified", label: "Qualified investors only", kind: "flag", help: "Stored in the registry. Not enforced yet." },
+      { name: "capped", label: "Crowdfunding cap", kind: "flag", help: "Stored in the registry. Not enforced yet." },
     ],
-    label: () => "Registrar token",
+    label: () => "Register token",
     args: (v) => [
       {
         name: v.name,
@@ -79,88 +80,88 @@ export const ACTIONS: ActionDef[] = [
   },
   {
     id: "emitir",
-    title: "Emitir unidades",
-    who: "Emisor",
+    title: "Issue units",
+    who: "Issuer",
     roles: EMISOR,
     needsToken: true,
     gated: true,
     fn: "mint",
     fields: () => [
-      { name: "to", label: "Titular", kind: "address", initial: actor("seller") },
-      { name: "amount", label: "Unidades", kind: "whole", initial: "10" },
+      { name: "to", label: "Holder", kind: "address", initial: actor("seller") },
+      { name: "amount", label: "Units", kind: "whole", initial: "10" },
     ],
-    label: () => "Emitir",
+    label: () => "Issue",
     args: (v, ctx) => [tokenOf(ctx), v.to, v.amount],
   },
   {
     id: "banda",
-    title: "Fijar banda",
-    who: "Emisor o PSAV",
+    title: "Set price band",
+    who: "Issuer or PSAV",
     roles: BOTH,
     needsToken: true,
     gated: true,
     fn: "setBand",
     fields: () => [
-      { name: "price", label: "Precio de referencia", kind: "usdc", help: "USDC por unidad.", initial: "2,50" },
-      { name: "width", label: "Ancho en puntos básicos", kind: "whole", help: "1000 es 10 % hacia cada lado.", initial: "1000" },
-      { name: "maxAge", label: "Vigencia en segundos", kind: "whole", help: "0 la deja sin vencimiento.", initial: "0" },
+      { name: "price", label: "Reference price", kind: "usdc", help: "USDC per unit.", initial: "2.50" },
+      { name: "width", label: "Width in basis points", kind: "whole", help: "1000 is 10% to each side.", initial: "1000" },
+      { name: "maxAge", label: "Valid for, in seconds", kind: "whole", help: "0 means it never expires.", initial: "0" },
     ],
-    label: () => "Fijar banda",
+    label: () => "Set price band",
     args: (v, ctx) => [tokenOf(ctx), parseUsdc(v.price).toString(), v.width, v.maxAge],
   },
   {
     id: "piso",
-    title: "Fijar piso",
-    who: "Emisor",
+    title: "Set floor",
+    who: "Issuer",
     roles: EMISOR,
     needsToken: true,
     gated: true,
     fn: "setFloor",
-    fields: () => [{ name: "floor", label: "Piso", kind: "usdc", help: "USDC por unidad. 0 lo quita.", initial: "2,00" }],
-    label: () => "Fijar piso",
+    fields: () => [{ name: "floor", label: "Floor", kind: "usdc", help: "USDC per unit. 0 removes it.", initial: "2.00" }],
+    label: () => "Set floor",
     args: (v, ctx) => [tokenOf(ctx), parseUsdc(v.floor).toString()],
   },
   {
     id: "negociacion",
-    title: "Negociación secundaria",
-    who: "Emisor",
+    title: "Secondary trading",
+    who: "Issuer",
     roles: EMISOR,
     needsToken: true,
     gated: true,
     fn: "setTradingEnabled",
     fields: () => [],
-    label: (ctx) => (ctx.token?.tradingEnabled ? "Cerrar negociación" : "Abrir negociación"),
+    label: (ctx) => (ctx.token?.tradingEnabled ? "Close trading" : "Open trading"),
     args: (_, ctx) => [tokenOf(ctx), !ctx.token?.tradingEnabled],
   },
   {
     id: "pausa",
-    title: "Pausar token",
-    who: "Emisor o PSAV",
+    title: "Pause token",
+    who: "Issuer or PSAV",
     roles: BOTH,
     needsToken: true,
     gated: true,
     danger: true,
     fn: "setPaused",
     fields: () => [],
-    label: (ctx) => (ctx.token?.paused ? "Reanudar" : "Pausar"),
+    label: (ctx) => (ctx.token?.paused ? "Resume" : "Pause"),
     args: (_, ctx) => [tokenOf(ctx), !ctx.token?.paused],
   },
   {
     id: "bloquear",
-    title: "Bloquear titular",
+    title: "Block holder",
     who: "PSAV",
     roles: PSAV,
     needsToken: true,
     gated: false,
     danger: true,
     fn: "setBlocked",
-    fields: () => [{ name: "holder", label: "Titular", kind: "address", initial: actor("seller") }],
-    label: (ctx, v) => (isBlocked(ctx, v.holder) ? "Desbloquear" : "Bloquear"),
+    fields: () => [{ name: "holder", label: "Holder", kind: "address", initial: actor("seller") }],
+    label: (ctx, v) => (isBlocked(ctx, v.holder) ? "Unblock" : "Block"),
     args: (v, ctx) => [tokenOf(ctx), v.holder, !isBlocked(ctx, v.holder)],
   },
   {
     id: "revertir",
-    title: "Revertir a papel",
+    title: "Revert to paper",
     who: "PSAV",
     roles: PSAV,
     needsToken: true,
@@ -168,44 +169,44 @@ export const ACTIONS: ActionDef[] = [
     danger: true,
     fn: "revertToPaper",
     fields: () => [
-      { name: "holder", label: "Titular", kind: "address", initial: actor("seller") },
-      { name: "amount", label: "Unidades", kind: "whole", initial: "1" },
+      { name: "holder", label: "Holder", kind: "address", initial: actor("seller") },
+      { name: "amount", label: "Units", kind: "whole", initial: "1" },
       // The contract accepts an empty reference, so this form is what requires it.
-      { name: "certificate", label: "Referencia del certificado", kind: "required", help: "La emite el depositario. Handoff no emite certificados." },
-      { name: "docHash", label: "Hash del documento", kind: "hash", help: "Hash de ejemplo. Pegá el del documento real.", initial: EXAMPLE_DOC_HASH },
+      { name: "certificate", label: "Certificate reference", kind: "required", help: "The depositary issues it. Handoff does not issue certificates." },
+      { name: "docHash", label: "Document hash", kind: "hash", help: "Example hash. Paste the hash of the real document.", initial: EXAMPLE_DOC_HASH },
     ],
-    label: () => "Revertir a papel",
+    label: () => "Revert to paper",
     args: (v, ctx) => [tokenOf(ctx), v.holder, v.amount, v.certificate, v.docHash],
   },
   {
     id: "plataforma",
-    title: "Agregar plataforma",
-    who: "Emisor",
+    title: "Add venue",
+    who: "Issuer",
     roles: EMISOR,
     needsToken: true,
     gated: true,
     fn: "addVenue",
     fields: () => [
-      { name: "venue", label: "Dirección de la plataforma", kind: "address" },
-      { name: "orderKey", label: "Clave de órdenes", kind: "address" },
+      { name: "venue", label: "Venue address", kind: "address" },
+      { name: "orderKey", label: "Order key", kind: "address" },
     ],
-    label: () => "Agregar plataforma",
+    label: () => "Add venue",
     args: (v, ctx) => [tokenOf(ctx), v.venue, v.orderKey],
   },
   {
     id: "reapuntar",
-    title: "Re-apuntar plataforma",
-    who: "Emisor o PSAV",
+    title: "Repoint venue",
+    who: "Issuer or PSAV",
     roles: BOTH,
     needsToken: true,
     gated: true,
     fn: "repointVenue",
     fields: (ctx) => [
-      { name: "oldVenue", label: "Plataforma actual", kind: "address", initial: ctx.token?.venues[0]?.venue ?? "" },
-      { name: "newVenue", label: "Plataforma nueva", kind: "address" },
-      { name: "newOrderKey", label: "Clave de órdenes nueva", kind: "address" },
+      { name: "oldVenue", label: "Current venue", kind: "address", initial: ctx.token?.venues[0]?.venue ?? "" },
+      { name: "newVenue", label: "New venue", kind: "address" },
+      { name: "newOrderKey", label: "New order key", kind: "address" },
     ],
-    label: () => "Re-apuntar",
+    label: () => "Repoint",
     args: (v, ctx) => [tokenOf(ctx), v.oldVenue, v.newVenue, v.newOrderKey],
   },
 ];
@@ -219,17 +220,17 @@ export function fieldError(field: FieldDef, value: string): string | undefined {
   const text = value.trim();
   switch (field.kind) {
     case "required":
-      return text ? undefined : "Completá este campo.";
+      return text ? undefined : "Fill in this field.";
     case "address":
-      return isAddress(text) ? undefined : "Ingresá una dirección 0x válida.";
+      return isAddress(text) ? undefined : "Enter a valid 0x address.";
     case "addresses":
-      return text.split(",").every((a) => isAddress(a.trim())) ? undefined : "Ingresá direcciones 0x válidas, separadas por coma.";
+      return text.split(",").every((a) => isAddress(a.trim())) ? undefined : "Enter valid 0x addresses, separated by commas.";
     case "hash":
-      return isHex(text) && text.length === 66 ? undefined : "Ingresá un hash 0x de 32 bytes.";
+      return isHex(text) && text.length === 66 ? undefined : "Enter a 32-byte 0x hash.";
     case "whole":
-      return /^\d+$/.test(text) ? undefined : "Ingresá un número entero.";
+      return /^\d+$/.test(text) ? undefined : "Enter a whole number.";
     case "usdc":
-      return /^\d{1,3}(\.\d{3})*(,\d{1,6})?$|^\d+(,\d{1,6})?$/.test(text) ? undefined : "Ingresá un monto como 2,50.";
+      return normalizeUsdc(text) !== null ? undefined : "Enter an amount like 2.50.";
     default:
       return undefined;
   }

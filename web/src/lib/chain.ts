@@ -21,7 +21,7 @@ function readChainName(): ChainName {
 export const chainName = readChainName();
 
 /** How the UI names the network to people. */
-export const networkLabel = chainName === "local" ? "la red local" : "Fuji";
+export const networkLabel = chainName === "local" ? "the local network" : "Fuji";
 export const chain: Chain = CHAINS[chainName];
 
 /** Null until deployments/<chain>.json exists. Inlined by next.config.ts; restart dev after a redeploy. */

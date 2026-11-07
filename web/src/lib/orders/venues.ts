@@ -16,5 +16,5 @@ export function venueIndex(venue: Address): number {
 }
 
 export function venueLabel(venue: Address): string {
-  return VENUES[venueIndex(venue)]?.label ?? "Otra plataforma";
+  return VENUES[venueIndex(venue)]?.label ?? "Another venue";
 }

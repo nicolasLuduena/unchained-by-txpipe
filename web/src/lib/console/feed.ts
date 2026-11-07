@@ -29,11 +29,11 @@ type Order = { token: Address; venue: Address; seller: Address; amount: bigint; 
 const orderKey = (seller: unknown, nonce: unknown) => `${String(seller).toLowerCase()}:${String(nonce)}`;
 
 function lots(amount: bigint, price: bigint): string {
-  return `${units(amount)} ${amount === 1n ? "unidad" : "unidades"}, total USDC ${usdc(amount * price)}`;
+  return `${units(amount)} ${amount === 1n ? "unit" : "units"}, total USDC ${usdc(amount * price)}`;
 }
 
-const announcedDetail = (amount: bigint, price: bigint, venue: Address) => `${lots(amount, price)}. Publicada por ${venueLabel(venue)}.`;
-const filledDetail = (amount: bigint, price: bigint, venue: Address) => `${lots(amount, price)}. Co-firma ${venueLabel(venue)}, la plataforma de la orden.`;
+const announcedDetail = (amount: bigint, price: bigint, venue: Address) => `${lots(amount, price)}. Posted by ${venueLabel(venue)}.`;
+const filledDetail = (amount: bigint, price: bigint, venue: Address) => `${lots(amount, price)}. Co-signed by ${venueLabel(venue)}, the order's venue.`;
 
 export function feedFromLogs(logs: readonly ScannedLog[], timeOf: (block: bigint) => number, assetName: (token: Address) => string): FeedEntry[] {
   const announced = new Map<string, Order>();
@@ -64,19 +64,19 @@ export function feedFromLogs(logs: readonly ScannedLog[], timeOf: (block: bigint
     switch (log.eventName) {
       case "OrderAnnounced": {
         const o = a as Order;
-        return { ...base, event: "Orden", status: "unused", asset: assetName(o.token), from: o.seller, price: usdc(o.price), detail: announcedDetail(o.amount, o.price, o.venue) };
+        return { ...base, event: "Order", status: "unused", asset: assetName(o.token), from: o.seller, price: usdc(o.price), detail: announcedDetail(o.amount, o.price, o.venue) };
       }
       case "OrderFilled": {
         const o = a as Order & { buyer: Address };
-        return { ...base, event: "Vendido", status: "sold", asset: assetName(o.token), from: o.seller, to: o.buyer, price: usdc(o.price), detail: filledDetail(o.amount, o.price, o.venue) };
+        return { ...base, event: "Sold", status: "sold", asset: assetName(o.token), from: o.seller, to: o.buyer, price: usdc(o.price), detail: filledDetail(o.amount, o.price, o.venue) };
       }
       case "OrderCancelled": {
         const o = announced.get(orderKey(a.seller, a.nonce));
         return {
           ...base,
-          event: "Cancelada",
+          event: "Cancelled",
           status: "cancelled",
-          asset: o ? assetName(o.token) : "Orden sin anunciar",
+          asset: o ? assetName(o.token) : "Unannounced order",
           from: a.seller as string,
           price: o ? usdc(o.price) : "-",
           detail: `Nonce ${String(a.nonce)}`,
@@ -85,35 +85,35 @@ export function feedFromLogs(logs: readonly ScannedLog[], timeOf: (block: bigint
       case "Reversion":
         return {
           ...base,
-          event: "En papel",
+          event: "On paper",
           status: "verified",
           asset: assetName(a.token as Address),
           from: a.holder as string,
-          fromRole: "Titular",
+          fromRole: "Holder",
           price: units(a.amount as bigint),
-          unit: "Unid.",
-          detail: `Art. 16. Certificado ${String(a.certificateRef)}. Documento ${String(a.docHash)}`,
+          unit: "Units",
+          detail: `Art. 16. Certificate ${String(a.certificateRef)}. Document ${String(a.docHash)}`,
         };
       case "HolderBlocked":
         return {
           ...base,
-          event: a.blocked ? "Bloqueado" : "Desbloqueado",
+          event: a.blocked ? "Blocked" : "Unblocked",
           status: a.blocked ? "blocked" : "verified",
           asset: assetName(a.token as Address),
           from: a.holder as string,
-          fromRole: "Titular",
+          fromRole: "Holder",
           price: "-",
           unit: " ",
-          detail: `Arts. 16 y 19. Por ${String(a.by)}`,
+          detail: `Arts. 16 and 19. By ${String(a.by)}`,
         };
       default:
         return {
           ...base,
-          event: a.paused ? "Pausado" : "Reanudado",
+          event: a.paused ? "Paused" : "Resumed",
           status: a.paused ? "blocked" : "verified",
           asset: assetName(a.token as Address),
           from: a.by as string,
-          fromRole: "Por",
+          fromRole: "By",
           price: "-",
           unit: " ",
           detail: "Art. 36",
@@ -131,11 +131,11 @@ export function feedFromOrders(orders: readonly OrderView[], assetName: (token: 
     const common = { asset: assetName(token), from: seller, price: usdc(price) };
     const at = view.announcedAt ?? 0;
     const rows: FeedEntry[] = [
-      { ...common, id: `${view.announceTx}:OrderAnnounced`, at, order: at * 1000, event: "Orden", status: "unused", hash: view.announceTx, code: "OrderAnnounced", detail: announcedDetail(amount, price, venue) },
+      { ...common, id: `${view.announceTx}:OrderAnnounced`, at, order: at * 1000, event: "Order", status: "unused", hash: view.announceTx, code: "OrderAnnounced", detail: announcedDetail(amount, price, venue) },
     ];
     if (view.status === "filled" && view.closeTx) {
       const closed = view.closedAt ?? at;
-      rows.push({ ...common, id: `${view.closeTx}:OrderFilled`, at: closed, order: closed * 1000 + 1, event: "Vendido", status: "sold", to: view.buyer, hash: view.closeTx, code: "OrderFilled", detail: filledDetail(amount, price, venue) });
+      rows.push({ ...common, id: `${view.closeTx}:OrderFilled`, at: closed, order: closed * 1000 + 1, event: "Sold", status: "sold", to: view.buyer, hash: view.closeTx, code: "OrderFilled", detail: filledDetail(amount, price, venue) });
     }
     return rows;
   });
@@ -192,11 +192,11 @@ export function feedFromVenue(payload: unknown, assetName: (token: Address) => s
         id: `venue:${pick(r, ["id"]) ?? index}`,
         at,
         order: at * 1000,
-        event: isRevertRequest ? "Reversión pedida" : "Rechazado",
+        event: isRevertRequest ? "Paper requested" : "Refused",
         status: (isRevertRequest ? "pending" : "blocked") as StampStatus,
-        asset: token ? assetName(token as Address) : "Sin token",
+        asset: token ? assetName(token as Address) : "No token",
         from: pick(r, ["address", "account", "seller", "holder", "from", "buyer"]) ?? "-",
-        fromRole: "Cuenta",
+        fromRole: "Account",
         price: price ?? "-",
         unit: price ? undefined : " ",
         hash: pick(r, ["hash", "txHash"]),

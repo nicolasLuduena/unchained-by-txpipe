@@ -5,9 +5,9 @@ export const ROLES = ["emisor", "psav", "sin-atestacion"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABEL: Record<Role, string> = {
-  emisor: "Emisor",
+  emisor: "Issuer",
   psav: "PSAV",
-  "sin-atestacion": "Sin atestación",
+  "sin-atestacion": "No attestation",
 };
 
 export function isRole(value: unknown): value is Role {

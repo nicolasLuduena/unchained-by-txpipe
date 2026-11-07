@@ -34,14 +34,14 @@ export async function forwardToPaymaster(body: RpcRequest | null): Promise<Respo
   const id = body?.id;
   const config = walletConfig();
   const key = readSecret("ZEROXGASLESS_KEY");
-  if (chainName === "local" || !config || !key) return refuse(id, 503, "El patrocinio no está configurado.");
-  if (body?.method !== SPONSOR_METHOD) return refuse(id, 403, "Este método no está permitido.");
+  if (chainName === "local" || !config || !key) return refuse(id, 503, "Sponsorship is not configured.");
+  if (body?.method !== SPONSOR_METHOD) return refuse(id, 403, "This method is not allowed.");
 
   const sender = senderOf(body.params);
-  if (!sender) return refuse(id, 400, "La operación no indica una cuenta.");
-  if (!(await passesPrecheck(config.attestationStore, sender))) return refuse(id, 403, "Esta cuenta no está verificada, así que no tiene patrocinio.");
-  if (!(await withinRate("paymaster:all", ALL_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Demasiadas operaciones. Probá en un minuto.");
-  if (!(await withinRate(`paymaster:${sender}`, SENDER_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Demasiadas operaciones seguidas. Esperá un minuto.");
+  if (!sender) return refuse(id, 400, "The operation does not name an account.");
+  if (!(await passesPrecheck(config.attestationStore, sender))) return refuse(id, 403, "This account is not verified, so it has no sponsorship.");
+  if (!(await withinRate("paymaster:all", ALL_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Too many operations. Try again in a minute.");
+  if (!(await withinRate(`paymaster:${sender}`, SENDER_CALLS_PER_MINUTE, MINUTE_MS))) return refuse(id, 429, "Too many operations in a row. Wait a minute.");
 
   try {
     const response = await fetch(`https://paymaster.0xgasless.com/v1/${chain.id}/rpc/${key}`, {
@@ -52,6 +52,6 @@ export async function forwardToPaymaster(body: RpcRequest | null): Promise<Respo
     const text = (await response.text()).replaceAll(key, "<key>");
     return new Response(text, { status: response.status, headers: { "Content-Type": "application/json" } });
   } catch {
-    return refuse(id, 502, "El patrocinio no pudo responder.");
+    return refuse(id, 502, "Sponsorship could not respond.");
   }
 }
