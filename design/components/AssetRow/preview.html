@@ -1,0 +1,11 @@
+<!-- @dsCard group="Lists" height=260 width=390 subtitle="market list rows at phone width" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<div id="root" style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--surface);width:390px;box-sizing:border-box"></div>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.AssetRow, { name: 'Edificio Conectia · CABA', meta: 'Tenés 12 · emisión USDC 109,10', price: '112,00', delta: '+2,7%', href: '#' }),
+    h(H.AssetRow, { name: 'CEDEAR AAPL · tokenizado', meta: 'Tenés 3 · cierre BYMA 41.250', price: '41.300', delta: '+0,1%', href: '#' }),
+    h(H.AssetRow, { name: 'Yerba mate · lote 2027', meta: 'Tenés 40 · emisión USDC 50,00', price: '48,50', delta: '-3,0%', href: '#' })
+  ));
+</script>

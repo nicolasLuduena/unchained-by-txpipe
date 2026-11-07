@@ -1,0 +1,11 @@
+<!-- @dsCard group="Lists" height=120 subtitle="headline balance, row price, muted fee" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<div id="root" style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--surface)"></div>
+<script>
+  var H = window.Handoff, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(H.Amount, { value: '3.418', currency: 'USDC', size: 'l' }),
+    h(H.Amount, { value: '112,00', currency: 'USDC' }),
+    h(H.Amount, { value: '2,24', currency: 'Comisión USDC', muted: true })
+  ));
+</script>
