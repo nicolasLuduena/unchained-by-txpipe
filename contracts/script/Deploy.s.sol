@@ -13,7 +13,6 @@ contract Deploy is Script {
     address internal constant KUMPLY_STORE = 0xa3Bc5564A18e107807aF41fF2a5215Db050b22dD;
     address internal constant FUJI_USDC = 0x5425890298aed601595a70AB815c96711a31Bc65;
 
-    string internal constant OUT_DIR = "../deployments";
     string internal constant OUT_FILE = "../deployments/fuji.json";
 
     function run() external {
@@ -41,7 +40,6 @@ contract Deploy is Script {
         vm.serializeString("deployment", "contracts", contracts);
         string memory out = vm.serializeString("deployment", "actors", actors);
 
-        vm.createDir(OUT_DIR, true);
         vm.writeJson(out, OUT_FILE);
         console2.log("Wrote", OUT_FILE);
     }

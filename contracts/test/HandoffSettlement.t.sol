@@ -216,7 +216,7 @@ contract HandoffSettlementTest is HandoffBase {
         _expectFillRefused(_order(), abi.encodeWithSelector(IHandoffSettlement.InvalidVenueSignature.selector, venue));
     }
 
-    function test_unregisteredTokenReverts() public {
+    function test_unregisteredTokenReverts() public holdsNothing {
         IHandoffSettlement.Order memory o = _order();
         o.token = stranger;
         bytes memory sellerSig = _sellerSig(o);
@@ -461,8 +461,7 @@ contract HandoffSettlementTest is HandoffBase {
         assertEq(token.balanceOf(address(account)), 50);
     }
 
-    function test_ownerKeySignatureDoesNotPassForTheAccountsSiblingAccount() public holdsNothing {
-        // An EOA seller cannot be impersonated by a smart account owned by another key.
+    function test_erc1271AccountOwnedByAnotherKeyRefusesTheSellerKey() public holdsNothing {
         MockERC1271Account account = new MockERC1271Account(vm.addr(OTHER_PK));
         IHandoffSettlement.Order memory o = _orderFrom(address(account));
         bytes memory sellerSig = _sign(sellerPk, settlement.hashOrder(o));
