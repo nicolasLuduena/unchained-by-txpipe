@@ -16,6 +16,7 @@
   "dependencies": {
     "@0xgasless/smart-account": "0.0.13",
     "@kumply/sdk": "^1.3.0",
+    "@upstash/redis": "^1.41.0",
     "merkletreejs": "^0.3.11",
     "next": "^16.4.5",
     "react": "^19.3.1",
