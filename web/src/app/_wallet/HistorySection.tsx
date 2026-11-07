@@ -10,8 +10,8 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
   if (!snapshot) return <Notice status="pending">Reading {networkLabel}.</Notice>;
 
   return (
-    <>
-      <section className="wallet-stack">
+    <div className="wallet-cols">
+      <section className="wallet-stack wallet-primary">
         <h2 className="t-title">History</h2>
         {historyPartial && <p className="caveat">Still reading {networkLabel}: some activity may not show yet.</p>}
         {history.length === 0 && !historyPartial && <p className="caveat">No activity on this account yet.</p>}
@@ -32,7 +32,7 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
         ))}
       </section>
 
-      <section className="wallet-stack">
+      <section className="wallet-stack wallet-side">
         <h2 className="t-title">Issuance document</h2>
         <p className="caveat">What backs this token and where you can check it.</p>
         <div className="wallet-doc">
@@ -48,6 +48,6 @@ export function HistorySection({ config, wallet }: { config: WalletConfig; walle
           <HashText value={snapshot.issuanceDocHash} href={explorerUrl("address", config.registry)} />
         </div>
       </section>
-    </>
+    </div>
   );
 }

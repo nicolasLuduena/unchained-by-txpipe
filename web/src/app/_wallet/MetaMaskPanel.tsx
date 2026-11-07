@@ -45,7 +45,7 @@ export function MetaMaskPanel({ metamask, wallet }: { metamask: MetaMask; wallet
   const { owner, smartAccount, record } = account;
 
   return (
-    <section className="wallet-stack">
+    <section className="wallet-stack wallet-account">
       <div className="wallet-doc">
         <span className="t-field-label">Owner, in MetaMask</span>
         <HashText value={owner} href={explorerUrl("address", owner)} />
