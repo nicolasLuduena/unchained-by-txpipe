@@ -1,0 +1,5 @@
+# Written by scripts/sync-design.mjs
+/src/design/generated/
+/public/design/
+next-env.d.ts
+*.tsbuildinfo

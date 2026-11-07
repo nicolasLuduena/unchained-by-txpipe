@@ -23,3 +23,15 @@ A white-label trading layer for Argentina's tokenized securities, built for the 
 git clone --recurse-submodules <repo>
 cd contracts && forge test
 ```
+
+The web app needs Node and pnpm, not Foundry. It serves the wallet screen at `/` and the issuer console at `/console`.
+
+```bash
+cd web
+pnpm install
+cp .env.example .env.local   # NEXT_PUBLIC_CHAIN=local or fuji
+pnpm dev                     # http://localhost:3000
+pnpm build
+```
+
+`pnpm dev` and `pnpm build` copy the design system into the app first. The app reads `deployments/<chain>.json` at startup, so restart `pnpm dev` after a redeploy; without the file it still runs, with no deployment loaded. After changing a contract interface, run `pnpm gen:abi` and commit `web/src/lib/abi/`.

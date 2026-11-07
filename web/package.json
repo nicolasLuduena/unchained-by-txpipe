@@ -1,0 +1,29 @@
+{
+  "name": "handoff-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync:design": "node scripts/sync-design.mjs",
+    "gen:abi": "node scripts/gen-abi.mjs",
+    "predev": "pnpm run sync:design",
+    "dev": "next dev",
+    "prebuild": "pnpm run sync:design",
+    "build": "next build",
+    "start": "next start",
+    "pretypecheck": "pnpm run sync:design",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kumply/sdk": "^1.3.0",
+    "next": "^16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}

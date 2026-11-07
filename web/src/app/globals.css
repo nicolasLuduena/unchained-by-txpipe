@@ -1,0 +1,60 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font: 400 15px/22px var(--font-sans);
+}
+
+h1, h2, p { margin: 0; }
+
+.caveat { color: var(--text-muted); font: 400 13px/18px var(--font-sans); }
+
+/* The fictional host wallet. Its brand owns the header; Handoff appears only through OperatedBy. */
+.host {
+  display: flex;
+  flex-direction: column;
+  width: min(390px, 100%);
+  min-height: 100dvh;
+  margin-inline: auto;
+  border-inline: 1px solid var(--rule-soft);
+}
+.host__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding-inline: var(--space-4);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.host__name { font: 600 17px/22px var(--font-sans); }
+.host__main {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+}
+.host__balance { display: grid; gap: var(--space-1); }
+.host__foot { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--rule-soft); }
+
+.console {
+  display: grid;
+  gap: var(--space-6);
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4);
+}
+.console__logo { display: block; height: 40px; }
+.console__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  gap: var(--space-6);
+  align-items: start;
+}
+.console__section { display: grid; gap: var(--space-3); }
+
+@media (max-width: 800px) {
+  .console__columns { grid-template-columns: minmax(0, 1fr); }
+}
