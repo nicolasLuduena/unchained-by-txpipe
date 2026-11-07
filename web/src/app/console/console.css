@@ -133,3 +133,24 @@ button.desk__token--current { background: var(--coupon); }
   .desk__actions { position: static; max-height: none; padding-inline: var(--space-6); }
   .desk__main { border-left: 0; }
 }
+
+/* Once the columns stack the head is too narrow to share: the ribbons stay above the title. */
+@media (max-width: 1100px) {
+  .desk > .desk__ribbons { inset: 0 0 auto 40%; height: 120px; }
+}
+
+/* Phone: tighter gutters, and only the holders table scrolls sideways, never the page. */
+@media (max-width: 640px) {
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .desk__main, .desk__section { grid-template-columns: minmax(0, 1fr); }
+  .desk__head, .desk__rail, .desk__actions, .desk__main { padding-inline: var(--space-4); }
+  .desk__offline { margin-inline: var(--space-4); }
+  .desk .desk__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk__split { grid-template-columns: minmax(0, 1fr); }
+  .desk > .desk__ribbons { height: 64px; }
+  .desk__table { display: block; overflow-x: auto; }
+  .desk__table th, .desk__table td { padding-right: var(--space-1); }
+  .desk__table th { font-size: 10px; letter-spacing: .08em; }
+  .desk__table th:last-child, .desk__table td:last-child { padding-right: 0; }
+  .desk__table .hf-hash { white-space: nowrap; }
+}
