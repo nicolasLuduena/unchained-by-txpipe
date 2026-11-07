@@ -60,7 +60,7 @@ export function RevertSection({ config, actor, wallet }: Props) {
           </Notice>
         ) : (
           <div className="wallet-stack" key={r.id}>
-            <Notice status="reverted">
+            <Notice status="verified" word="En papel">
               El PSAV pasó {tokensLabel(BigInt(r.amount))} a papel. Certificado {r.certificateRef}.
             </Notice>
             {r.txHash && <HashText value={r.txHash} href={explorerUrl("tx", r.txHash)} />}

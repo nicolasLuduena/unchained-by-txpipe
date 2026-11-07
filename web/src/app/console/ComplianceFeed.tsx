@@ -20,8 +20,7 @@ function Entry({ entry }: { entry: FeedEntry }) {
         price={entry.price}
         currency={entry.unit}
       />
-      <p className="desk__meta t-caption">
-        <span>{entry.at ? fullTime(entry.at) : "Sin hora"}</span>
+      <p className="desk__meta t-caption" title={entry.at ? fullTime(entry.at) : undefined}>
         {entry.fromRole ? <span>{entry.fromRole}</span> : null}
         <code className="desk__code">{entry.code}</code>
         {entry.hash ? <Hash value={entry.hash} href={explorerUrl("tx", entry.hash as TxHash)} /> : <span>Sin transacción</span>}
@@ -36,9 +35,7 @@ export function ComplianceFeed({ entries }: { entries: FeedEntry[] }) {
   return (
     <section className="desk__section">
       <h2 className="t-title">Feed de cumplimiento</h2>
-      <p className="t-caption">
-        Órdenes, cancelaciones, ventas, bloqueos, pausas y reversiones leídos de los eventos del contrato. Incluye los rechazos del servicio de órdenes.
-      </p>
+      <p className="t-caption">Eventos del contrato y rechazos del servicio de órdenes.</p>
       <div className="desk__feed">
         {entries.length === 0 ? <p className="t-caption desk__empty">Sin actividad todavía.</p> : entries.map((entry) => <Entry key={entry.id} entry={entry} />)}
       </div>

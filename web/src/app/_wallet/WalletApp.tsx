@@ -30,9 +30,10 @@ function Frame({ brand, stamp, children }: { brand: string; stamp?: StampStatus;
       </header>
       {children}
       <footer className="host__foot wallet-foot">
-        <p className="caveat">Atestaciones de demostración en Fuji, sin verificación de identidad.</p>
-        {chainName === "fuji" && <p className="caveat">Las emite una instancia de demostración del contrato de KUMPLY.</p>}
-        <p className="caveat">Libro de órdenes y co-firma operados por el PSAV.</p>
+        <p className="caveat">
+          Atestaciones de demostración en Fuji, sin verificación de identidad.
+          {chainName === "fuji" && " Las emite una instancia de demostración del contrato de KUMPLY."}
+        </p>
         <OperatedBy />
       </footer>
     </div>

@@ -1,7 +1,7 @@
 /* The jury's view on a projector. Layout only: everything visual comes from the design system's tokens. */
 .demo {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: var(--space-3);
   height: 100dvh;
   padding: var(--space-3) var(--space-5) var(--space-4);
@@ -10,6 +10,8 @@
 .demo__head { display: flex; align-items: center; gap: var(--space-5); }
 .demo__logo { display: block; height: 28px; }
 .demo__caveat { margin-left: auto; text-align: right; }
+
+.demo__story { margin: 0; color: var(--amber); font-size: 20px; line-height: 28px; }
 
 .demo__stage {
   display: grid;

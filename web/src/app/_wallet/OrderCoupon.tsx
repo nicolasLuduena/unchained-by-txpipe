@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Hash } from "viem";
-import { Coupon, Hash as HashText, Notice, Stamp, type CouponState } from "@/design";
+import { Coupon, Hash as HashText, Stamp, type CouponState } from "@/design";
 import { explorerUrl } from "@/lib/chain";
 import { fromWireOrder, type OrderStatus, type OrderView } from "@/lib/orders/types";
 import { formatUsdc, tokensLabel } from "@/lib/wallet/format";
@@ -71,9 +71,9 @@ export function FillProof({ view, userOpHash }: { view: OrderView; userOpHash?: 
         </div>
       )}
       {view.report?.status === "acknowledged" ? (
-        <Notice status="unused" word="Acuse">
+        <p className="caveat">
           {view.report.label}. {view.report.id}
-        </Notice>
+        </p>
       ) : (
         <Stamp status="pending">Reporte pendiente</Stamp>
       )}

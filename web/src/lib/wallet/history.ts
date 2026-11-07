@@ -61,7 +61,7 @@ export async function readHistory(config: WalletConfig, account: Address): Promi
       const { token, holder, amount } = e.args as ReversionArgs;
       if (!ofToken(token) || !mine(holder)) continue;
       // Amount prints the currency first, so a blank one keeps this reading "1 token" rather than "tokens 1".
-      entries.push({ ...located, event: "Revertido", status: "reverted", detail: "A certificado en papel", from: holder, price: tokensLabel(amount), currency: " " });
+      entries.push({ ...located, event: "En papel", status: "verified", detail: "A certificado en papel", from: holder, price: tokensLabel(amount), currency: " " });
     }
   }
 

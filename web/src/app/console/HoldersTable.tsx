@@ -6,7 +6,7 @@ import type { HolderState, TokenView } from "@/lib/console/state";
 const STATE_STAMP: Record<HolderState, StampStatus> = {
   Verificado: "verified",
   Bloqueado: "blocked",
-  Revertido: "reverted",
+  "En papel": "verified",
   "Sin atestación": "blocked",
   "Sin unidades": "unused",
 };
@@ -41,7 +41,6 @@ export function HoldersTable({ token }: { token: TokenView }) {
           </tbody>
         </table>
       )}
-      <p className="caveat">Atestaciones de demostración en Fuji, sin verificación de identidad.</p>
     </section>
   );
 }

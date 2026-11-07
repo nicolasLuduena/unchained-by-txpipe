@@ -15,6 +15,7 @@ import { HoldersTable } from "./HoldersTable";
 import { TokenSummary } from "./TokenSummary";
 
 const POLL_MS = chainName === "local" ? 3000 : 5000;
+const SYNCED_BLOCKS = 100n;
 const CAVEAT = "Atestaciones de demostración en Fuji, sin verificación de identidad.";
 
 function useRoleFromHash(): Role {
@@ -76,6 +77,11 @@ function businessStamp(read: boolean | null | undefined) {
   return read ? <Stamp status="verified">Empresa</Stamp> : <Stamp status="blocked">Sin atestación de empresa</Stamp>;
 }
 
+/** The sync line only earns its place while the scan is catching up. */
+function behind(state: ConsoleState | null) {
+  return !state || state.head - state.scannedTo > SYNCED_BLOCKS;
+}
+
 export function Console() {
   const role = useRoleFromHash();
   const { roles, state, failed, refresh } = useConsoleState();
@@ -129,13 +135,17 @@ export function Console() {
           <span className="t-field-label">Dirección</span>
           {address ? <Hash value={address} href={explorerUrl("address", address)} /> : <span className="t-caption">Sin clave configurada</span>}
         </span>
-        <span className="desk__who">
-          <span className="t-field-label">SDK isBusiness</span>
-          {businessStamp(state?.business[role])}
-        </span>
-        <span className="desk__sync t-caption">
-          {state ? `Bloque ${units(state.head)}, leído hasta ${units(state.scannedTo)}` : "Leyendo la cadena"}
-        </span>
+        {state?.business[role] !== true && (
+          <span className="desk__who">
+            <span className="t-field-label">SDK isBusiness</span>
+            {businessStamp(state?.business[role])}
+          </span>
+        )}
+        {behind(state) && (
+          <span className="desk__sync t-caption">
+            {state ? `Leyendo la cadena: bloque ${units(state.scannedTo)} de ${units(state.head)}` : "Leyendo la cadena"}
+          </span>
+        )}
       </section>
 
       <p className="caveat">

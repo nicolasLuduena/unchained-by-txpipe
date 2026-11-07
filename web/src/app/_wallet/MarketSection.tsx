@@ -106,7 +106,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
               {`Comprar ${tokensLabel(BigInt(ask.order.amount))}`}
             </Button>
             {total > snapshot.usdc && <p className="caveat">Tu saldo no alcanza para esta oferta.</p>}
-            <Notice status="sponsored">{SPONSOR_LABEL}</Notice>
+            <p className="caveat">{SPONSOR_LABEL}</p>
           </>
         )}
         {buying.error && (
@@ -130,7 +130,7 @@ export function MarketSection({ config, actor, wallet }: Props) {
           )}
           {attempt && (
             <div className="wallet-stack">
-              <Notice status={attempt.reverted ? "reverted" : "sold"}>
+              <Notice status={attempt.reverted ? "reverted" : "sold"} word={attempt.reverted ? "Rechazada" : undefined}>
                 {attempt.reverted ? `La cadena rechazó la compra: ${attempt.reason}` : "La transacción no se revirtió."}
               </Notice>
               <HashText value={attempt.hash} href={explorerUrl("tx", attempt.hash)} />

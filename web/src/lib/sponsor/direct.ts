@@ -19,7 +19,7 @@ export async function sendFrom(wallet: WalletClient<Transport, Chain, Account>, 
   // A receipt carries no reason, so the call is replayed at its block to read the named error.
   const reason = await publicClient
     .call({ account: wallet.account.address, to: call.to, data: call.data, blockNumber: receipt.blockNumber })
-    .then(() => "Revertida sin motivo informado")
+    .then(() => "Rechazada sin motivo informado")
     .catch(revertReason);
   return { hash, reverted: true, reason };
 }

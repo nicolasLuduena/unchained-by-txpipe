@@ -9,7 +9,7 @@ import type { LogScanner, ScannedLog } from "./scan";
 import { ROLES, type Role, type RoleAddresses } from "./roles";
 import { shortAddress } from "./format";
 
-export type HolderState = "Verificado" | "Bloqueado" | "Revertido" | "Sin atestación" | "Sin unidades";
+export type HolderState = "Verificado" | "Bloqueado" | "En papel" | "Sin atestación" | "Sin unidades";
 
 export type HolderRow = { address: Address; category: Category; units: bigint; state: HolderState; blocked: boolean };
 
@@ -64,7 +64,7 @@ function balancesFrom(transfers: readonly ScannedLog[]): Map<Address, bigint> {
 
 function holderState(units: bigint, blocked: boolean, attested: boolean, reverted: boolean): HolderState {
   if (blocked) return "Bloqueado";
-  if (units === 0n) return reverted ? "Revertido" : "Sin unidades";
+  if (units === 0n) return reverted ? "En papel" : "Sin unidades";
   return attested ? "Verificado" : "Sin atestación";
 }
 

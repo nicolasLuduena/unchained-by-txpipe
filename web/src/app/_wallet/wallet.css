@@ -37,3 +37,6 @@
 .wallet-long-button { height: auto; min-height: 44px; padding-block: var(--space-2); line-height: 1.25; white-space: normal; }
 
 .wallet-foot { display: grid; gap: var(--space-2); }
+
+/* An open order already says it is unused. The stamp appears when there is news: sold. */
+.hf-coupon--open .hf-coupon__stubhead .hf-stamp { display: none; }

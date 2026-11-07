@@ -98,7 +98,7 @@ export function SellSection({ config, actor, wallet }: Props) {
         <Button variant="primary" size="lg" busy={posting.busy} disabled={!ready} onClick={post}>
           {ready ? `Vender ${tokensLabel(amount)}` : "Vender"}
         </Button>
-        <Notice status="sponsored">{SPONSOR_LABEL}</Notice>
+        <p className="caveat">{SPONSOR_LABEL}</p>
         {posting.error && (
           <Notice status="blocked" word="Rechazado">
             {posting.error}

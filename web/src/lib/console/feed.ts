@@ -76,8 +76,8 @@ export function feedFromLogs(logs: readonly ScannedLog[], timeOf: (block: bigint
       case "Reversion":
         return {
           ...base,
-          event: "Revertida",
-          status: "reverted",
+          event: "En papel",
+          status: "verified",
           asset: assetName(a.token as Address),
           from: a.holder as string,
           fromRole: "Titular",

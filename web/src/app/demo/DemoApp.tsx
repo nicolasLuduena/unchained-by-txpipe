@@ -91,7 +91,6 @@ function Phone(props: { brand: string; role: string; venueName: string; wallet: 
       </main>
       <BookStrip book={book} />
       <footer className="host__foot demo-phone__foot">
-        <p className="caveat">Libro de órdenes y co-firma operados por el PSAV.</p>
         <OperatedBy />
       </footer>
     </article>
@@ -285,12 +284,24 @@ function refusalRow(result: DirectResult, from: Address, asset: string): FeedEnt
   };
 }
 
+/** One plain sentence for what just happened, so the page reads without narration. */
+function storyLine(book: Book, refused: boolean) {
+  if (!book.loaded) return "Leyendo el libro de órdenes.";
+  if (refused) return "La cadena rechazó la compra de la cuenta sin verificar. No se movieron tokens ni USDC.";
+  const latest = book.orders[0];
+  if (latest?.status === "open") return "Orden publicada. Los tokens siguen en la billetera de la vendedora. Ahora Banco Norte puede comprar.";
+  if (latest?.status === "filled") return "Venta liquidada en una sola transacción: tokens al comprador, USDC a la vendedora. Ninguno pagó gas.";
+  if (latest?.status === "cancelled") return "La vendedora canceló la orden. No se movió nada.";
+  return "La vendedora firma una orden de venta. Es gratis y sus tokens no se mueven.";
+}
+
 function Stage({ config }: { config: WalletConfig }) {
   const book = useBook();
   const seller = useWallet(config, config.seller);
   const buyer = useWallet(config, config.buyer);
   const scanned = useScannedFeed();
   const [refusals, setRefusals] = useState<FeedEntry[]>([]);
+  const [refusedAt, setRefusedAt] = useState<string | null>(null);
   const asset = seller.snapshot?.tokenName ?? "Token";
 
   const refreshSeller = seller.refresh;
@@ -328,6 +339,10 @@ function Stage({ config }: { config: WalletConfig }) {
         </div>
       </header>
 
+      <p className="demo__story" role="status">
+        {storyLine(book, refusedAt === signature)}
+      </p>
+
       <div className="demo__stage">
         <SellerPhone config={config} wallet={{ ...seller, ...shared }} book={book} />
         <BuyerPhone config={config} wallet={{ ...buyer, ...shared }} book={book} />
@@ -337,7 +352,7 @@ function Stage({ config }: { config: WalletConfig }) {
           </div>
           <div className="demo__controls">
             <LastSale orders={book.orders} />
-            <UnverifiedControl config={config} order={open} onResult={(result) => setRefusals((list) => (result.reverted ? [...list, refusalRow(result, config.unverified, asset)] : list))} />
+            <UnverifiedControl config={config} order={open} onResult={(result) => { if (result.reverted) setRefusedAt(signature); setRefusals((list) => (result.reverted ? [...list, refusalRow(result, config.unverified, asset)] : list)); }} />
           </div>
         </div>
       </div>
