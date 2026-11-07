@@ -57,7 +57,7 @@ Each row is a real transaction, read from [`spike/evidence/`](spike/evidence). *
 | Attested holder transfers directly to an attested holder, outside the venue path | Reverted, `NotRoutedThroughVenue` | [`0x4554...5f3b`](https://testnet.snowtrace.io/tx/0x4554b2f23dc30c2db6bffd89c64a19d4ece8c93d2350d4d919f5aeeaf0ef5f3b) |
 | Reversion to paper: the PSAV burns 1 unit against `DEMO-CERT-0001` | Success | [`0x2c8e...3460`](https://testnet.snowtrace.io/tx/0x2c8e4a20b1d894e22526273c646cc53ad3d69f0e0bec8518fa0452b007163460) |
 
-The [demo clip](docs/demo/handoff-demo.mp4) is a separate run through the hosted `/demo` page in a real browser: HOSTED_RUN
+The [demo clip](docs/demo/handoff-demo.mp4) is a separate run through the hosted `/demo` page in a real browser: a [refused purchase by an unverified account](https://testnet.snowtrace.io/tx/0x6ff145c0c167af917ffd49ad8f3e025d9f1bf9b36bd34b09e8021364ebd93a01) and a [sponsored sale](https://testnet.snowtrace.io/tx/0xbf3a21f40abfb6df3b627fd97593b5c45e4cbf545ce7338a5ef453d97ea59d82).
 
 After the scripted fill the seller held 98 units and USDC 5, the buyer 22 units and USDC 15, and the settlement contract zero of both. The reversion then took the buyer to 21.
 
