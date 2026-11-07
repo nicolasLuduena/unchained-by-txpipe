@@ -1,6 +1,6 @@
 > **Demo attestations.** Every attestation on Fuji is a demo attestation with no real identity verification. The KUMPLY mainnet store holds zero attestations.
 >
-> The Fuji store in this demo is the team's own instance of KUMPLY's unmodified open-source AttestationStore. It is not KUMPLY's official store, and KUMPLY issued none of these attestations.
+> Fuji is a testnet, so the demo runs the setup that suits one: the team's own instance of KUMPLY's unmodified open-source AttestationStore, read through the real KUMPLY SDK. It is not KUMPLY's official store, and KUMPLY issued none of these attestations.
 
 # Handoff
 
@@ -23,8 +23,8 @@ Handoff is software, built to the structure of Título XXII of the CNV Normas an
 - [x] [Bonus section: 0xGasless components and sponsored user operation links](#bonus-0xgasless)
 - [x] [Bonus section: KUMPLY on-chain hook, SDK calls, pass and block transactions](#bonus-kumply)
 - [x] [Demo-attestation disclaimer on the first screen](#handoff)
-- [ ] Demo video link (TODO, see above)
-- [ ] Wallet screen screenshot (TODO, see above)
+- [x] [Demo video](docs/demo/handoff-demo.mp4)
+- [x] [Wallet screen screenshot](#bring-your-own-metamask)
 - [x] [Known gaps](#known-gaps)
 - [x] [Business model: problem, customer, revenue, competitive advantage](#business-model)
 - [x] [Installation](#install), [deployment](#deploy-to-fuji), [hosting](#deploy-the-web-app-to-vercel) and [architecture](#architecture)
@@ -57,7 +57,7 @@ Each row is a real transaction, read from [`spike/evidence/`](spike/evidence). *
 | Attested holder transfers directly to an attested holder, outside the venue path | Reverted, `NotRoutedThroughVenue` | [`0x4554...5f3b`](https://testnet.snowtrace.io/tx/0x4554b2f23dc30c2db6bffd89c64a19d4ece8c93d2350d4d919f5aeeaf0ef5f3b) |
 | Reversion to paper: the PSAV burns 1 unit against `DEMO-CERT-0001` | Success | [`0x2c8e...3460`](https://testnet.snowtrace.io/tx/0x2c8e4a20b1d894e22526273c646cc53ad3d69f0e0bec8518fa0452b007163460) |
 
-The [demo clip](docs/demo/handoff-demo.mp4) is a separate run through the hosted `/demo` page in a real browser: a [refused purchase by an unverified account](https://testnet.snowtrace.io/tx/0x6ff145c0c167af917ffd49ad8f3e025d9f1bf9b36bd34b09e8021364ebd93a01) and a [sponsored sale](https://testnet.snowtrace.io/tx/0xbf3a21f40abfb6df3b627fd97593b5c45e4cbf545ce7338a5ef453d97ea59d82).
+The [demo clip](docs/demo/handoff-demo.mp4) is a separate run through the hosted `/demo` page in a real browser: a [refused purchase by an unverified account](https://testnet.snowtrace.io/tx/0x69138ad83a862c8dd7e1d60c38fe79dc756bf5fdd7b2f6274f6d0a4d34b0fa66) and a [sponsored sale](https://testnet.snowtrace.io/tx/0x34f7000b9fc1177442a70d108921952cbe4e7bf3d212390fcf5bb2f7740b6635).
 
 After the scripted fill the seller held 98 units and USDC 5, the buyer 22 units and USDC 15, and the settlement contract zero of both. The reversion then took the buyer to 21.
 
@@ -69,6 +69,8 @@ Three things to read correctly:
 
 ## Bring your own MetaMask
 
+![The wallet with a connected MetaMask owner and its smart account, after receiving a demo verification, 5 tokens and USDC 5](docs/demo/wallet-screen.png)
+
 The wallet has a fourth actor on Fuji, "My wallet", at `/?actor=metamask`. **It is a demo verification with no identity check:** anyone who signs gets a tier 2 demo attestation from the team's demo instance of KUMPLY's contract, not from KUMPLY's official store.
 
 1. The page connects to the injected provider and switches to Fuji, adding the network if needed. With no provider it says so.
@@ -78,7 +80,7 @@ The wallet has a fourth actor on Fuji, "My wallet", at `/?actor=metamask`. **It 
 
 Onboarding is idempotent per owner, serialized by a Redis lock and capped at 20 owners. It needs no new environment variables, only the `AA_*`, Upstash and mnemonic values above. The proxy does not inspect what an attested sender's operation calls, so the rate limit is its only bound on sponsorship spend.
 
-**One cycle ran on live Fuji with a fake injected EIP-1193 provider in headless Chromium, backed by a throwaway key. Real MetaMask was not exercised:** a person cannot be driven headless, so its prompts and its handling of these signatures are unproven.
+**One cycle ran on live Fuji with a fake injected EIP-1193 provider in headless Chromium, backed by a throwaway key.** Onboarding then ran with the real MetaMask extension in a person's browser, shown in the screenshot above: owner `0x8124...2AAD`, smart account `0x90A9...AAB9`. Orders, fills and cancels signed by the real extension are not recorded.
 
 | Step | Transaction |
 |---|---|
@@ -262,6 +264,8 @@ Code: [`web/src/lib/sponsor/fuji-server.ts`](web/src/lib/sponsor/fuji-server.ts)
 
 **Whose store this is.** [`0x94b7...1c10`](https://testnet.snowtrace.io/address/0x94b711809FDb5dcFdD2eD488EE10790DaFdC1c10) is the team's own Fuji instance of KUMPLY's unmodified open-source AttestationStore, vendored at [`contracts/src/vendor/kumply/`](contracts/src/vendor/kumply) under Apache-2.0, with the team as admin and verifier. **It is not KUMPLY's official store** (`0xa3Bc5564A18e107807aF41fF2a5215Db050b22dD`), **and KUMPLY did not issue these attestations.** The team issued them with no identity check, and the demo accounts hold no attestation on the official store.
 
+**Why the team's own instance.** Fuji is a testnet, and this demo needs accounts attested on demand with no identity check, including each visitor's MetaMask account. An instance the team controls allows that without issuing anything under KUMPLY's name. The contract is KUMPLY's unmodified code and the app reads it through the real SDK, so the on-chain hook and the SDK calls are the ones a production store would use. This is a deliberate choice for the testnet, and the path to the official store is below.
+
 **Moving to the official store.** The registry fixes its issuer attester at deployment (`issuerAttester` is immutable), so swapping to the official store means redeploying the registry, and with it the settlement and token, which are bound to that registry. An issuer can repoint the holder checks of an existing token with `setAttester`, but the business check on registration stays on the store the registry was deployed with.
 
 **On-chain hook.** [`HandoffToken._update`](contracts/src/HandoffToken.sol) asks [`HandoffRegistry.isAttested`](contracts/src/HandoffRegistry.sol), which calls `verify(address)` on each store in the token's attester set. `registerToken` requires tier 4 on the issuer attester. Attestations are keyed by the smart account, not the owner key.
@@ -330,11 +334,10 @@ The 0xGasless bundler, paymaster, EntryPoint and smart-account contracts are thi
 
 **In the demo:**
 
-- **Attestations are demo attestations** in the team's own store, with no identity check, as stated at the top.
 - **The order book is sell-only.** There are no buy orders, so the spec's "best bid" is shown as the lowest ask, under the label "Best offer". There is no matching engine: it is a bulletin board.
 - **The registry acknowledgment is a labelled mock.** It reads "Demo acknowledgment, no real call". No call to BYMA or anyone else happens.
 - **The hosted console signs for anyone with the demo password.** Its route acts as issuer or PSAV, so the password is the only control, and any holder can pause the token or burn units. Re-pointing a venue is switched off on Fuji because one bad key would stop every order.
-- **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. The exception is [Mi billetera](#bring-your-own-metamask), where the visitor's MetaMask signs.
+- **On Fuji the app server holds the demo owner keys** and signs for the demo accounts. The wallet screen switches between them with a demo selector. The exception is [My wallet](#bring-your-own-metamask), where the visitor's MetaMask signs.
 - **Venue powers are wider than the spec's.** Any listed venue can lift a pause and can change the band's width and age limit, which the spec gives to the issuer. A price-0 sale that way still needs a venue key and a seller signature, and an issuer floor blocks it. Fixing this means redeploying the contracts, so it stayed as it is.
 - **Some duties sit only in the PSAV's service, not the contracts.** A blocked holder can still receive tokens on-chain, and only the co-signature refuses them. `revertToPaper` accepts an empty certificate reference, and only the console form requires one. `announceOrder` accepts a spent nonce, and only the order service refuses it.
 - **The linked transactions in the table came from scripts,** see [What ran on Fuji](#what-ran-on-fuji). The hosted run is listed below that table.
