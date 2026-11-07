@@ -13,6 +13,7 @@ import { orderKeyAccount, orderKeyClient } from "./venue";
 const RECEIPT_POLL_MS = 200;
 const REVERSION_MAX_AGE_S = 600n;
 const MAX_REFUSALS = 200;
+const LOG_WINDOW_BLOCKS = 2000n;
 
 /** A request the PSAV declines. Logged to the refusal list the console reads. */
 export class Refused extends Error {
@@ -58,6 +59,12 @@ function registry() {
 
 function nowSeconds() {
   return BigInt(Math.floor(Date.now() / 1000));
+}
+
+/** Fuji's public RPC refuses wide getLogs ranges, so a read never reaches further back than the window. */
+async function logsFrom(block: bigint) {
+  const oldest = (await publicClient.getBlockNumber()) - LOG_WINDOW_BLOCKS;
+  return block > oldest ? block : oldest > 0n ? oldest : 0n;
 }
 
 function parseAddress(value: unknown, field: string): Address {
@@ -201,7 +208,7 @@ async function syncWithChain(stored: StoredOrder) {
       ...settlement(),
       eventName: "OrderFilled",
       args: { orderHash: stored.orderHash },
-      fromBlock: stored.announceBlock,
+      fromBlock: await logsFrom(stored.announceBlock),
     });
     if (event?.args.buyer) stored.filled = { tx: event.transactionHash, buyer: event.args.buyer };
     reportFill(stored);
@@ -210,7 +217,7 @@ async function syncWithChain(stored: StoredOrder) {
       ...settlement(),
       eventName: "OrderCancelled",
       args: { seller, nonce },
-      fromBlock: stored.announceBlock,
+      fromBlock: await logsFrom(stored.announceBlock),
     });
     stored.cancelled = { tx: event?.transactionHash };
   }
@@ -341,7 +348,7 @@ async function syncReversion(r: StoredReversion) {
     ...registry(),
     eventName: "Reversion",
     args: { token: r.token, holder: r.holder },
-    fromBlock: r.requestBlock,
+    fromBlock: await logsFrom(r.requestBlock),
   });
   const event = events.find((e) => e.args.amount === r.amount);
   if (!event) return;

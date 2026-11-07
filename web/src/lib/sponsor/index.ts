@@ -20,6 +20,5 @@ export const SPONSOR_LABEL = chainName === "local" ? "Sin gas: patrocinio simula
 /** Loaded on demand so a Fuji page never fetches the local fake or its dev keys. */
 export async function getSponsor(): Promise<Sponsor> {
   if (chainName === "local") return (await import("./local")).localSponsor;
-  // The 0xGasless implementation goes here after the spike reports. Screens do not change.
-  throw new Error("Sponsor on Fuji is not implemented yet");
+  return (await import("./fuji")).fujiSponsor;
 }

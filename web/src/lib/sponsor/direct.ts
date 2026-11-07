@@ -9,14 +9,14 @@ const RECEIPT_POLL_MS = 200;
 
 export type DirectResult = { hash: Hash; reverted: boolean; reason?: string };
 
-/**
- * An unsponsored transaction the actor pays for: the refusal demo, where a revert with a hash is the point.
- * Local only until Fuji has an unverified EOA signer to put behind it.
- */
+async function directWallet(actor: Actor) {
+  if (chainName === "local") return (await import("./dev-keys")).devWallet(actor);
+  return (await import("./owner-keys")).ownerWallet(actor);
+}
+
+/** An unsponsored transaction the actor pays for: the refusal demo, where a revert with a hash is the point. */
 export async function sendDirect(actor: Actor, call: Call): Promise<DirectResult> {
-  if (chainName !== "local") throw new Error("Direct demo transactions are not implemented on Fuji yet");
-  const { devWallet } = await import("./dev-keys");
-  const wallet = devWallet(actor);
+  const wallet = await directWallet(actor);
   const hash = await wallet.sendTransaction({ ...call, gas: DIRECT_GAS });
   const receipt = await publicClient.waitForTransactionReceipt({ hash, pollingInterval: RECEIPT_POLL_MS });
   if (receipt.status === "success") return { hash, reverted: false };
