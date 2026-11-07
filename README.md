@@ -17,7 +17,7 @@ Handoff is software, built to the structure of Título XXII of the CNV Normas an
 ## Deliverables checklist
 
 - [x] [Verified contract addresses with Snowtrace links](#deployed-contracts): the three Handoff contracts plus the demo attestation store
-- [x] [End-user interface](#install): guided demo at `/demo`, wallet at `/`, issuer and PSAV console at `/console`
+- [x] [End-user interface](#install): landing page at `/`, guided demo at `/demo`, wallet at `/?actor=seller`, issuer and PSAV console at `/console`
 - [x] [Why Avalanche](#why-avalanche): five-validator L1 mapping, finality of about one second, ICM
 - [x] [Built today versus libraries used](#built-today-versus-libraries)
 - [x] [Bonus section: 0xGasless components and sponsored user operation links](#bonus-0xgasless)
@@ -170,7 +170,7 @@ git clone --recurse-submodules https://github.com/nicolasLuduena/unchained-by-tx
 cd unchained-by-txpipe/contracts && forge test
 ```
 
-The web app needs Node and pnpm, not Foundry. It serves the guided demo at `/demo`, the wallet at `/` and the issuer console at `/console`, all in English.
+The web app needs Node and pnpm, not Foundry. It serves the landing page at `/`, the guided demo at `/demo`, the wallet at `/?actor=seller` and the issuer console at `/console`, all in English.
 
 ```bash
 cd web
